@@ -12,9 +12,14 @@ class AuthInterceptor extends QueuedInterceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    // Normalize path to prevent leading slash from stripping baseUrl's /api/ prefix
+    if (options.path.startsWith('/')) {
+      options.path = options.path.substring(1);
+    }
+
     final path = options.path;
     final isAuthPublicEndpoint =
-        path.contains('/auth/login') || path.contains('/auth/register');
+        path.contains('auth/login') || path.contains('auth/register');
 
     if (!isAuthPublicEndpoint) {
       final token = await _storageService.getToken();

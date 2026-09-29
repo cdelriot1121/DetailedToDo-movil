@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/config/app_config.dart';
 import '../storage/secure_storage_service.dart';
@@ -28,6 +29,18 @@ Dio createDioClient(SecureStorageService storageService, {void Function()? onUna
       onUnauthorized: onUnauthorized,
     ),
   );
+
+  if (kDebugMode) {
+    dio.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        error: true,
+        requestHeader: true,
+        responseHeader: false,
+      ),
+    );
+  }
 
   return dio;
 }
