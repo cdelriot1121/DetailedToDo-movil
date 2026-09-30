@@ -1,62 +1,59 @@
-name: Deploy Flutter Web to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch: # Permite ejecutar manualmente desde la UI de GitHub
+      - main # O la rama por defecto que utilices
+  workflow_dispatch: # Permite ejecutar el flujo manualmente desde GitHub
 
-# Permisos necesarios para GitHub Pages
+# Establece los permisos del GITHUB_TOKEN para permitir la implementación en GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Solo un deploy a la vez
+# Permite una sola implementación simultánea
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.9'
           channel: 'stable'
           cache: true
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Flutter Web
-        env:
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      - name: Build Web Application
         run: |
-          flutter build web \
-            --release \
-            --base-href "/detailed_to_do/" \
-            --dart-define=API_BASE_URL=$API_BASE_URL
+          flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define=API_BASE_URL="${{ secrets.API_BASE_URL }}"
 
-      - name: Upload Pages artifact
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./build/web
+          path: 'build/web'
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
