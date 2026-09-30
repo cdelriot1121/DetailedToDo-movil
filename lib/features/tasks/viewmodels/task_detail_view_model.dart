@@ -173,7 +173,8 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
     );
 
     try {
-      await _repository.toggleSubtask(taskId, subtaskId, completed);
+      final subtask = currentTask.subtasks.firstWhere((s) => s.id == subtaskId);
+      await _repository.toggleSubtask(taskId, subtaskId, completed, subtask.title);
     } catch (_) {
       state = state.copyWith(task: currentTask);
     }

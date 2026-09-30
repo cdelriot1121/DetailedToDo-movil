@@ -110,11 +110,15 @@ class TaskRepository {
     String taskId,
     String subtaskId,
     bool completed,
+    String title,
   ) async {
     return await _apiService.updateSubtask(
       taskId,
       subtaskId,
-      {'completed': completed},
+      {
+        'title': title,
+        'completed': completed,
+      },
     );
   }
 

@@ -31,6 +31,6 @@ class AIQuota {
 
   double get progressPercentage {
     if (limit <= 0) return 0.0;
-    return (used / limit).clamp(0.0, 1.0);
+    return (remaining / limit).clamp(0.0, 1.0);
   }
 }
