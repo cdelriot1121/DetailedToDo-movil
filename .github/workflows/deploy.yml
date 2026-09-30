@@ -35,7 +35,7 @@ jobs:
       - name: Build Flutter Web
         # IMPORTANTE: Reemplaza 'detailed_to_do' con el nombre exacto de tu repositorio en GitHub
         # si se aloja en una subruta. Si usas un dominio personalizado o un repositorio raíz, bórralo.
-        run: flutter build web --release --base-href "/detailed_to_do/"
+        run: flutter build web --release --base-href "/DetailedToDo-movil/"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
