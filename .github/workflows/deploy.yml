@@ -3,7 +3,7 @@ name: Deploy Flutter Web to GitHub Pages
 on:
   push:
     branches:
-      - main # Cambia 'main' por 'master' si tu rama principal se llama así
+      - main
 
 jobs:
   build-and-deploy:
@@ -33,9 +33,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter Web
-        # IMPORTANTE: Reemplaza 'detailed_to_do' con el nombre exacto de tu repositorio en GitHub
-        # si se aloja en una subruta. Si usas un dominio personalizado o un repositorio raíz, bórralo.
-        run: flutter build web --release --base-href "/DetailedToDo-movil/"
+        run: flutter build web --release --base-href "/DetailedToDo-movil/" --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
