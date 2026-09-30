@@ -13,9 +13,9 @@ class AIQuota {
 
   factory AIQuota.fromJson(Map<String, dynamic> json) {
     return AIQuota(
-      used: (json['used'] as num?)?.toInt() ?? 0,
-      limit: (json['limit'] as num?)?.toInt() ?? 5,
-      remaining: (json['remaining'] as num?)?.toInt() ?? 0,
+      used: (json['requestsUsed'] ?? json['usedToday'] ?? json['used'] as num?)?.toInt() ?? 0,
+      limit: (json['requestsLimit'] ?? json['dailyLimit'] ?? json['limit'] as num?)?.toInt() ?? 5,
+      remaining: (json['requestsRemaining'] ?? json['remaining'] as num?)?.toInt() ?? 0,
       plan: json['plan'] as String? ?? 'FREE',
     );
   }

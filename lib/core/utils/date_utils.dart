@@ -6,12 +6,16 @@ class AppDateUtils {
   static String formatFull(DateTime? dateTime) {
     if (dateTime == null) return '';
     final local = dateTime.toLocal();
-    final dateFormat = DateFormat("EEEE d 'de' MMMM · h:mm a", 'es');
     try {
+      final dateFormat = DateFormat("EEEE d 'de' MMMM · h:mm a", 'es');
       final formatted = dateFormat.format(local);
       return formatted[0].toUpperCase() + formatted.substring(1);
     } catch (_) {
-      return DateFormat('yyyy-MM-dd HH:mm').format(local);
+      try {
+        return DateFormat("EEEE d 'de' MMMM · h:mm a").format(local);
+      } catch (_) {
+        return DateFormat('yyyy-MM-dd HH:mm').format(local);
+      }
     }
   }
 
@@ -37,7 +41,11 @@ class AppDateUtils {
       final dateFormat = DateFormat("d 'de' MMM · h:mm a", 'es');
       return dateFormat.format(local);
     } catch (_) {
-      return DateFormat('dd/MM/yyyy HH:mm').format(local);
+      try {
+        return DateFormat("d MMM · h:mm a").format(local);
+      } catch (_) {
+        return DateFormat('dd/MM/yyyy HH:mm').format(local);
+      }
     }
   }
 
@@ -47,7 +55,11 @@ class AppDateUtils {
     try {
       return DateFormat('dd MMM', 'es').format(local).toUpperCase();
     } catch (_) {
-      return DateFormat('dd/MM').format(local);
+      try {
+        return DateFormat('dd MMM').format(local).toUpperCase();
+      } catch (_) {
+        return DateFormat('dd/MM').format(local);
+      }
     }
   }
 
