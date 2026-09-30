@@ -6,6 +6,7 @@ import '../../../app/theme.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../core/widgets/voice_input_widget.dart';
 import '../data/task_repository.dart';
 import '../viewmodels/tasks_view_model.dart';
 
@@ -122,11 +123,28 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
               // Prompt Input Area
               AppTextField(
                 controller: _contentController,
-                maxLines: 8,
-                minLines: 5,
+                maxLines: 7,
+                minLines: 4,
                 autofocus: true,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+
+              // Voice input recorder (max 15s)
+              VoiceInputWidget(
+                onTranscriptionComplete: (text) {
+                  setState(() {
+                    if (_contentController.text.trim().isEmpty) {
+                      _contentController.text = text;
+                    } else {
+                      _contentController.text = '${_contentController.text.trim()} $text';
+                    }
+                  });
+                },
+                onTranscriptionUpdate: (partialText) {
+                  // real-time partial feedback
+                },
+              ),
+              const SizedBox(height: 20),
 
               // Creation Button
               AppButton(

@@ -6,6 +6,7 @@ import '../../../app/theme.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../core/widgets/voice_input_widget.dart';
 import '../data/event_repository.dart';
 import '../viewmodels/events_view_model.dart';
 
@@ -72,7 +73,7 @@ class _AIEventScreenState extends ConsumerState<AIEventScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -120,11 +121,25 @@ class _AIEventScreenState extends ConsumerState<AIEventScreen> {
 
               AppTextField(
                 controller: _contentController,
-                maxLines: 8,
-                minLines: 5,
+                maxLines: 7,
+                minLines: 4,
                 autofocus: true,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+
+              // Voice input recorder (max 15s)
+              VoiceInputWidget(
+                onTranscriptionComplete: (text) {
+                  setState(() {
+                    if (_contentController.text.trim().isEmpty) {
+                      _contentController.text = text;
+                    } else {
+                      _contentController.text = '${_contentController.text.trim()} $text';
+                    }
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
 
               AppButton(
                 label: _isLoading ? 'Agendando evento...' : 'Generar evento con IA',
