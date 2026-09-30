@@ -46,6 +46,27 @@ class AuthApiService {
           'password': password,
         },
       );
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      }
+      return {'message': 'OTP enviado correctamente'};
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyOtp({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/auth/verify-otp',
+        data: {
+          'email': email,
+          'code': code,
+        },
+      );
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);

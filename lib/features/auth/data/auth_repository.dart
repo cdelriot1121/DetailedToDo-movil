@@ -33,6 +33,20 @@ class AuthRepository {
     await _apiService.register(name: name, email: email, password: password);
   }
 
+  Future<User> verifyOtp(String email, String code) async {
+    final response = await _apiService.verifyOtp(email: email, code: code);
+    final token = response['token'] as String?;
+    if (token != null) {
+      await _storageService.saveToken(token);
+    }
+    await _storageService.saveUserEmail(email);
+
+    if (response['user'] is Map<String, dynamic>) {
+      return User.fromJson(response['user'] as Map<String, dynamic>);
+    }
+    return await _apiService.getCurrentUser();
+  }
+
   Future<User?> checkAuth() async {
     final token = await _storageService.getToken();
     if (token == null || token.isEmpty) {

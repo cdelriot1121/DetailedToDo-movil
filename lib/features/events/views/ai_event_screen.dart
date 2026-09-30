@@ -120,8 +120,6 @@ class _AIEventScreenState extends ConsumerState<AIEventScreen> {
 
               AppTextField(
                 controller: _contentController,
-                hint:
-                    'Ej. Presentación del proyecto final este viernes a las 10:00 am en la sala de conferencias con el profesor y el equipo...',
                 maxLines: 8,
                 minLines: 5,
                 autofocus: true,

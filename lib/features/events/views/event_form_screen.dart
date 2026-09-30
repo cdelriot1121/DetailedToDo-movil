@@ -143,6 +143,7 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
               ? null
               : _locationController.text.trim(),
           reminderDate: _reminderDate,
+          tags: widget.eventToEdit?.tags ?? [],
         );
       } else {
         await repository.createEvent(
@@ -199,7 +200,6 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
               children: [
                 AppTextField(
                   label: 'Título del evento',
-                  hint: 'Ej. Presentación de arquitectura',
                   controller: _titleController,
                   validator: (v) => Validators.requiredField(v, 'El título'),
                 ),
@@ -207,7 +207,6 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
 
                 AppTextField(
                   label: 'Descripción (opcional)',
-                  hint: 'Notas sobre la reunión o evento...',
                   controller: _descriptionController,
                   maxLines: 3,
                 ),
@@ -253,7 +252,6 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
                 // Location
                 AppTextField(
                   label: 'Ubicación o enlace (opcional)',
-                  hint: 'Ej. Google Meet / Sala 402',
                   controller: _locationController,
                   prefixIcon: const Icon(
                     PhosphorIconsRegular.mapPin,

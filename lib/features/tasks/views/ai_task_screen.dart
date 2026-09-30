@@ -122,8 +122,6 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
               // Prompt Input Area
               AppTextField(
                 controller: _contentController,
-                hint:
-                    'Ej. Tengo que entregar la actividad de minería de datos este viernes a las 11:59 pm y repasar los scripts en RStudio...',
                 maxLines: 8,
                 minLines: 5,
                 autofocus: true,

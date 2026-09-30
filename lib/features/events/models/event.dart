@@ -6,6 +6,7 @@ class Event {
   final DateTime? endDate;
   final String? location;
   final DateTime? reminderDate;
+  final List<String> tags;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -17,13 +18,14 @@ class Event {
     this.endDate,
     this.location,
     this.reminderDate,
+    this.tags = const [],
     this.createdAt,
     this.updatedAt,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
-    // Backend may return startDate or date
-    final dateStr = json['startDate'] ?? json['date'] ?? json['start'];
+    // Backend returns dateTime or startDate or date
+    final dateStr = json['dateTime'] ?? json['startDate'] ?? json['date'] ?? json['start'];
     final startDate = dateStr != null
         ? DateTime.tryParse(dateStr.toString()) ?? DateTime.now()
         : DateTime.now();
@@ -34,6 +36,11 @@ class Event {
     final remStr = json['reminderDate'] ?? json['reminder'];
     final reminderDate = remStr != null ? DateTime.tryParse(remStr.toString()) : null;
 
+    final rawTags = json['tags'];
+    final List<String> parsedTags = rawTags is List
+        ? rawTags.map((e) => e.toString()).toList()
+        : [];
+
     return Event(
       id: (json['id'] ?? json['_id'] ?? '').toString(),
       title: json['title'] as String? ?? '',
@@ -42,6 +49,7 @@ class Event {
       endDate: endDate,
       location: json['location'] as String?,
       reminderDate: reminderDate,
+      tags: parsedTags,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
@@ -55,13 +63,15 @@ class Event {
     return {
       'id': id,
       'title': title,
-      'description': description,
+      if (description != null) 'description': description,
+      'dateTime': startDate.toIso8601String(),
       'startDate': startDate.toIso8601String(),
-      'endDate': endDate?.toIso8601String(),
-      'location': location,
-      'reminderDate': reminderDate?.toIso8601String(),
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      if (endDate != null) 'endDate': endDate?.toIso8601String(),
+      if (location != null) 'location': location,
+      if (reminderDate != null) 'reminderDate': reminderDate?.toIso8601String(),
+      'tags': tags,
+      if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -73,6 +83,7 @@ class Event {
     DateTime? endDate,
     String? location,
     DateTime? reminderDate,
+    List<String>? tags,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -84,6 +95,7 @@ class Event {
       endDate: endDate ?? this.endDate,
       location: location ?? this.location,
       reminderDate: reminderDate ?? this.reminderDate,
+      tags: tags ?? this.tags,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

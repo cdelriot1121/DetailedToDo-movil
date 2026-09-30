@@ -124,7 +124,6 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
               children: [
                 AppTextField(
                   label: 'Título',
-                  hint: 'Ej. Ideas para la arquitectura',
                   controller: _titleController,
                   validator: (v) => Validators.requiredField(v, 'El título'),
                 ),
@@ -132,7 +131,6 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
 
                 AppTextField(
                   label: 'Contenido',
-                  hint: 'Escribe aquí tus notas o pensamientos...',
                   controller: _contentController,
                   maxLines: 12,
                   minLines: 6,
@@ -142,7 +140,6 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
 
                 AppTextField(
                   label: 'Carpeta (opcional)',
-                  hint: 'Ej. Personal, Arquitectura, Ideas',
                   controller: _folderController,
                   prefixIcon: const Icon(
                     PhosphorIconsRegular.folderSimple,
@@ -154,7 +151,6 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
 
                 AppTextField(
                   label: 'Etiquetas (separadas por comas)',
-                  hint: 'diseño, backend, flutter',
                   controller: _tagsController,
                   prefixIcon: const Icon(
                     PhosphorIconsRegular.tag,

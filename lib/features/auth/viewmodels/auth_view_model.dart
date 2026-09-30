@@ -1,5 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
+import '../../events/viewmodels/events_view_model.dart';
+import '../../home/viewmodels/home_view_model.dart';
+import '../../notes/viewmodels/notes_view_model.dart';
+import '../../profile/viewmodels/profile_view_model.dart';
+import '../../tasks/viewmodels/tasks_view_model.dart';
 import '../data/auth_repository.dart';
 import '../models/user.dart';
 
@@ -85,6 +90,11 @@ class AuthViewModel extends Notifier<AuthState> {
         user: user,
         clearError: true,
       );
+      ref.invalidate(tasksViewModelProvider);
+      ref.invalidate(notesViewModelProvider);
+      ref.invalidate(eventsViewModelProvider);
+      ref.invalidate(homeViewModelProvider);
+      ref.invalidate(profileViewModelProvider);
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(
@@ -125,8 +135,43 @@ class AuthViewModel extends Notifier<AuthState> {
     }
   }
 
+  Future<bool> verifyOtp(String email, String code) async {
+    state = state.copyWith(status: AuthStatus.loading, clearError: true);
+    try {
+      final user = await _repository.verifyOtp(email.trim(), code.trim());
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        user: user,
+        clearError: true,
+      );
+      ref.invalidate(tasksViewModelProvider);
+      ref.invalidate(notesViewModelProvider);
+      ref.invalidate(eventsViewModelProvider);
+      ref.invalidate(homeViewModelProvider);
+      ref.invalidate(profileViewModelProvider);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.message,
+      );
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'Código inválido o expirado.',
+      );
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await _repository.logout();
+    ref.invalidate(tasksViewModelProvider);
+    ref.invalidate(notesViewModelProvider);
+    ref.invalidate(eventsViewModelProvider);
+    ref.invalidate(homeViewModelProvider);
+    ref.invalidate(profileViewModelProvider);
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 

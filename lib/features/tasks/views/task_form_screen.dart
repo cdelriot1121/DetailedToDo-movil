@@ -207,7 +207,6 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 // Title
                 AppTextField(
                   label: 'Título de la tarea',
-                  hint: 'Ej. Entregar reporte mensual',
                   controller: _titleController,
                   validator: (v) => Validators.requiredField(v, 'El título'),
                 ),
@@ -216,7 +215,6 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 // Description
                 AppTextField(
                   label: 'Descripción (opcional)',
-                  hint: 'Detalles adicionales...',
                   controller: _descriptionController,
                   maxLines: 4,
                   minLines: 2,
@@ -274,8 +272,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
 
                 // Folder
                 AppTextField(
-                  label: 'Carpeta / Categoría',
-                  hint: 'Ej. Universidad, Trabajo, Personal',
+                  label: 'Carpeta / Categoría (opcional)',
                   controller: _folderController,
                   prefixIcon: const Icon(
                     PhosphorIconsRegular.folderSimple,
@@ -288,7 +285,6 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 // Tags
                 AppTextField(
                   label: 'Etiquetas (separadas por comas)',
-                  hint: 'urgente, proyecto, estudio',
                   controller: _tagsController,
                   prefixIcon: const Icon(
                     PhosphorIconsRegular.tag,

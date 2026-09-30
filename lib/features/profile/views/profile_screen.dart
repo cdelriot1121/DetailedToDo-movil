@@ -9,10 +9,23 @@ import '../../../core/widgets/loading_view.dart';
 import '../../auth/viewmodels/auth_view_model.dart';
 import '../viewmodels/profile_view_model.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
-  void _showEditNameDialog(BuildContext context, WidgetRef ref, String currentName) {
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(profileViewModelProvider.notifier).loadProfile();
+    });
+  }
+
+  void _showEditNameDialog(BuildContext context, String currentName) {
     final controller = TextEditingController(text: currentName);
 
     showDialog(
@@ -56,7 +69,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
+  void _confirmLogout(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) {
@@ -93,10 +106,10 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final state = ref.watch(profileViewModelProvider);
 
-    if (state.isLoading) {
+    if (state.isLoading && state.user == null) {
       return const Scaffold(
         backgroundColor: AppColors.scaffoldBackground,
         body: LoadingView(message: 'Cargando perfil...'),
@@ -271,7 +284,6 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       onTap: () => _showEditNameDialog(
                         context,
-                        ref,
                         user?.name ?? '',
                       ),
                     ),
@@ -285,7 +297,7 @@ class ProfileScreen extends ConsumerWidget {
                 label: 'Cerrar sesión',
                 icon: PhosphorIconsRegular.signOut,
                 variant: AppButtonVariant.danger,
-                onPressed: () => _confirmLogout(context, ref),
+                onPressed: () => _confirmLogout(context),
               ),
               const SizedBox(height: 20),
             ],

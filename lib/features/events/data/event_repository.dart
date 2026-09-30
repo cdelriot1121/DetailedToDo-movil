@@ -30,22 +30,26 @@ class EventRepository {
     DateTime? endDate,
     String? location,
     DateTime? reminderDate,
+    List<String> tags = const [],
   }) async {
+    final isoDate = startDate.toIso8601String();
     final payload = <String, dynamic>{
       'title': title,
-      'startDate': startDate.toUtc().toIso8601String(),
+      'dateTime': isoDate,
+      'startDate': isoDate,
+      'tags': tags,
     };
     if (description != null && description.isNotEmpty) {
       payload['description'] = description;
     }
     if (endDate != null) {
-      payload['endDate'] = endDate.toUtc().toIso8601String();
+      payload['endDate'] = endDate.toIso8601String();
     }
     if (location != null && location.isNotEmpty) {
       payload['location'] = location;
     }
     if (reminderDate != null) {
-      payload['reminderDate'] = reminderDate.toUtc().toIso8601String();
+      payload['reminderDate'] = reminderDate.toIso8601String();
     }
 
     return await _apiService.createEvent(payload);
@@ -59,18 +63,22 @@ class EventRepository {
     DateTime? endDate,
     String? location,
     DateTime? reminderDate,
+    List<String> tags = const [],
   }) async {
+    final isoDate = startDate.toIso8601String();
     final payload = <String, dynamic>{
       'title': title,
-      'startDate': startDate.toUtc().toIso8601String(),
+      'dateTime': isoDate,
+      'startDate': isoDate,
+      'tags': tags,
     };
     if (description != null) payload['description'] = description;
     if (endDate != null) {
-      payload['endDate'] = endDate.toUtc().toIso8601String();
+      payload['endDate'] = endDate.toIso8601String();
     }
     if (location != null) payload['location'] = location;
     if (reminderDate != null) {
-      payload['reminderDate'] = reminderDate.toUtc().toIso8601String();
+      payload['reminderDate'] = reminderDate.toIso8601String();
     }
 
     return await _apiService.updateEvent(id, payload);

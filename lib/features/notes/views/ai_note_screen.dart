@@ -120,8 +120,6 @@ class _AINoteScreenState extends ConsumerState<AINoteScreen> {
 
               AppTextField(
                 controller: _contentController,
-                hint:
-                    'Ej. Puntos clave de la reunión: migrar a Docker, ajustar endpoints en Spring Boot y verificar cuota diaria de IA...',
                 maxLines: 8,
                 minLines: 5,
                 autofocus: true,
