@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../features/auth/views/login_screen.dart';
+import '../features/auth/views/otp_screen.dart';
 import '../features/auth/views/register_screen.dart';
 import '../features/auth/views/splash_screen.dart';
 import '../features/events/models/event.dart';
@@ -42,6 +43,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/otp',
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return OtpScreen(email: email);
+        },
       ),
 
       // Bottom Navigation Shell for 4 Main Tabs
