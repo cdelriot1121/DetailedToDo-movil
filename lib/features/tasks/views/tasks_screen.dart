@@ -148,25 +148,22 @@ class TasksScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildChip(String label, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.white : AppColors.secondarySurface,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? AppColors.white : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? AppColors.pureBlack : AppColors.primaryText,
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          ),
+  static Widget _buildChip(String label, bool isSelected, VoidCallback onTap) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onTap(),
+      selectedColor: AppColors.white,
+      backgroundColor: AppColors.secondarySurface,
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.pureBlack : AppColors.primaryText,
+        fontSize: 13,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? AppColors.white : AppColors.border,
         ),
       ),
     );
@@ -175,6 +172,7 @@ class TasksScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(tasksViewModelProvider);
+    final tasks = state.tasks;
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -182,260 +180,201 @@ class TasksScreen extends ConsumerWidget {
         title: const Text('Tareas'),
         actions: [
           IconButton(
-            icon: Badge(
-              isLabelVisible: state.hasFilters,
-              smallSize: 8,
-              backgroundColor: AppColors.white,
-              child: const Icon(PhosphorIconsRegular.funnelSimple),
-            ),
+            icon: const Icon(PhosphorIconsRegular.fadersHorizontal, size: 20),
             onPressed: () => _showFilterModal(context, ref),
+            tooltip: 'Filtrar',
           ),
-          const SizedBox(width: 8),
         ],
       ),
-      body: Builder(
-        builder: (context) {
-          if (state.isLoading) {
-            return const LoadingView(message: 'Cargando tareas...');
-          }
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.pureBlack,
+        shape: const CircleBorder(),
+        onPressed: () => context.push('/tasks/new'),
+        child: const Icon(PhosphorIconsRegular.plus, size: 24),
+      ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          color: AppColors.white,
+          backgroundColor: AppColors.primarySurface,
+          onRefresh: () => ref.read(tasksViewModelProvider.notifier).loadTasks(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Search Bar & AI Quick Action
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.primarySurface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: TextField(
+                          onChanged: (value) {
+                            // Search filtering if supported
+                          },
+                          style: const TextStyle(color: AppColors.primaryText, fontSize: 14),
+                          decoration: const InputDecoration(
+                            hintText: 'Buscar tareas...',
+                            prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass, color: AppColors.secondaryText, size: 18),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primarySurface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(PhosphorIconsRegular.sparkle, color: AppColors.white, size: 20),
+                        onPressed: () => context.push('/tasks/ai'),
+                        tooltip: 'Crear con IA',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
-          if (state.viewState == TasksViewState.error) {
-            return EmptyState(
-              icon: PhosphorIconsRegular.warningCircle,
-              title: 'Error al cargar tareas',
-              message: state.errorMessage,
-              actionLabel: 'Reintentar',
-              onAction: () =>
-                  ref.read(tasksViewModelProvider.notifier).loadTasks(),
-              isError: true,
-            );
-          }
-
-          if (state.isEmpty) {
-            return EmptyState(
-              icon: PhosphorIconsRegular.checkCircle,
-              title: 'No hay tareas',
-              message: state.hasFilters
-                  ? 'No hay tareas que coincidan con los filtros seleccionados.'
-                  : 'Crea tu primera tarea o utiliza la IA para organizarte.',
-              actionLabel: state.hasFilters ? 'Limpiar filtros' : 'Crear tarea',
-              onAction: () {
-                if (state.hasFilters) {
-                  ref.read(tasksViewModelProvider.notifier).clearFilters();
-                } else {
-                  context.push('/tasks/new');
-                }
-              },
-            );
-          }
-
-          return RefreshIndicator(
-            color: AppColors.white,
-            backgroundColor: AppColors.primarySurface,
-            onRefresh: () => ref
-                .read(tasksViewModelProvider.notifier)
-                .loadTasks(isRefresh: true),
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: state.tasks.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final task = state.tasks[index];
-                return _TaskCard(
-                  task: task,
-                  onTap: () async {
-                    await context.push('/tasks/${task.id}');
-                    ref.read(tasksViewModelProvider.notifier).loadTasks();
-                  },
-                  onToggle: () {
-                    ref.read(tasksViewModelProvider.notifier).toggleTaskStatus(task);
-                  },
-                );
-              },
-            ),
-          );
-        },
+              Expanded(
+                child: state.isLoading && tasks.isEmpty
+                    ? const LoadingView(message: 'Cargando tareas...')
+                    : tasks.isEmpty
+                        ? const EmptyState(
+                            icon: PhosphorIconsRegular.checkCircle,
+                            title: 'No hay tareas',
+                            message: 'Crea una nueva tarea o ajusta los filtros de búsqueda.',
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            itemCount: tasks.length,
+                            separatorBuilder: (_, _) => const SizedBox(height: 10),
+                            itemBuilder: (context, index) {
+                              final task = tasks[index];
+                              return _buildTaskCard(context, ref, task);
+                            },
+                          ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
-}
 
-class _TaskCard extends StatelessWidget {
-  final Task task;
-  final VoidCallback onTap;
-  final VoidCallback onToggle;
-
-  const _TaskCard({
-    required this.task,
-    required this.onTap,
-    required this.onToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDone = task.isCompleted;
+  Widget _buildTaskCard(BuildContext context, WidgetRef ref, Task task) {
+    Color priorityColor = AppColors.lowPriority;
+    if (task.priority == TaskPriority.high) priorityColor = AppColors.highPriority;
+    if (task.priority == TaskPriority.medium) priorityColor = AppColors.mediumPriority;
 
     return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(14),
+      onTap: () => context.push('/tasks/${task.id}'),
+      padding: const EdgeInsets.all(16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Custom Monochrome Checkbox
           GestureDetector(
-            onTap: onToggle,
+            onTap: () {
+              ref.read(tasksViewModelProvider.notifier).toggleTaskStatus(task);
+            },
             child: Container(
               width: 22,
               height: 22,
-              margin: const EdgeInsets.only(top: 2, right: 12),
+              margin: const EdgeInsets.only(top: 2),
               decoration: BoxDecoration(
-                color: isDone ? AppColors.white : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isDone ? AppColors.white : AppColors.secondaryText,
-                  width: 1.5,
+                  color: task.isCompleted ? AppColors.white : AppColors.secondaryText,
+                  width: 2,
                 ),
+                color: task.isCompleted ? AppColors.white : Colors.transparent,
               ),
-              child: isDone
-                  ? const Icon(
-                      PhosphorIconsBold.check,
-                      size: 14,
-                      color: AppColors.pureBlack,
+              child: task.isCompleted
+                  ? const Center(
+                      child: Icon(
+                        PhosphorIconsBold.check,
+                        size: 12,
+                        color: AppColors.pureBlack,
+                      ),
                     )
                   : null,
             ),
           ),
-
-          // Content
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        task.title,
-                        style: TextStyle(
-                          color: isDone
-                              ? AppColors.disabledText
-                              : AppColors.primaryText,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          decoration:
-                              isDone ? TextDecoration.lineThrough : null,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                    ),
-                    if (task.priority == TaskPriority.high)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondarySurface,
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: const Text(
-                          'HIGH',
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                  ],
+                Text(
+                  task.title,
+                  style: TextStyle(
+                    color: task.isCompleted ? AppColors.secondaryText : AppColors.primaryText,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                  ),
                 ),
-                if (task.description != null &&
-                    task.description!.trim().isNotEmpty) ...[
+                if (task.description?.isNotEmpty == true) ...[
                   const SizedBox(height: 4),
                   Text(
                     task.description!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: isDone
-                          ? AppColors.disabledText
-                          : AppColors.secondaryText,
+                    style: const TextStyle(
+                      color: AppColors.secondaryText,
                       fontSize: 13,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    if (task.folder != null && task.folder!.isNotEmpty) ...[
-                      Icon(
-                        PhosphorIconsRegular.folderSimple,
-                        size: 14,
-                        color: AppColors.secondaryText,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        task.folder!,
-                        style: const TextStyle(
-                          color: AppColors.secondaryText,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                    ],
                     if (task.dueDate != null) ...[
-                      Icon(
-                        PhosphorIconsRegular.calendarBlank,
-                        size: 14,
-                        color: AppColors.secondaryText,
-                      ),
+                      const Icon(PhosphorIconsRegular.clock, size: 12, color: AppColors.secondaryText),
                       const SizedBox(width: 4),
                       Text(
-                        AppDateUtils.formatShort(task.dueDate),
+                        AppDateUtils.formatShort(task.dueDate!),
                         style: const TextStyle(
                           color: AppColors.secondaryText,
-                          fontSize: 12,
+                          fontSize: 11,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                     ],
                     if (task.subtasks.isNotEmpty) ...[
-                      Icon(
-                        PhosphorIconsRegular.listChecks,
-                        size: 14,
-                        color: AppColors.secondaryText,
-                      ),
+                      const Icon(PhosphorIconsRegular.listChecks, size: 12, color: AppColors.secondaryText),
                       const SizedBox(width: 4),
                       Text(
-                        '${task.completedSubtasksCount}/${task.totalSubtasksCount}',
+                        '${task.subtasks.where((s) => s.completed).length}/${task.subtasks.length}',
                         style: const TextStyle(
                           color: AppColors.secondaryText,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                    if (task.isAIGenerating) ...[
-                      const SizedBox(width: 8),
-                      const Icon(
-                        PhosphorIconsRegular.sparkle,
-                        size: 14,
-                        color: AppColors.white,
-                      ),
-                      const SizedBox(width: 4),
-                      const Text(
-                        'IA...',
-                        style: TextStyle(
-                          color: AppColors.white,
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ],
                 ),
               ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.only(top: 6),
+            decoration: BoxDecoration(
+              color: priorityColor,
+              shape: BoxShape.circle,
             ),
           ),
         ],

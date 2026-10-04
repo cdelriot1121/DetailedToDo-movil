@@ -135,7 +135,7 @@ class HomeScreen extends ConsumerWidget {
                   context.push('/tasks/ai');
                 },
               ),
-              const Divider(),
+              const Divider(color: AppColors.border),
               ListTile(
                 leading: const Icon(PhosphorIconsRegular.note, color: AppColors.white),
                 title: const Text('Estructurar Nota con IA', style: TextStyle(color: AppColors.white)),
@@ -146,7 +146,7 @@ class HomeScreen extends ConsumerWidget {
                   context.push('/notes/ai');
                 },
               ),
-              const Divider(),
+              const Divider(color: AppColors.border),
               ListTile(
                 leading: const Icon(PhosphorIconsRegular.calendarBlank, color: AppColors.white),
                 title: const Text('Agendar Evento con IA', style: TextStyle(color: AppColors.white)),
@@ -350,19 +350,21 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            '¡Estás al día con tus tareas!',
-                            style: TextStyle(
-                              color: AppColors.primaryText,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'No tienes tareas pendientes urgentes.',
+                            'No hay tareas pendientes para hoy',
                             style: TextStyle(
                               color: AppColors.secondaryText,
-                              fontSize: 12,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () => context.push('/tasks/new'),
+                            child: const Text(
+                              'Crear tarea',
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -370,162 +372,11 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ] else ...[
-                  ...homeState.pendingTasks.map((task) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: AppCard(
-                        onTap: () async {
-                          await context.push('/tasks/${task.id}');
-                          ref.read(homeViewModelProvider.notifier).loadHomeData();
-                        },
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () async {
-                                await ref
-                                    .read(tasksViewModelProvider.notifier)
-                                    .toggleTaskStatus(task);
-                                ref
-                                    .read(homeViewModelProvider.notifier)
-                                    .loadHomeData();
-                              },
-                              child: Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: AppColors.secondaryText,
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    task.title,
-                                    style: const TextStyle(
-                                      color: AppColors.primaryText,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  if (task.dueDate != null) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      AppDateUtils.formatShort(task.dueDate),
-                                      style: const TextStyle(
-                                        color: AppColors.secondaryText,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            if (task.priority == TaskPriority.high)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.secondarySurface,
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: AppColors.border),
-                                ),
-                                child: const Text(
-                                  'HIGH',
-                                  style: TextStyle(
-                                    color: AppColors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
+                  ...homeState.pendingTasks.take(3).map((task) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _buildTaskCard(context, ref, task),
+                      )),
                 ],
-                const SizedBox(height: 24),
-
-                // "Próximos eventos" Section
-                if (homeState.upcomingEvents.isNotEmpty) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Próximos eventos',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => context.go('/events'),
-                        child: const Text(
-                          'Ver agenda',
-                          style: TextStyle(
-                            color: AppColors.secondaryText,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  ...homeState.upcomingEvents.map((event) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: AppCard(
-                        onTap: () => context.push('/events/${event.id}', extra: event),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              PhosphorIconsRegular.calendarBlank,
-                              size: 18,
-                              color: AppColors.white,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    event.title,
-                                    style: const TextStyle(
-                                      color: AppColors.primaryText,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    AppDateUtils.formatShort(event.startDate),
-                                    style: const TextStyle(
-                                      color: AppColors.secondaryText,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-
-                const SizedBox(height: 48),
               ],
             ),
           ),
@@ -540,25 +391,116 @@ class HomeScreen extends ConsumerWidget {
     required IconData icon,
   }) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 18, color: AppColors.secondaryText),
-        const SizedBox(height: 4),
-        Text(
-          '$count',
-          style: const TextStyle(
-            color: AppColors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: AppColors.secondaryText),
+            const SizedBox(width: 6),
+            Text(
+              '$count',
+              style: const TextStyle(
+                color: AppColors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 2),
         Text(
           label,
           style: const TextStyle(
             color: AppColors.secondaryText,
-            fontSize: 11,
+            fontSize: 12,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTaskCard(BuildContext context, WidgetRef ref, Task task) {
+    Color priorityColor = AppColors.lowPriority;
+    if (task.priority == TaskPriority.high) priorityColor = AppColors.highPriority;
+    if (task.priority == TaskPriority.medium) priorityColor = AppColors.mediumPriority;
+
+    return AppCard(
+      onTap: () => context.push('/tasks/${task.id}'),
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              ref.read(tasksViewModelProvider.notifier).toggleTaskStatus(task);
+            },
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: task.isCompleted ? AppColors.white : AppColors.secondaryText,
+                  width: 2,
+                ),
+                color: task.isCompleted ? AppColors.white : Colors.transparent,
+              ),
+              child: task.isCompleted
+                  ? const Center(
+                      child: Icon(
+                        PhosphorIconsBold.check,
+                        size: 12,
+                        color: AppColors.pureBlack,
+                      ),
+                    )
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.title,
+                  style: TextStyle(
+                    color: task.isCompleted ? AppColors.secondaryText : AppColors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (task.dueDate != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(PhosphorIconsRegular.clock, size: 12, color: AppColors.secondaryText),
+                      const SizedBox(width: 4),
+                      Text(
+                        AppDateUtils.formatShort(task.dueDate!),
+                        style: const TextStyle(
+                          color: AppColors.secondaryText,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: priorityColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
