@@ -4,6 +4,8 @@ class Note {
   final String content;
   final String? folder;
   final List<String> tags;
+  final String? color;
+  final bool isFavorite;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -13,6 +15,8 @@ class Note {
     required this.content,
     this.folder,
     this.tags = const [],
+    this.color,
+    this.isFavorite = false,
     this.createdAt,
     this.updatedAt,
   });
@@ -30,6 +34,11 @@ class Note {
       content: json['content'] as String? ?? '',
       folder: json['folder'] as String?,
       tags: tagList,
+      color: json['color'] as String?,
+      isFavorite: json['isFavorite'] == true ||
+          json['favorite'] == true ||
+          tagList.contains('favoritas') ||
+          tagList.contains('favorite'),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
@@ -46,6 +55,8 @@ class Note {
       'content': content,
       'folder': folder,
       'tags': tags,
+      if (color != null) 'color': color,
+      'isFavorite': isFavorite,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -57,6 +68,8 @@ class Note {
     String? content,
     String? folder,
     List<String>? tags,
+    String? color,
+    bool? isFavorite,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -66,6 +79,8 @@ class Note {
       content: content ?? this.content,
       folder: folder ?? this.folder,
       tags: tags ?? this.tags,
+      color: color ?? this.color,
+      isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

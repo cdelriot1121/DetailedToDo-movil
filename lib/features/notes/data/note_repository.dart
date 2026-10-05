@@ -27,6 +27,7 @@ class NoteRepository {
     required String title,
     required String content,
     String? folder,
+    String? color,
     List<String> tags = const [],
   }) async {
     final payload = <String, dynamic>{
@@ -37,6 +38,9 @@ class NoteRepository {
     if (folder != null && folder.isNotEmpty) {
       payload['folder'] = folder;
     }
+    if (color != null && color.isNotEmpty) {
+      payload['color'] = color;
+    }
     return await _apiService.createNote(payload);
   }
 
@@ -45,6 +49,7 @@ class NoteRepository {
     required String title,
     required String content,
     String? folder,
+    String? color,
     List<String>? tags,
   }) async {
     final payload = <String, dynamic>{
@@ -52,6 +57,7 @@ class NoteRepository {
       'content': content,
     };
     if (folder != null) payload['folder'] = folder;
+    if (color != null) payload['color'] = color;
     if (tags != null) payload['tags'] = tags;
 
     return await _apiService.updateNote(id, payload);
