@@ -14,7 +14,7 @@ class HomeState {
   final String? errorMessage;
 
   const HomeState({
-    this.isLoading = false,
+    this.isLoading = true,
     this.pendingTasks = const [],
     this.upcomingEvents = const [],
     this.pendingTasksCount = 0,
@@ -60,39 +60,63 @@ class HomeViewModel extends Notifier<HomeState> {
 
   Future<void> loadHomeData() async {
     state = state.copyWith(isLoading: true, clearError: true);
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    String? errorMessage;
+    List<Task>? tasks;
+    List<Event>? events;
+
+    // Keep each section usable when one endpoint is temporarily unavailable.
     try {
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
-
-      final tasks = await _taskRepository.getTasks();
-      final events = await _eventRepository.getEvents();
-
-      final pending = tasks.where((t) => t.status != TaskStatus.completed).toList();
-      final todayTasks = pending.where((t) {
-        if (t.dueDate == null) return false;
-        return t.dueDate!.isAfter(startOfDay) && t.dueDate!.isBefore(endOfDay);
-      }).length;
-
-      final upcomingEvs = events.where((e) => e.startDate.isAfter(startOfDay)).toList();
-      upcomingEvs.sort((a, b) => a.startDate.compareTo(b.startDate));
-
-      final reminders = tasks.where((t) => t.reminderDate != null && t.reminderDate!.isAfter(now)).length +
-          events.where((e) => e.reminderDate != null && e.reminderDate!.isAfter(now)).length;
-
-      state = state.copyWith(
-        isLoading: false,
-        pendingTasks: pending.take(5).toList(),
-        upcomingEvents: upcomingEvs.take(3).toList(),
-        pendingTasksCount: todayTasks > 0 ? todayTasks : pending.length,
-        upcomingEventsCount: upcomingEvs.length,
-        remindersCount: reminders,
-      );
+      tasks = await _taskRepository.getTasks();
     } catch (_) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Error al actualizar el resumen.',
-      );
+      errorMessage = 'No se pudieron actualizar las tareas.';
     }
+    try {
+      events = await _eventRepository.getEvents();
+    } catch (_) {
+      errorMessage = errorMessage == null
+          ? 'No se pudieron actualizar los eventos.'
+          : 'No se pudieron actualizar tareas ni eventos.';
+    }
+
+    final pending = tasks
+            ?.where((task) => task.status != TaskStatus.completed)
+            .toList() ??
+        state.pendingTasks;
+    final todayEvents = events
+            ?.where((event) =>
+                !event.startDate.isBefore(startOfDay) &&
+                event.startDate.isBefore(endOfDay))
+            .length ??
+        state.upcomingEventsCount;
+    final upcomingEvents = events
+            ?.where((event) => event.startDate.isAfter(now))
+            .toList() ??
+        state.upcomingEvents;
+    upcomingEvents.sort((a, b) => a.startDate.compareTo(b.startDate));
+
+    final todayTasks = pending.where((task) {
+      if (task.dueDate == null) return false;
+      return !task.dueDate!.isBefore(startOfDay) &&
+          task.dueDate!.isBefore(endOfDay);
+    }).length;
+    final reminders = tasks == null
+        ? state.remindersCount
+        : tasks.where((task) =>
+                task.reminderDate != null && task.reminderDate!.isAfter(now)).length +
+            (events ?? const <Event>[]).where((event) =>
+                event.reminderDate != null && event.reminderDate!.isAfter(now)).length;
+
+    state = state.copyWith(
+      isLoading: false,
+      pendingTasks: pending.take(5).toList(),
+      upcomingEvents: upcomingEvents.take(3).toList(),
+      pendingTasksCount: todayTasks > 0 ? todayTasks : pending.length,
+      upcomingEventsCount: todayEvents,
+      remindersCount: reminders,
+      errorMessage: errorMessage,
+    );
   }
 }

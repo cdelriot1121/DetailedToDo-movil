@@ -56,38 +56,53 @@ class EventsScreen extends ConsumerWidget {
                     separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       final date = DateTime.now().add(Duration(days: index - 2));
-                      final isSelected = index == 2;
+                      final selectedDate = state.fromDate;
+                      final isSelected = selectedDate == null
+                          ? index == 2
+                          : selectedDate.year == date.year &&
+                              selectedDate.month == date.month &&
+                              selectedDate.day == date.day;
 
-                      return Container(
-                        width: 52,
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppColors.white : AppColors.primarySurface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? AppColors.white : AppColors.border,
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          final start = DateTime(date.year, date.month, date.day);
+                          ref.read(eventsViewModelProvider.notifier).setDateRange(
+                                start,
+                                start.add(const Duration(days: 1)),
+                              );
+                        },
+                        child: Container(
+                          width: 52,
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.white : AppColors.primarySurface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected ? AppColors.white : AppColors.border,
+                            ),
                           ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              AppDateUtils.formatEventBadge(date),
-                              style: TextStyle(
-                                color: isSelected ? AppColors.pureBlack : AppColors.secondaryText,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                AppDateUtils.formatEventBadge(date),
+                                style: TextStyle(
+                                  color: isSelected ? AppColors.pureBlack : AppColors.secondaryText,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${date.day}',
-                              style: TextStyle(
-                                color: isSelected ? AppColors.pureBlack : AppColors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                              const SizedBox(height: 4),
+                              Text(
+                                '${date.day}',
+                                style: TextStyle(
+                                  color: isSelected ? AppColors.pureBlack : AppColors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -95,11 +110,13 @@ class EventsScreen extends ConsumerWidget {
                 ),
               ),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Text(
-                  'Agenda del día',
-                  style: TextStyle(
+                  state.fromDate == null
+                      ? 'Agenda del día'
+                      : 'Agenda · ${AppDateUtils.formatEventBadge(state.fromDate)}',
+                  style: const TextStyle(
                     color: AppColors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -110,6 +127,17 @@ class EventsScreen extends ConsumerWidget {
               Expanded(
                 child: state.isLoading && events.isEmpty
                     ? const LoadingView(message: 'Cargando eventos...')
+                    : state.errorMessage != null && events.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                state.errorMessage!,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: AppColors.secondaryText),
+                              ),
+                            ),
+                          )
                     : events.isEmpty
                         ? const EmptyState(
                             icon: PhosphorIconsRegular.calendarBlank,

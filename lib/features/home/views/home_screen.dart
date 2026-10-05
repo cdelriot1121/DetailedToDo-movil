@@ -208,6 +208,29 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
 
+                if (homeState.errorMessage != null) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF4E5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline, size: 18, color: Color(0xFF8A5200)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            homeState.errorMessage!,
+                            style: const TextStyle(color: Color(0xFF6B4300), fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 if (homeState.isLoading) ...[
                   const LoadingView(message: 'Cargando resumen...'),
                 ] else if (homeState.pendingTasks.isEmpty) ...[
@@ -261,54 +284,58 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Event Card matching Penpot design (white card with left dark stripe)
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E2E2)),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: IntrinsicHeight(
-                      child: Row(
-                        children: [
-                          Container(width: 6, color: const Color(0xFF444444)),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                if (homeState.isLoading && homeState.upcomingEvents.isEmpty)
+                  const LoadingView(message: 'Cargando eventos...')
+                else if (homeState.upcomingEvents.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E2E2)),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'No hay próximos eventos',
+                        style: TextStyle(color: Color(0xFF666666), fontSize: 14),
+                      ),
+                    ),
+                  )
+                else
+                  ...homeState.upcomingEvents.take(3).map((event) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFE2E2E2)),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: IntrinsicHeight(
+                              child: Row(
                                 children: [
-                                  const Text(
-                                    'Tutoría de Desarrollo de Software',
-                                    style: TextStyle(
-                                      color: Color(0xFF111111),
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'Hoy · 6:00 – 7:00 p. m.  ·  Sede B, Aula 204',
-                                    style: TextStyle(
-                                      color: Color(0xFF666666),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFEAEAEA),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: const Text(
-                                      'En 2 h',
-                                      style: TextStyle(
-                                        color: Color(0xFF444444),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
+                                  Container(width: 6, color: const Color(0xFF444444)),
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () => context.push('/events/${event.id}', extra: event),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(event.title, style: const TextStyle(color: Color(0xFF111111), fontSize: 15, fontWeight: FontWeight.w600)),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${AppDateUtils.formatShort(event.startDate)}${event.location?.isNotEmpty == true ? ' · ${event.location}' : ''}',
+                                              style: const TextStyle(color: Color(0xFF666666), fontSize: 12),
+                                            ),
+                                            if (event.description?.isNotEmpty == true) ...[
+                                              const SizedBox(height: 4),
+                                              Text(event.description!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF666666), fontSize: 12)),
+                                            ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -316,11 +343,8 @@ class HomeScreen extends ConsumerWidget {
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                        ),
+                      )),
                 const SizedBox(height: 32),
               ],
             ),

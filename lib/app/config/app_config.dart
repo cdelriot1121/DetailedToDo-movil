@@ -8,7 +8,7 @@ class AppConfig {
     if (_envUrl.isNotEmpty) {
       base = _envUrl;
     } else if (kIsWeb) {
-      base = 'http://localhost:8000/api';  //http://localhost:8000/api
+      base = 'https://detailedtodo-backend.up.railway.app/api';  //http://localhost:8000/api
     } else {
       base = 'http://192.168.1.21:8000/api';
     }

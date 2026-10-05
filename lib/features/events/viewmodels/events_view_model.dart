@@ -57,8 +57,14 @@ class EventsViewModel extends Notifier<EventsState> {
 
   @override
   EventsState build() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    final initialState = EventsState(
+      fromDate: start,
+      toDate: start.add(const Duration(days: 1)),
+    );
     Future.microtask(() => loadEvents());
-    return const EventsState();
+    return initialState;
   }
 
   Future<void> loadEvents({bool isRefresh = false}) async {
