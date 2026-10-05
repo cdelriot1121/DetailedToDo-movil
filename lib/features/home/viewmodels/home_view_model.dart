@@ -45,8 +45,9 @@ class HomeState {
   }
 }
 
-final homeViewModelProvider =
-    NotifierProvider<HomeViewModel, HomeState>(HomeViewModel.new);
+final homeViewModelProvider = NotifierProvider<HomeViewModel, HomeState>(
+  HomeViewModel.new,
+);
 
 class HomeViewModel extends Notifier<HomeState> {
   TaskRepository get _taskRepository => ref.read(taskRepositoryProvider);
@@ -81,19 +82,20 @@ class HomeViewModel extends Notifier<HomeState> {
           : 'No se pudieron actualizar tareas ni eventos.';
     }
 
-    final pending = tasks
-            ?.where((task) => task.status != TaskStatus.completed)
-            .toList() ??
+    final pending =
+        tasks?.where((task) => task.status != TaskStatus.completed).toList() ??
         state.pendingTasks;
-    final todayEvents = events
-            ?.where((event) =>
-                !event.startDate.isBefore(startOfDay) &&
-                event.startDate.isBefore(endOfDay))
+    final todayEvents =
+        events
+            ?.where(
+              (event) =>
+                  !event.startDate.isBefore(startOfDay) &&
+                  event.startDate.isBefore(endOfDay),
+            )
             .length ??
         state.upcomingEventsCount;
-    final upcomingEvents = events
-            ?.where((event) => event.startDate.isAfter(now))
-            .toList() ??
+    final upcomingEvents =
+        events?.where((event) => event.startDate.isAfter(now)).toList() ??
         state.upcomingEvents;
     upcomingEvents.sort((a, b) => a.startDate.compareTo(b.startDate));
 
@@ -104,10 +106,20 @@ class HomeViewModel extends Notifier<HomeState> {
     }).length;
     final reminders = tasks == null
         ? state.remindersCount
-        : tasks.where((task) =>
-                task.reminderDate != null && task.reminderDate!.isAfter(now)).length +
-            (events ?? const <Event>[]).where((event) =>
-                event.reminderDate != null && event.reminderDate!.isAfter(now)).length;
+        : tasks
+                  .where(
+                    (task) =>
+                        task.reminderDate != null &&
+                        task.reminderDate!.isAfter(now),
+                  )
+                  .length +
+              (events ?? const <Event>[])
+                  .where(
+                    (event) =>
+                        event.reminderDate != null &&
+                        event.reminderDate!.isAfter(now),
+                  )
+                  .length;
 
     state = state.copyWith(
       isLoading: false,

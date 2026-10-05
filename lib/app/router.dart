@@ -36,10 +36,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
@@ -192,10 +189,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 class ScaffoldWithBottomNavBar extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const ScaffoldWithBottomNavBar({
-    super.key,
-    required this.navigationShell,
-  });
+  const ScaffoldWithBottomNavBar({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
@@ -205,9 +199,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.primarySurface,
-          border: Border(
-            top: BorderSide(color: AppColors.border, width: 1),
-          ),
+          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
         ),
         child: SafeArea(
           child: Padding(
@@ -269,13 +261,15 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
             Icon(
               isSelected ? activeIcon : icon,
               size: 22,
-              color: isSelected ? AppColors.white : AppColors.secondaryText,
+              color: isSelected ? AppColors.nearBlack : AppColors.secondaryText,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.white : AppColors.secondaryText,
+                color: isSelected
+                    ? AppColors.nearBlack
+                    : AppColors.secondaryText,
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),

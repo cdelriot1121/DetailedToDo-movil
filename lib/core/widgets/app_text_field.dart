@@ -70,6 +70,7 @@ class _AppTextFieldState extends State<AppTextField> {
           const SizedBox(height: 6),
         ],
         TextFormField(
+          cursorColor: AppColors.nearBlack,
           controller: widget.controller,
           initialValue: widget.initialValue,
           focusNode: widget.focusNode,

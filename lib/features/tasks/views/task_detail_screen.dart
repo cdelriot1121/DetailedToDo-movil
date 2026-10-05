@@ -14,10 +14,7 @@ import '../viewmodels/tasks_view_model.dart';
 class TaskDetailScreen extends ConsumerStatefulWidget {
   final String taskId;
 
-  const TaskDetailScreen({
-    super.key,
-    required this.taskId,
-  });
+  const TaskDetailScreen({super.key, required this.taskId});
 
   @override
   ConsumerState<TaskDetailScreen> createState() => _TaskDetailScreenState();
@@ -44,7 +41,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
           ),
           title: const Text(
             'Nueva subtarea',
-            style: TextStyle(color: AppColors.white, fontSize: 18),
+            style: TextStyle(color: AppColors.primaryText, fontSize: 18),
           ),
           content: TextField(
             controller: _subtaskTextController,
@@ -66,7 +63,10 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.secondaryText)),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.secondaryText),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -79,7 +79,13 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   _subtaskTextController.clear();
                 }
               },
-              child: const Text('Agregar', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Agregar',
+                style: TextStyle(
+                  color: AppColors.nearBlack,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -97,7 +103,10 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
             borderRadius: BorderRadius.circular(14),
             side: const BorderSide(color: AppColors.border),
           ),
-          title: const Text('¿Eliminar tarea?', style: TextStyle(color: AppColors.white)),
+          title: const Text(
+            '¿Eliminar tarea?',
+            style: TextStyle(color: AppColors.primaryText),
+          ),
           content: const Text(
             'Esta acción eliminará la tarea y todas sus subtareas permanentemente.',
             style: TextStyle(color: AppColors.secondaryText),
@@ -105,7 +114,10 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.secondaryText)),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.secondaryText),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -117,7 +129,13 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   context.pop();
                 }
               },
-              child: const Text('Eliminar', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -166,11 +184,16 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(PhosphorIconsRegular.pencilSimple, size: 20),
-            onPressed: () => context.push('/tasks/${task.id}/edit', extra: task),
+            onPressed: () =>
+                context.push('/tasks/${task.id}/edit', extra: task),
             tooltip: 'Editar',
           ),
           IconButton(
-            icon: const Icon(PhosphorIconsRegular.trash, size: 20, color: AppColors.error),
+            icon: const Icon(
+              PhosphorIconsRegular.trash,
+              size: 20,
+              color: AppColors.error,
+            ),
             onPressed: () => _confirmDeleteTask(context),
             tooltip: 'Eliminar',
           ),
@@ -192,11 +215,16 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: priorityColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: priorityColor.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: priorityColor.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Text(
                             'Prioridad $priorityLabel',
@@ -209,7 +237,11 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                         ),
                         Row(
                           children: [
-                            const Icon(PhosphorIconsRegular.circle, size: 14, color: AppColors.secondaryText),
+                            const Icon(
+                              PhosphorIconsRegular.circle,
+                              size: 14,
+                              color: AppColors.secondaryText,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               task.status.label,
@@ -226,7 +258,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                     Text(
                       task.title,
                       style: const TextStyle(
-                        color: AppColors.white,
+                        color: AppColors.primaryText,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.4,
@@ -249,7 +281,11 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          const Icon(PhosphorIconsRegular.calendarBlank, size: 16, color: AppColors.secondaryText),
+                          const Icon(
+                            PhosphorIconsRegular.calendarBlank,
+                            size: 16,
+                            color: AppColors.secondaryText,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Fecha límite: ${AppDateUtils.formatFull(task.dueDate!)}',
@@ -274,17 +310,24 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   const Text(
                     'Subtareas',
                     style: TextStyle(
-                      color: AppColors.white,
+                      color: AppColors.primaryText,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   TextButton.icon(
                     onPressed: _showAddSubtaskDialog,
-                    icon: const Icon(PhosphorIconsRegular.plus, size: 16, color: AppColors.white),
+                    icon: const Icon(
+                      PhosphorIconsRegular.plus,
+                      size: 16,
+                      color: AppColors.nearBlack,
+                    ),
                     label: const Text(
                       'Agregar',
-                      style: TextStyle(color: AppColors.white, fontSize: 13),
+                      style: TextStyle(
+                        color: AppColors.nearBlack,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -297,74 +340,109 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   child: Center(
                     child: Column(
                       children: const [
-                        Icon(PhosphorIconsRegular.listChecks, size: 28, color: AppColors.secondaryText),
+                        Icon(
+                          PhosphorIconsRegular.listChecks,
+                          size: 28,
+                          color: AppColors.secondaryText,
+                        ),
                         SizedBox(height: 8),
                         Text(
                           'No hay subtareas registradas',
-                          style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
+                          style: TextStyle(
+                            color: AppColors.secondaryText,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
               ] else ...[
-                ...task.subtasks.map((subtask) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: AppCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                ref
-                                    .read(taskDetailViewModelProvider(widget.taskId).notifier)
-                                    .toggleSubtask(subtask.id, !subtask.completed);
-                              },
-                              child: Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: subtask.completed ? AppColors.white : AppColors.secondaryText,
-                                    width: 2,
-                                  ),
-                                  color: subtask.completed ? AppColors.white : Colors.transparent,
+                ...task.subtasks.map(
+                  (subtask) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: AppCard(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              ref
+                                  .read(
+                                    taskDetailViewModelProvider(
+                                      widget.taskId,
+                                    ).notifier,
+                                  )
+                                  .toggleSubtask(
+                                    subtask.id,
+                                    !subtask.completed,
+                                  );
+                            },
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: subtask.completed
+                                      ? AppColors.white
+                                      : AppColors.secondaryText,
+                                  width: 2,
                                 ),
-                                child: subtask.completed
-                                    ? const Center(
-                                        child: Icon(
-                                          PhosphorIconsBold.check,
-                                          size: 10,
-                                          color: AppColors.pureBlack,
-                                        ),
-                                      )
+                                color: subtask.completed
+                                    ? AppColors.nearBlack
+                                    : Colors.transparent,
+                              ),
+                              child: subtask.completed
+                                  ? const Center(
+                                      child: Icon(
+                                        PhosphorIconsBold.check,
+                                        size: 10,
+                                        color: AppColors.white,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              subtask.title,
+                              style: TextStyle(
+                                color: subtask.completed
+                                    ? AppColors.secondaryText
+                                    : AppColors.primaryText,
+                                fontSize: 14,
+                                decoration: subtask.completed
+                                    ? TextDecoration.lineThrough
                                     : null,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                subtask.title,
-                                style: TextStyle(
-                                  color: subtask.completed ? AppColors.secondaryText : AppColors.white,
-                                  fontSize: 14,
-                                  decoration: subtask.completed ? TextDecoration.lineThrough : null,
-                                ),
-                              ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              PhosphorIconsRegular.trash,
+                              size: 16,
+                              color: AppColors.secondaryText,
                             ),
-                            IconButton(
-                              icon: const Icon(PhosphorIconsRegular.trash, size: 16, color: AppColors.secondaryText),
-                              onPressed: () {
-                                ref
-                                    .read(taskDetailViewModelProvider(widget.taskId).notifier)
-                                    .deleteSubtask(subtask.id);
-                              },
-                            ),
-                          ],
-                        ),
+                            onPressed: () {
+                              ref
+                                  .read(
+                                    taskDetailViewModelProvider(
+                                      widget.taskId,
+                                    ).notifier,
+                                  )
+                                  .deleteSubtask(subtask.id);
+                            },
+                          ),
+                        ],
                       ),
-                    )),
+                    ),
+                  ),
+                ),
               ],
             ],
           ),

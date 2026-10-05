@@ -3,14 +3,7 @@ import '../../../core/network/api_exception.dart';
 import '../data/event_repository.dart';
 import '../models/event.dart';
 
-enum EventsViewState {
-  initial,
-  loading,
-  success,
-  empty,
-  error,
-  refreshing,
-}
+enum EventsViewState { initial, loading, success, empty, error, refreshing }
 
 class EventsState {
   final EventsViewState viewState;
@@ -49,8 +42,9 @@ class EventsState {
   }
 }
 
-final eventsViewModelProvider =
-    NotifierProvider<EventsViewModel, EventsState>(EventsViewModel.new);
+final eventsViewModelProvider = NotifierProvider<EventsViewModel, EventsState>(
+  EventsViewModel.new,
+);
 
 class EventsViewModel extends Notifier<EventsState> {
   EventRepository get _repository => ref.read(eventRepositoryProvider);
@@ -69,9 +63,15 @@ class EventsViewModel extends Notifier<EventsState> {
 
   Future<void> loadEvents({bool isRefresh = false}) async {
     if (isRefresh) {
-      state = state.copyWith(viewState: EventsViewState.refreshing, clearError: true);
+      state = state.copyWith(
+        viewState: EventsViewState.refreshing,
+        clearError: true,
+      );
     } else {
-      state = state.copyWith(viewState: EventsViewState.loading, clearError: true);
+      state = state.copyWith(
+        viewState: EventsViewState.loading,
+        clearError: true,
+      );
     }
 
     try {

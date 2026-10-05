@@ -44,7 +44,10 @@ class _AIEventScreenState extends ConsumerState<AIEventScreen> {
       ref.read(eventsViewModelProvider.notifier).loadEvents();
 
       if (mounted) {
-        context.pushReplacement('/events/${createdEvent.id}', extra: createdEvent);
+        context.pushReplacement(
+          '/events/${createdEvent.id}',
+          extra: createdEvent,
+        );
       }
     } on ApiException catch (e) {
       setState(() {
@@ -81,7 +84,7 @@ class _AIEventScreenState extends ConsumerState<AIEventScreen> {
               const Text(
                 'Describe tu reunión o evento',
                 style: TextStyle(
-                  color: AppColors.white,
+                  color: AppColors.primaryText,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.4,
@@ -134,7 +137,8 @@ class _AIEventScreenState extends ConsumerState<AIEventScreen> {
                     if (_contentController.text.trim().isEmpty) {
                       _contentController.text = text;
                     } else {
-                      _contentController.text = '${_contentController.text.trim()} $text';
+                      _contentController.text =
+                          '${_contentController.text.trim()} $text';
                     }
                   });
                 },
@@ -142,7 +146,9 @@ class _AIEventScreenState extends ConsumerState<AIEventScreen> {
               const SizedBox(height: 20),
 
               AppButton(
-                label: _isLoading ? 'Agendando evento...' : 'Generar evento con IA',
+                label: _isLoading
+                    ? 'Agendando evento...'
+                    : 'Generar evento con IA',
                 isLoading: _isLoading,
                 variant: AppButtonVariant.ai,
                 onPressed: _submit,

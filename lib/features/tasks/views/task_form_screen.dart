@@ -14,10 +14,7 @@ import '../viewmodels/tasks_view_model.dart';
 class TaskFormScreen extends ConsumerStatefulWidget {
   final Task? taskToEdit;
 
-  const TaskFormScreen({
-    super.key,
-    this.taskToEdit,
-  });
+  const TaskFormScreen({super.key, this.taskToEdit});
 
   @override
   ConsumerState<TaskFormScreen> createState() => _TaskFormScreenState();
@@ -31,6 +28,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   late final TextEditingController _tagsController;
 
   late TaskPriority _priority;
+  late bool _isCompleted;
   DateTime? _dueDate;
   DateTime? _reminderDate;
   bool _isLoading = false;
@@ -40,12 +38,13 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     super.initState();
     final task = widget.taskToEdit;
     _titleController = TextEditingController(text: task?.title ?? '');
-    _descriptionController =
-        TextEditingController(text: task?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: task?.description ?? '',
+    );
     _folderController = TextEditingController(text: task?.folder ?? '');
-    _tagsController =
-        TextEditingController(text: task?.tags.join(', ') ?? '');
+    _tagsController = TextEditingController(text: task?.tags.join(', ') ?? '');
     _priority = task?.priority ?? TaskPriority.medium;
+    _isCompleted = task?.status == TaskStatus.completed;
     _dueDate = task?.dueDate;
     _reminderDate = task?.reminderDate;
   }
@@ -70,11 +69,11 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       lastDate: now.add(const Duration(days: 365 * 5)),
       builder: (context, child) {
         return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.white,
-              onPrimary: AppColors.pureBlack,
-              surface: AppColors.primarySurface,
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.nearBlack,
+              onPrimary: AppColors.white,
+              surface: AppColors.white,
               onSurface: AppColors.primaryText,
             ),
           ),
@@ -90,11 +89,11 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       initialTime: TimeOfDay.fromDateTime(initialDate),
       builder: (context, child) {
         return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.white,
-              onPrimary: AppColors.pureBlack,
-              surface: AppColors.primarySurface,
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.nearBlack,
+              onPrimary: AppColors.white,
+              surface: AppColors.white,
               onSurface: AppColors.primaryText,
             ),
           ),
@@ -142,6 +141,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
           description: _descriptionController.text.trim().isEmpty
               ? null
               : _descriptionController.text.trim(),
+          status: _isCompleted ? TaskStatus.completed : TaskStatus.pending,
           priority: _priority,
           dueDate: _dueDate,
           reminderDate: _reminderDate,
@@ -187,15 +187,48 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     }
   }
 
+  Future<void> _deleteTask() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Eliminar tarea?'),
+        content: const Text('La tarea y sus subtareas se eliminarán.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text(
+              'Eliminar',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || widget.taskToEdit == null) return;
+    final deleted = await ref
+        .read(tasksViewModelProvider.notifier)
+        .deleteTask(widget.taskToEdit!.id);
+    if (!mounted) return;
+    if (deleted) {
+      context.go('/tasks');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo eliminar la tarea.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.taskToEdit != null;
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
-      appBar: AppBar(
-        title: Text(isEditing ? 'Editar tarea' : 'Nueva tarea'),
-      ),
+      appBar: AppBar(title: Text(isEditing ? 'Editar tarea' : 'Nueva tarea')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -241,6 +274,21 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
+
+                if (isEditing) ...[
+                  SwitchListTile.adaptive(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    value: _isCompleted,
+                    activeTrackColor: AppColors.nearBlack,
+                    title: const Text('Marcar como completada'),
+                    onChanged: (value) => setState(() => _isCompleted = value),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
 
                 // Due Date Picker Tile
                 _buildPickerTile(
@@ -301,6 +349,14 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                   onPressed: _save,
                   variant: AppButtonVariant.primary,
                 ),
+                if (isEditing) ...[
+                  const SizedBox(height: 12),
+                  AppButton(
+                    label: 'Eliminar tarea',
+                    onPressed: _deleteTask,
+                    variant: AppButtonVariant.secondary,
+                  ),
+                ],
                 const SizedBox(height: 24),
               ],
             ),
@@ -318,10 +374,12 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.white : AppColors.secondarySurface,
+            color: isSelected
+                ? AppColors.lightSurfaceSecondary
+                : AppColors.white,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? AppColors.white : AppColors.border,
+              color: isSelected ? AppColors.nearBlack : AppColors.border,
             ),
           ),
           child: Center(

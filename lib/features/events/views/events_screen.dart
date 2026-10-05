@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
 import '../../../core/utils/date_utils.dart';
@@ -17,11 +18,25 @@ class EventsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(eventsViewModelProvider);
     final events = state.events;
+    final selectedDate = state.fromDate ?? DateTime.now();
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
-        title: const Text('Eventos y Agenda'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Eventos'),
+            Text(
+              '${_monthName(selectedDate.month)} ${selectedDate.year}',
+              style: const TextStyle(
+                color: AppColors.secondaryText,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(PhosphorIconsRegular.sparkle, size: 20),
@@ -31,23 +46,27 @@ class EventsScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.pureBlack,
+        backgroundColor: AppColors.nearBlack,
+        foregroundColor: AppColors.white,
         shape: const CircleBorder(),
         onPressed: () => context.push('/events/new'),
         child: const Icon(PhosphorIconsRegular.plus, size: 24),
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.white,
+          color: AppColors.nearBlack,
           backgroundColor: AppColors.primarySurface,
-          onRefresh: () => ref.read(eventsViewModelProvider.notifier).loadEvents(),
+          onRefresh: () =>
+              ref.read(eventsViewModelProvider.notifier).loadEvents(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Horizontal Week Strip
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: SizedBox(
                   height: 70,
                   child: ListView.separated(
@@ -55,40 +74,54 @@ class EventsScreen extends ConsumerWidget {
                     itemCount: 7,
                     separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
-                      final date = DateTime.now().add(Duration(days: index - 2));
+                      final date = DateTime.now().add(
+                        Duration(days: index - 2),
+                      );
                       final selectedDate = state.fromDate;
                       final isSelected = selectedDate == null
                           ? index == 2
                           : selectedDate.year == date.year &&
-                              selectedDate.month == date.month &&
-                              selectedDate.day == date.day;
+                                selectedDate.month == date.month &&
+                                selectedDate.day == date.day;
 
                       return InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
-                          final start = DateTime(date.year, date.month, date.day);
-                          ref.read(eventsViewModelProvider.notifier).setDateRange(
+                          final start = DateTime(
+                            date.year,
+                            date.month,
+                            date.day,
+                          );
+                          ref
+                              .read(eventsViewModelProvider.notifier)
+                              .setDateRange(
                                 start,
                                 start.add(const Duration(days: 1)),
                               );
                         },
                         child: Container(
-                          width: 52,
+                          width: 44,
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.white : AppColors.primarySurface,
-                            borderRadius: BorderRadius.circular(12),
+                            color: isSelected
+                                ? AppColors.nearBlack
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: isSelected ? AppColors.white : AppColors.border,
+                              color: isSelected
+                                  ? AppColors.nearBlack
+                                  : Colors.transparent,
                             ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                AppDateUtils.formatEventBadge(date),
+                                _weekdayLetter(date),
                                 style: TextStyle(
-                                  color: isSelected ? AppColors.pureBlack : AppColors.secondaryText,
-                                  fontSize: 10,
+                                  color: isSelected
+                                      ? AppColors.white
+                                      : AppColors.secondaryText,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -96,7 +129,9 @@ class EventsScreen extends ConsumerWidget {
                               Text(
                                 '${date.day}',
                                 style: TextStyle(
-                                  color: isSelected ? AppColors.pureBlack : AppColors.white,
+                                  color: isSelected
+                                      ? AppColors.white
+                                      : AppColors.primaryText,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -111,13 +146,18 @@ class EventsScreen extends ConsumerWidget {
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
                 child: Text(
-                  state.fromDate == null
-                      ? 'Agenda del día'
-                      : 'Agenda · ${AppDateUtils.formatEventBadge(state.fromDate)}',
+                  selectedDate.year == DateTime.now().year &&
+                          selectedDate.month == DateTime.now().month &&
+                          selectedDate.day == DateTime.now().day
+                      ? 'Agenda de hoy'
+                      : 'Agenda · ${AppDateUtils.formatEventBadge(selectedDate)}',
                   style: const TextStyle(
-                    color: AppColors.white,
+                    color: AppColors.primaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -128,31 +168,75 @@ class EventsScreen extends ConsumerWidget {
                 child: state.isLoading && events.isEmpty
                     ? const LoadingView(message: 'Cargando eventos...')
                     : state.errorMessage != null && events.isEmpty
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(
-                                state.errorMessage!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(color: AppColors.secondaryText),
-                              ),
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            state.errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AppColors.secondaryText,
                             ),
-                          )
-                    : events.isEmpty
-                        ? const EmptyState(
-                            icon: PhosphorIconsRegular.calendarBlank,
-                            title: 'No hay eventos',
-                            message: 'Programa un evento o usa la IA para agendar automáticamente.',
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                            itemCount: events.length,
-                            separatorBuilder: (_, _) => const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final event = events[index];
-                              return _buildEventCard(context, event);
-                            },
                           ),
+                        ),
+                      )
+                    : events.isEmpty
+                    ? const EmptyState(
+                        icon: PhosphorIconsRegular.calendarBlank,
+                        title: 'No hay eventos',
+                        message:
+                            'Programa un evento o usa la IA para agendar automáticamente.',
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        itemCount: events.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final event = events[index];
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 64,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 8,
+                                    right: 8,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        DateFormat(
+                                          'h:mm',
+                                        ).format(event.startDate.toLocal()),
+                                        style: const TextStyle(
+                                          color: AppColors.primaryText,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        event.startDate.toLocal().hour < 12
+                                            ? 'a. m.'
+                                            : 'p. m.',
+                                        style: const TextStyle(
+                                          color: AppColors.secondaryText,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Expanded(child: _buildEventCard(context, event)),
+                            ],
+                          );
+                        },
+                      ),
               ),
             ],
           ),
@@ -172,7 +256,7 @@ class EventsScreen extends ConsumerWidget {
             width: 4,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: AppColors.nearBlack,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -181,43 +265,38 @@ class EventsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      AppDateUtils.formatTime(event.startDate),
-                      style: const TextStyle(
-                        color: AppColors.secondaryText,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    if (event.location?.isNotEmpty == true) ...[
-                      Row(
-                        children: [
-                          const Icon(PhosphorIconsRegular.mapPin, size: 12, color: AppColors.secondaryText),
-                          const SizedBox(width: 4),
-                          Text(
-                            event.location!,
-                            style: const TextStyle(
-                              color: AppColors.secondaryText,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 4),
                 Text(
                   event.title,
                   style: const TextStyle(
-                    color: AppColors.white,
+                    color: AppColors.primaryText,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (event.location?.isNotEmpty == true) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        PhosphorIconsRegular.mapPin,
+                        size: 12,
+                        color: AppColors.secondaryText,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          event.location!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppColors.secondaryText,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (event.description?.isNotEmpty == true) ...[
                   const SizedBox(height: 4),
                   Text(
@@ -237,4 +316,27 @@ class EventsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _weekdayLetter(DateTime date) {
+  const weekdays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  return weekdays[date.weekday - 1];
+}
+
+String _monthName(int month) {
+  const months = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ];
+  return months[month - 1];
 }

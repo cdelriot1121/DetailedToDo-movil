@@ -48,7 +48,9 @@ class TasksScreen extends ConsumerWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          ref.read(tasksViewModelProvider.notifier).clearFilters();
+                          ref
+                              .read(tasksViewModelProvider.notifier)
+                              .clearFilters();
                           Navigator.pop(context);
                         },
                         child: const Text(
@@ -132,7 +134,9 @@ class TasksScreen extends ConsumerWidget {
                   AppButton(
                     label: 'Aplicar filtros',
                     onPressed: () {
-                      ref.read(tasksViewModelProvider.notifier).setFilter(
+                      ref
+                          .read(tasksViewModelProvider.notifier)
+                          .setFilter(
                             status: tempStatus,
                             priority: tempPriority,
                           );
@@ -153,7 +157,7 @@ class TasksScreen extends ConsumerWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.white,
+      selectedColor: AppColors.lightSurfaceSecondary,
       backgroundColor: AppColors.secondarySurface,
       labelStyle: TextStyle(
         color: isSelected ? AppColors.pureBlack : AppColors.primaryText,
@@ -163,7 +167,7 @@ class TasksScreen extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? AppColors.white : AppColors.border,
+          color: isSelected ? AppColors.nearBlack : AppColors.border,
         ),
       ),
     );
@@ -187,29 +191,33 @@ class TasksScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.pureBlack,
+        backgroundColor: AppColors.nearBlack,
+        foregroundColor: AppColors.white,
         shape: const CircleBorder(),
         onPressed: () => context.push('/tasks/new'),
         child: const Icon(PhosphorIconsRegular.plus, size: 24),
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.white,
+          color: AppColors.nearBlack,
           backgroundColor: AppColors.primarySurface,
-          onRefresh: () => ref.read(tasksViewModelProvider.notifier).loadTasks(),
+          onRefresh: () =>
+              ref.read(tasksViewModelProvider.notifier).loadTasks(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Search Bar & AI Quick Action
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: AppColors.primarySurface,
+                          color: AppColors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: AppColors.border),
                         ),
@@ -217,14 +225,24 @@ class TasksScreen extends ConsumerWidget {
                           onChanged: (value) {
                             // Search filtering if supported
                           },
-                          style: const TextStyle(color: AppColors.primaryText, fontSize: 14),
+                          style: const TextStyle(
+                            color: AppColors.primaryText,
+                            fontSize: 14,
+                          ),
                           decoration: const InputDecoration(
                             hintText: 'Buscar tareas...',
-                            prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass, color: AppColors.secondaryText, size: 18),
+                            prefixIcon: Icon(
+                              PhosphorIconsRegular.magnifyingGlass,
+                              color: AppColors.secondaryText,
+                              size: 18,
+                            ),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -232,12 +250,15 @@ class TasksScreen extends ConsumerWidget {
                     const SizedBox(width: 10),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.primarySurface,
+                        color: AppColors.nearBlack,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
                       ),
                       child: IconButton(
-                        icon: const Icon(PhosphorIconsRegular.sparkle, color: AppColors.white, size: 20),
+                        icon: const Icon(
+                          PhosphorIconsRegular.sparkle,
+                          color: AppColors.white,
+                          size: 20,
+                        ),
                         onPressed: () => context.push('/tasks/ai'),
                         tooltip: 'Crear con IA',
                       ),
@@ -250,20 +271,24 @@ class TasksScreen extends ConsumerWidget {
                 child: state.isLoading && tasks.isEmpty
                     ? const LoadingView(message: 'Cargando tareas...')
                     : tasks.isEmpty
-                        ? const EmptyState(
-                            icon: PhosphorIconsRegular.checkCircle,
-                            title: 'No hay tareas',
-                            message: 'Crea una nueva tarea o ajusta los filtros de búsqueda.',
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                            itemCount: tasks.length,
-                            separatorBuilder: (_, _) => const SizedBox(height: 10),
-                            itemBuilder: (context, index) {
-                              final task = tasks[index];
-                              return _buildTaskCard(context, ref, task);
-                            },
-                          ),
+                    ? const EmptyState(
+                        icon: PhosphorIconsRegular.checkCircle,
+                        title: 'No hay tareas',
+                        message:
+                            'Crea una nueva tarea o ajusta los filtros de búsqueda.',
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        itemCount: tasks.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final task = tasks[index];
+                          return _buildTaskCard(context, ref, task);
+                        },
+                      ),
               ),
             ],
           ),
@@ -274,8 +299,12 @@ class TasksScreen extends ConsumerWidget {
 
   Widget _buildTaskCard(BuildContext context, WidgetRef ref, Task task) {
     Color priorityColor = AppColors.lowPriority;
-    if (task.priority == TaskPriority.high) priorityColor = AppColors.highPriority;
-    if (task.priority == TaskPriority.medium) priorityColor = AppColors.mediumPriority;
+    if (task.priority == TaskPriority.high) {
+      priorityColor = AppColors.highPriority;
+    }
+    if (task.priority == TaskPriority.medium) {
+      priorityColor = AppColors.mediumPriority;
+    }
 
     return AppCard(
       onTap: () => context.push('/tasks/${task.id}'),
@@ -294,17 +323,21 @@ class TasksScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: task.isCompleted ? AppColors.white : AppColors.secondaryText,
+                  color: task.isCompleted
+                      ? AppColors.white
+                      : AppColors.secondaryText,
                   width: 2,
                 ),
-                color: task.isCompleted ? AppColors.white : Colors.transparent,
+                color: task.isCompleted
+                    ? AppColors.nearBlack
+                    : Colors.transparent,
               ),
               child: task.isCompleted
                   ? const Center(
                       child: Icon(
                         PhosphorIconsBold.check,
                         size: 12,
-                        color: AppColors.pureBlack,
+                        color: AppColors.white,
                       ),
                     )
                   : null,
@@ -318,10 +351,14 @@ class TasksScreen extends ConsumerWidget {
                 Text(
                   task.title,
                   style: TextStyle(
-                    color: task.isCompleted ? AppColors.secondaryText : AppColors.primaryText,
+                    color: task.isCompleted
+                        ? AppColors.secondaryText
+                        : AppColors.primaryText,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                    decoration: task.isCompleted
+                        ? TextDecoration.lineThrough
+                        : null,
                   ),
                 ),
                 if (task.description?.isNotEmpty == true) ...[
@@ -340,7 +377,11 @@ class TasksScreen extends ConsumerWidget {
                 Row(
                   children: [
                     if (task.dueDate != null) ...[
-                      const Icon(PhosphorIconsRegular.clock, size: 12, color: AppColors.secondaryText),
+                      const Icon(
+                        PhosphorIconsRegular.clock,
+                        size: 12,
+                        color: AppColors.secondaryText,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         AppDateUtils.formatShort(task.dueDate!),
@@ -352,7 +393,11 @@ class TasksScreen extends ConsumerWidget {
                       const SizedBox(width: 12),
                     ],
                     if (task.subtasks.isNotEmpty) ...[
-                      const Icon(PhosphorIconsRegular.listChecks, size: 12, color: AppColors.secondaryText),
+                      const Icon(
+                        PhosphorIconsRegular.listChecks,
+                        size: 12,
+                        color: AppColors.secondaryText,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${task.subtasks.where((s) => s.completed).length}/${task.subtasks.length}',

@@ -3,17 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // --- Tema oscuro (existente) ---
-  static const Color scaffoldBackground = Color(0xFF0B0B0B);
-  static const Color primarySurface = Color(0xFF151515);
-  static const Color secondarySurface = Color(0xFF1E1E1E);
-  static const Color border = Color(0xFF2A2A2A);
-  static const Color primaryText = Color(0xFFFFFFFF);
-  static const Color secondaryText = Color(0xFFA7A7A7);
-  static const Color disabledText = Color(0xFF656565);
-  static const Color inputBackground = Color(0xFF171717);
-
-  // --- Tema claro — valores extraidos de Penpot ---
+  // Design system claro de Penpot.
   static const Color lightScaffold = Color(0xFFFAFAFA);
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightSurfaceSecondary = Color(0xFFF0F0F0);
@@ -24,6 +14,16 @@ class AppColors {
   static const Color lightDivider = Color(0xFFE2E2E2);
   static const Color lightDecoration1 = Color(0xFFF0F0F0);
   static const Color lightDecoration2 = Color(0xFFEBEBEB);
+
+  // Aliases usados por las vistas existentes, ahora alineados al tema claro.
+  static const Color scaffoldBackground = lightScaffold;
+  static const Color primarySurface = lightSurface;
+  static const Color secondarySurface = lightSurfaceSecondary;
+  static const Color border = lightBorder;
+  static const Color primaryText = lightPrimaryText;
+  static const Color secondaryText = lightSecondaryText;
+  static const Color disabledText = lightPlaceholder;
+  static const Color inputBackground = lightSurface;
 
   // --- Comunes ---
   static const Color white = Color(0xFFFFFFFF);
@@ -87,16 +87,25 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.inputBackground,
-        hintStyle: const TextStyle(color: AppColors.secondaryText, fontSize: 14),
-        labelStyle: const TextStyle(color: AppColors.secondaryText, fontSize: 14),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        hintStyle: const TextStyle(
+          color: AppColors.secondaryText,
+          fontSize: 14,
+        ),
+        labelStyle: const TextStyle(
+          color: AppColors.secondaryText,
+          fontSize: 14,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.white, width: 1.2),
+          borderSide: const BorderSide(color: AppColors.nearBlack, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -196,13 +205,19 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.lightSurface,
-        hintStyle: const TextStyle(color: AppColors.lightPlaceholder, fontSize: 15),
+        hintStyle: const TextStyle(
+          color: AppColors.lightPlaceholder,
+          fontSize: 15,
+        ),
         labelStyle: const TextStyle(
           color: AppColors.lightSecondaryText,
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.lightBorder, width: 1),
@@ -269,18 +284,12 @@ class AppTheme {
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
-        bodyLarge: TextStyle(
-          color: AppColors.lightPrimaryText,
-          fontSize: 15,
-        ),
+        bodyLarge: TextStyle(color: AppColors.lightPrimaryText, fontSize: 15),
         bodyMedium: TextStyle(
           color: AppColors.lightSecondaryText,
           fontSize: 15,
         ),
-        bodySmall: TextStyle(
-          color: AppColors.lightSecondaryText,
-          fontSize: 13,
-        ),
+        bodySmall: TextStyle(color: AppColors.lightSecondaryText, fontSize: 13),
         labelLarge: TextStyle(
           color: AppColors.lightPrimaryText,
           fontSize: 13,

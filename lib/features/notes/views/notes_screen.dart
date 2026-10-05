@@ -31,26 +31,30 @@ class NotesScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.pureBlack,
+        backgroundColor: AppColors.nearBlack,
+        foregroundColor: AppColors.white,
         shape: const CircleBorder(),
         onPressed: () => context.push('/notes/new'),
         child: const Icon(PhosphorIconsRegular.plus, size: 24),
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.white,
+          color: AppColors.nearBlack,
           backgroundColor: AppColors.primarySurface,
-          onRefresh: () => ref.read(notesViewModelProvider.notifier).loadNotes(),
+          onRefresh: () =>
+              ref.read(notesViewModelProvider.notifier).loadNotes(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Search Bar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
+                    color: AppColors.primaryText,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.border),
                   ),
@@ -58,14 +62,24 @@ class NotesScreen extends ConsumerWidget {
                     onChanged: (value) {
                       // Optional search
                     },
-                    style: const TextStyle(color: AppColors.primaryText, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppColors.primaryText,
+                      fontSize: 14,
+                    ),
                     decoration: const InputDecoration(
                       hintText: 'Buscar notas...',
-                      prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass, color: AppColors.secondaryText, size: 18),
+                      prefixIcon: Icon(
+                        PhosphorIconsRegular.magnifyingGlass,
+                        color: AppColors.secondaryText,
+                        size: 18,
+                      ),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -73,7 +87,10 @@ class NotesScreen extends ConsumerWidget {
 
               // Filter Chips
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 4,
+                ),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -115,20 +132,23 @@ class NotesScreen extends ConsumerWidget {
                 child: state.isLoading && notes.isEmpty
                     ? const LoadingView(message: 'Cargando notas...')
                     : notes.isEmpty
-                        ? const EmptyState(
-                            icon: PhosphorIconsRegular.note,
-                            title: 'No hay notas',
-                            message: 'Crea una nueva nota para capturar tus ideas.',
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                            itemCount: notes.length,
-                            separatorBuilder: (_, _) => const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final note = notes[index];
-                              return _buildNoteCard(context, note);
-                            },
-                          ),
+                    ? const EmptyState(
+                        icon: PhosphorIconsRegular.note,
+                        title: 'No hay notas',
+                        message: 'Crea una nueva nota para capturar tus ideas.',
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        itemCount: notes.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final note = notes[index];
+                          return _buildNoteCard(context, note);
+                        },
+                      ),
               ),
             ],
           ),
@@ -149,7 +169,7 @@ class NotesScreen extends ConsumerWidget {
       onSelected: (_) {
         ref.read(notesViewModelProvider.notifier).setFilter(folder: folder);
       },
-      selectedColor: AppColors.white,
+      selectedColor: AppColors.lightSurfaceSecondary,
       backgroundColor: AppColors.secondarySurface,
       labelStyle: TextStyle(
         color: isSelected ? AppColors.pureBlack : AppColors.primaryText,
@@ -159,7 +179,7 @@ class NotesScreen extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? AppColors.white : AppColors.border,
+          color: isSelected ? AppColors.nearBlack : AppColors.border,
         ),
       ),
     );
@@ -179,7 +199,7 @@ class NotesScreen extends ConsumerWidget {
                 child: Text(
                   note.title,
                   style: const TextStyle(
-                    color: AppColors.white,
+                    color: AppColors.primaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -190,7 +210,10 @@ class NotesScreen extends ConsumerWidget {
               if (note.folder != null && note.folder!.isNotEmpty) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.secondarySurface,
                     borderRadius: BorderRadius.circular(6),
@@ -223,7 +246,11 @@ class NotesScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Icon(PhosphorIconsRegular.clock, size: 12, color: AppColors.secondaryText),
+              const Icon(
+                PhosphorIconsRegular.clock,
+                size: 12,
+                color: AppColors.secondaryText,
+              ),
               const SizedBox(width: 4),
               Text(
                 AppDateUtils.formatShort(note.updatedAt ?? note.createdAt),

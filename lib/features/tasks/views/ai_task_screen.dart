@@ -54,7 +54,8 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
       });
     } catch (_) {
       setState(() {
-        _errorMessage = 'No pudimos estructurar la tarea con IA. Inténtalo de nuevo.';
+        _errorMessage =
+            'No pudimos estructurar la tarea con IA. Inténtalo de nuevo.';
         _isLoading = false;
       });
     }
@@ -82,7 +83,7 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
               const Text(
                 'Cuéntame qué necesitas hacer',
                 style: TextStyle(
-                  color: AppColors.white,
+                  color: AppColors.primaryText,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.4,
@@ -136,7 +137,8 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
                     if (_contentController.text.trim().isEmpty) {
                       _contentController.text = text;
                     } else {
-                      _contentController.text = '${_contentController.text.trim()} $text';
+                      _contentController.text =
+                          '${_contentController.text.trim()} $text';
                     }
                   });
                 },
@@ -148,7 +150,9 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
 
               // Creation Button
               AppButton(
-                label: _isLoading ? 'Organizando tu tarea...' : 'Generar tarea con IA',
+                label: _isLoading
+                    ? 'Organizando tu tarea...'
+                    : 'Generar tarea con IA',
                 isLoading: _isLoading,
                 variant: AppButtonVariant.ai,
                 onPressed: _submit,
@@ -170,8 +174,12 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildSuggestionChip('Estudiar para el examen de cálculo el jueves a las 3pm'),
-                  _buildSuggestionChip('Preparar presentación de sprint para el equipo de diseño'),
+                  _buildSuggestionChip(
+                    'Estudiar para el examen de cálculo el jueves a las 3pm',
+                  ),
+                  _buildSuggestionChip(
+                    'Preparar presentación de sprint para el equipo de diseño',
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -196,10 +204,7 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
         ),
         child: Text(
           text,
-          style: const TextStyle(
-            color: AppColors.secondaryText,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: AppColors.secondaryText, fontSize: 12),
         ),
       ),
     );

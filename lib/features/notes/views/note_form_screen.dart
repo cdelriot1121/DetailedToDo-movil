@@ -13,10 +13,7 @@ import '../viewmodels/notes_view_model.dart';
 class NoteFormScreen extends ConsumerStatefulWidget {
   final Note? noteToEdit;
 
-  const NoteFormScreen({
-    super.key,
-    this.noteToEdit,
-  });
+  const NoteFormScreen({super.key, this.noteToEdit});
 
   @override
   ConsumerState<NoteFormScreen> createState() => _NoteFormScreenState();
@@ -37,8 +34,7 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
     _titleController = TextEditingController(text: note?.title ?? '');
     _contentController = TextEditingController(text: note?.content ?? '');
     _folderController = TextEditingController(text: note?.folder ?? '');
-    _tagsController =
-        TextEditingController(text: note?.tags.join(', ') ?? '');
+    _tagsController = TextEditingController(text: note?.tags.join(', ') ?? '');
   }
 
   @override
@@ -105,15 +101,48 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
     }
   }
 
+  Future<void> _deleteNote() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Eliminar nota?'),
+        content: const Text('La nota se eliminará permanentemente.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text(
+              'Eliminar',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || widget.noteToEdit == null) return;
+    final deleted = await ref
+        .read(notesViewModelProvider.notifier)
+        .deleteNote(widget.noteToEdit!.id);
+    if (!mounted) return;
+    if (deleted) {
+      context.go('/notes');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo eliminar la nota.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.noteToEdit != null;
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
-      appBar: AppBar(
-        title: Text(isEditing ? 'Editar nota' : 'Nueva nota'),
-      ),
+      appBar: AppBar(title: Text(isEditing ? 'Editar nota' : 'Nueva nota')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -166,6 +195,14 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
                   onPressed: _save,
                   variant: AppButtonVariant.primary,
                 ),
+                if (isEditing) ...[
+                  const SizedBox(height: 12),
+                  AppButton(
+                    label: 'Eliminar nota',
+                    onPressed: _deleteNote,
+                    variant: AppButtonVariant.secondary,
+                  ),
+                ],
               ],
             ),
           ),
