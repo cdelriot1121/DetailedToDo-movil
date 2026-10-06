@@ -37,19 +37,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             borderRadius: BorderRadius.circular(14),
             side: const BorderSide(color: AppColors.border),
           ),
-          title: const Text('Editar nombre', style: TextStyle(color: AppColors.white)),
+          title: const Text(
+            'Editar nombre',
+            style: TextStyle(color: AppColors.primaryText),
+          ),
           content: TextField(
             controller: controller,
             autofocus: true,
             style: const TextStyle(color: AppColors.primaryText),
-            decoration: const InputDecoration(
-              hintText: 'Tu nombre completo',
-            ),
+            decoration: const InputDecoration(hintText: 'Tu nombre completo'),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.secondaryText)),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.secondaryText),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -61,7 +65,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       .updateProfile(name: newName);
                 }
               },
-              child: const Text('Guardar', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Guardar',
+                style: TextStyle(
+                  color: AppColors.nearBlack,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -79,7 +89,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             borderRadius: BorderRadius.circular(14),
             side: const BorderSide(color: AppColors.border),
           ),
-          title: const Text('¿Cerrar sesión?', style: TextStyle(color: AppColors.white)),
+          title: const Text(
+            '¿Cerrar sesión?',
+            style: TextStyle(color: AppColors.primaryText),
+          ),
           content: const Text(
             'Tendrás que ingresar tus credenciales nuevamente para acceder.',
             style: TextStyle(color: AppColors.secondaryText),
@@ -87,7 +100,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.secondaryText)),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.secondaryText),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -97,7 +113,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   context.go('/login');
                 }
               },
-              child: const Text('Cerrar sesión', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Cerrar sesión',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -121,9 +143,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
-      appBar: AppBar(
-        title: const Text('Perfil'),
-      ),
+      appBar: AppBar(title: const Text('Perfil')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -138,7 +158,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: AppColors.primarySurface,
+                        color: AppColors.nearBlack,
                         shape: BoxShape.circle,
                         border: Border.all(color: AppColors.border, width: 1.5),
                       ),
@@ -159,7 +179,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Text(
                       user?.name ?? 'Usuario',
                       style: const TextStyle(
-                        color: AppColors.white,
+                        color: AppColors.primaryText,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.4,
@@ -189,6 +209,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 10),
               AppCard(
+                backgroundColor: AppColors.nearBlack,
+                borderColor: AppColors.nearBlack,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +239,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Text(
                           '${quota?.used ?? 0} de ${quota?.limit ?? 5} usadas',
                           style: const TextStyle(
-                            color: AppColors.secondaryText,
+                            color: Color(0xFFCCCCCC),
                             fontSize: 13,
                           ),
                         ),
@@ -231,7 +253,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: LinearProgressIndicator(
                         value: quota?.progressPercentage ?? 0.0,
                         minHeight: 8,
-                        backgroundColor: AppColors.secondarySurface,
+                        backgroundColor: const Color(0xFF444444),
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           AppColors.white,
                         ),
@@ -241,7 +263,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Text(
                       'Te quedan ${quota?.remaining ?? 5} solicitudes hoy.',
                       style: const TextStyle(
-                        color: AppColors.secondaryText,
+                        color: Color(0xFFCCCCCC),
                         fontSize: 12,
                       ),
                     ),
@@ -282,10 +304,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         size: 16,
                         color: AppColors.secondaryText,
                       ),
-                      onTap: () => _showEditNameDialog(
-                        context,
-                        user?.name ?? '',
-                      ),
+                      onTap: () =>
+                          _showEditNameDialog(context, user?.name ?? ''),
                     ),
                   ],
                 ),

@@ -81,7 +81,7 @@ class _AINoteScreenState extends ConsumerState<AINoteScreen> {
               const Text(
                 'Escribe tus pensamientos o ideas sueltas',
                 style: TextStyle(
-                  color: AppColors.white,
+                  color: AppColors.primaryText,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.4,
@@ -134,7 +134,8 @@ class _AINoteScreenState extends ConsumerState<AINoteScreen> {
                     if (_contentController.text.trim().isEmpty) {
                       _contentController.text = text;
                     } else {
-                      _contentController.text = '${_contentController.text.trim()} $text';
+                      _contentController.text =
+                          '${_contentController.text.trim()} $text';
                     }
                   });
                 },
@@ -142,7 +143,9 @@ class _AINoteScreenState extends ConsumerState<AINoteScreen> {
               const SizedBox(height: 20),
 
               AppButton(
-                label: _isLoading ? 'Organizando nota...' : 'Generar nota con IA',
+                label: _isLoading
+                    ? 'Organizando nota...'
+                    : 'Generar nota con IA',
                 isLoading: _isLoading,
                 variant: AppButtonVariant.ai,
                 onPressed: _submit,

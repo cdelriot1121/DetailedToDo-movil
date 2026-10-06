@@ -69,7 +69,10 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
             borderRadius: BorderRadius.circular(14),
             side: const BorderSide(color: AppColors.border),
           ),
-          title: const Text('¿Eliminar evento?', style: TextStyle(color: AppColors.white)),
+          title: const Text(
+            '¿Eliminar evento?',
+            style: TextStyle(color: AppColors.primaryText),
+          ),
           content: const Text(
             'Este evento se eliminará permanentemente.',
             style: TextStyle(color: AppColors.secondaryText),
@@ -77,7 +80,10 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.secondaryText)),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.secondaryText),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -89,7 +95,13 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                   context.pop();
                 }
               },
-              child: const Text('Eliminar', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -151,7 +163,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
               Text(
                 event.title,
                 style: const TextStyle(
-                  color: AppColors.white,
+                  color: AppColors.primaryText,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
@@ -182,7 +194,8 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                         value: AppDateUtils.formatFull(event.endDate),
                       ),
                     ],
-                    if (event.location != null && event.location!.isNotEmpty) ...[
+                    if (event.location != null &&
+                        event.location!.isNotEmpty) ...[
                       const Divider(height: 20),
                       _buildRow(
                         icon: PhosphorIconsRegular.mapPin,

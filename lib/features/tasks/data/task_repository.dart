@@ -102,8 +102,8 @@ class TaskRepository {
     return await _apiService.createTaskWithAI(content);
   }
 
-  Future<Subtask> addSubtask(String taskId, String title) async {
-    return await _apiService.createSubtask(taskId, title);
+  Future<Subtask> addSubtask(String taskId, String title, String description) async {
+    return await _apiService.createSubtask(taskId, title, description);
   }
 
   Future<Subtask> toggleSubtask(
@@ -111,13 +111,15 @@ class TaskRepository {
     String subtaskId,
     bool completed,
     String title,
+    String? description,
   ) async {
     return await _apiService.updateSubtask(
       taskId,
       subtaskId,
       {
         'title': title,
-        'completed': completed,
+        'description': description,
+        'status': completed ? 'COMPLETED' : 'PENDING',
       },
     );
   }

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/utils/validators.dart';
-import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../viewmodels/auth_view_model.dart';
 
@@ -21,12 +20,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  final List<TextEditingController> _otpDigitControllers =
-      List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _otpFocusNodes =
-      List.generate(6, (_) => FocusNode());
-
-  bool _waitingForOtp = false;
+  bool _acceptedTerms = true;
 
   @override
   void dispose() {
@@ -34,21 +28,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    for (final c in _otpDigitControllers) {
-      c.dispose();
-    }
-    for (final f in _otpFocusNodes) {
-      f.dispose();
-    }
     super.dispose();
-  }
-
-  String _getOtpCode() {
-    return _otpDigitControllers.map((c) => c.text.trim()).join();
   }
 
   Future<void> _submitRegister() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Debes aceptar los terminos de uso.'),
+          backgroundColor: AppColors.nearBlack,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
 
     final success = await ref.read(authViewModelProvider.notifier).register(
           _nameController.text,
@@ -57,51 +52,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
 
     if (success && mounted) {
-      for (final c in _otpDigitControllers) {
-        c.clear();
-      }
-      setState(() {
-        _waitingForOtp = true;
-      });
-      Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted && _otpFocusNodes.isNotEmpty) {
-          _otpFocusNodes[0].requestFocus();
-        }
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Código de verificación enviado a tu correo.'),
-          backgroundColor: AppColors.primarySurface,
-        ),
-      );
-    }
-  }
-
-  Future<void> _submitOtp() async {
-    final code = _getOtpCode();
-    if (code.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor completa los 6 dígitos del código OTP.'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    final success = await ref.read(authViewModelProvider.notifier).verifyOtp(
-          _emailController.text,
-          code,
-        );
-
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Cuenta verificada y creada con éxito!'),
-          backgroundColor: AppColors.primarySurface,
-        ),
-      );
-      context.go('/home');
+      context.push('/otp', extra: _emailController.text.trim());
     }
   }
 
@@ -110,200 +61,82 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authViewModelProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
-      appBar: AppBar(
-        title: Text(_waitingForOtp ? 'Verificación OTP' : 'Crear cuenta'),
-      ),
+      backgroundColor: AppColors.lightScaffold,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: _waitingForOtp
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Boton atras
+                Row(
                   children: [
-                    const SizedBox(height: 12),
-                    Center(
+                    GestureDetector(
+                      onTap: () => context.pop(),
                       child: Container(
-                        width: 60,
-                        height: 60,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primarySurface,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.border, width: 1.2),
+                          color: AppColors.lightSurface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.lightBorder),
                         ),
                         child: const Icon(
-                          Icons.mark_email_read_outlined,
-                          color: AppColors.white,
-                          size: 28,
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 18,
+                          color: AppColors.lightPrimaryText,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Código de verificación',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Ingresa el código de 6 dígitos que enviamos a:\n${_emailController.text.trim()}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.secondaryText,
-                        fontSize: 14,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    if (authState.errorMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppColors.error.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          authState.errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColors.error,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-
-                    // 6 Separate Pin Digit Boxes
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(6, (index) {
-                        return SizedBox(
-                          width: 46,
-                          height: 54,
-                          child: TextField(
-                            controller: _otpDigitControllers[index],
-                            focusNode: _otpFocusNodes[index],
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            maxLength: 1,
-                            style: const TextStyle(
-                              color: AppColors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              contentPadding: EdgeInsets.zero,
-                              filled: true,
-                              fillColor: AppColors.inputBackground,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: AppColors.border,
-                                  width: 1.2,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: AppColors.white,
-                                  width: 1.8,
-                                ),
-                              ),
-                            ),
-                            onChanged: (value) {
-                              if (value.isNotEmpty) {
-                                if (index < 5) {
-                                  _otpFocusNodes[index + 1].requestFocus();
-                                } else {
-                                  _otpFocusNodes[index].unfocus();
-                                  _submitOtp();
-                                }
-                              } else {
-                                if (index > 0) {
-                                  _otpFocusNodes[index - 1].requestFocus();
-                                }
-                              }
-                            },
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 32),
-
-                    AppButton(
-                      label: 'Verificar y entrar',
-                      isLoading: authState.isLoading,
-                      onPressed: _submitOtp,
-                      variant: AppButtonVariant.primary,
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _waitingForOtp = false;
-                            });
-                          },
-                          child: const Text(
-                            'Volver / Cambiar correo',
-                            style: TextStyle(
-                              color: AppColors.secondaryText,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ],
-                )
-              : Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'Comienza con DetailedToDo',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Crea una cuenta para organizar tus notas, tareas y eventos con IA.',
-                        style: TextStyle(
-                          color: AppColors.secondaryText,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
+                ),
+                const SizedBox(height: 28),
 
-                      if (authState.errorMessage != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.error.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: AppColors.error.withValues(alpha: 0.3),
-                            ),
-                          ),
+                // Titulo
+                const Text(
+                  'Crea tu cuenta',
+                  style: TextStyle(
+                    color: AppColors.lightPrimaryText,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.6,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Subtitulo
+                const Text(
+                  'Empieza gratis y organiza tareas, notas y eventos en un solo lugar.',
+                  style: TextStyle(
+                    color: AppColors.lightSecondaryText,
+                    fontSize: 15,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // Banner de error
+                if (authState.errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.error.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
                           child: Text(
                             authState.errorMessage!,
                             style: const TextStyle(
@@ -312,83 +145,212 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
 
-                      // Name
-                      AppTextField(
-                        label: 'Nombre completo',
-                        controller: _nameController,
-                        validator: (v) => Validators.requiredField(v, 'El nombre'),
-                      ),
-                      const SizedBox(height: 16),
+                // Campo: Nombre completo
+                const Text(
+                  'Nombre completo',
+                  style: TextStyle(
+                    color: AppColors.lightSecondaryText,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                AppTextField(
+                  hint: 'Tu nombre',
+                  controller: _nameController,
+                  validator: (v) => Validators.requiredField(v, 'El nombre'),
+                  prefixIcon: const Icon(
+                    Icons.person_outline_rounded,
+                    color: AppColors.lightPlaceholder,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(height: 18),
 
-                      // Email
-                      AppTextField(
-                        label: 'Correo electrónico',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: Validators.email,
-                      ),
-                      const SizedBox(height: 16),
+                // Campo: Correo electronico
+                const Text(
+                  'Correo electronico',
+                  style: TextStyle(
+                    color: AppColors.lightSecondaryText,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                AppTextField(
+                  hint: 'tu@correo.com',
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: Validators.email,
+                  prefixIcon: const Icon(
+                    Icons.mail_outline_rounded,
+                    color: AppColors.lightPlaceholder,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(height: 18),
 
-                      // Password
-                      AppTextField(
-                        label: 'Contraseña',
-                        controller: _passwordController,
-                        isPassword: true,
-                        validator: Validators.password,
-                      ),
-                      const SizedBox(height: 16),
+                // Campo: Contrasena
+                const Text(
+                  'Contrasena',
+                  style: TextStyle(
+                    color: AppColors.lightSecondaryText,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                AppTextField(
+                  hint: 'Minimo 8 caracteres',
+                  controller: _passwordController,
+                  isPassword: true,
+                  validator: Validators.password,
+                  prefixIcon: const Icon(
+                    Icons.lock_outline_rounded,
+                    color: AppColors.lightPlaceholder,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(height: 18),
 
-                      // Confirm Password
-                      AppTextField(
-                        label: 'Confirmar contraseña',
-                        controller: _confirmPasswordController,
-                        isPassword: true,
-                        validator: (v) =>
-                            Validators.confirmPassword(v, _passwordController.text),
-                      ),
-                      const SizedBox(height: 28),
+                // Campo: Confirmar contrasena
+                const Text(
+                  'Confirmar contrasena',
+                  style: TextStyle(
+                    color: AppColors.lightSecondaryText,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                AppTextField(
+                  hint: 'Repite tu contrasena',
+                  controller: _confirmPasswordController,
+                  isPassword: true,
+                  validator: (v) =>
+                      Validators.confirmPassword(v, _passwordController.text),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline_rounded,
+                    color: AppColors.lightPlaceholder,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-                      // Submit Button
-                      AppButton(
-                        label: 'Solicitar código de verificación',
-                        isLoading: authState.isLoading,
-                        onPressed: _submitRegister,
-                        variant: AppButtonVariant.primary,
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Back to login
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            '¿Ya tienes una cuenta? ',
-                            style: TextStyle(
-                              color: AppColors.secondaryText,
-                              fontSize: 14,
-                            ),
+                // Checkbox: Terminos
+                GestureDetector(
+                  onTap: () => setState(() => _acceptedTerms = !_acceptedTerms),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: _acceptedTerms
+                              ? AppColors.nearBlack
+                              : AppColors.lightSurface,
+                          borderRadius: BorderRadius.circular(7),
+                          border: Border.all(
+                            color: _acceptedTerms
+                                ? AppColors.nearBlack
+                                : AppColors.lightBorder,
+                            width: 1.5,
                           ),
-                          GestureDetector(
-                            onTap: () => context.pop(),
-                            child: const Text(
-                              'Iniciar sesión',
-                              style: TextStyle(
+                        ),
+                        child: _acceptedTerms
+                            ? const Icon(
+                                Icons.check_rounded,
+                                size: 14,
                                 color: AppColors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ],
+                              )
+                            : null,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Acepto los terminos de uso y la politica de privacidad',
+                          style: TextStyle(
+                            color: AppColors.lightSecondaryText,
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 28),
+
+                // Boton: Crear cuenta
+                SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.nearBlack,
+                      foregroundColor: AppColors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: authState.isLoading ? null : _submitRegister,
+                    child: authState.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.white),
+                            ),
+                          )
+                        : const Text(
+                            'Crear cuenta',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Link: Ya tienes cuenta
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Ya tienes cuenta?  ',
+                      style: TextStyle(
+                        color: AppColors.lightSecondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: const Text(
+                        'Inicia sesion',
+                        style: TextStyle(
+                          color: AppColors.lightPrimaryText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
         ),
       ),
     );

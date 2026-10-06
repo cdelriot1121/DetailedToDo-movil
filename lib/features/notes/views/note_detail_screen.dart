@@ -13,11 +13,7 @@ class NoteDetailScreen extends ConsumerStatefulWidget {
   final String noteId;
   final Note? initialNote;
 
-  const NoteDetailScreen({
-    super.key,
-    required this.noteId,
-    this.initialNote,
-  });
+  const NoteDetailScreen({super.key, required this.noteId, this.initialNote});
 
   @override
   ConsumerState<NoteDetailScreen> createState() => _NoteDetailScreenState();
@@ -68,7 +64,10 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
             borderRadius: BorderRadius.circular(14),
             side: const BorderSide(color: AppColors.border),
           ),
-          title: const Text('¿Eliminar nota?', style: TextStyle(color: AppColors.white)),
+          title: const Text(
+            '¿Eliminar nota?',
+            style: TextStyle(color: AppColors.primaryText),
+          ),
           content: const Text(
             'Esta nota se eliminará de forma permanente.',
             style: TextStyle(color: AppColors.secondaryText),
@@ -76,7 +75,10 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.secondaryText)),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.secondaryText),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -88,7 +90,13 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                   context.pop();
                 }
               },
-              child: const Text('Eliminar', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -150,7 +158,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
               Text(
                 note.title,
                 style: const TextStyle(
-                  color: AppColors.white,
+                  color: AppColors.primaryText,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,

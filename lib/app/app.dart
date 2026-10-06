@@ -13,7 +13,9 @@ class DetailedToDoApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'DetailedToDo',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.lightTheme,
+      themeMode: ThemeMode.light,
       routerConfig: router,
     );
   }

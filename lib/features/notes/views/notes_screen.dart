@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
+import '../../../core/utils/date_utils.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_view.dart';
@@ -15,6 +16,7 @@ class NotesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notesViewModelProvider);
+    final notes = state.notes;
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -22,92 +24,176 @@ class NotesScreen extends ConsumerWidget {
         title: const Text('Notas'),
         actions: [
           IconButton(
-            icon: const Icon(PhosphorIconsRegular.plus),
-            onPressed: () async {
-              await context.push('/notes/new');
-              ref.read(notesViewModelProvider.notifier).loadNotes();
-            },
+            icon: const Icon(PhosphorIconsRegular.sparkle, size: 20),
+            onPressed: () => context.push('/notes/ai'),
+            tooltip: 'Resumir con IA',
           ),
-          const SizedBox(width: 8),
         ],
       ),
-      body: Builder(
-        builder: (context) {
-          if (state.isLoading) {
-            return const LoadingView(message: 'Cargando notas...');
-          }
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.nearBlack,
+        foregroundColor: AppColors.white,
+        shape: const CircleBorder(),
+        onPressed: () => context.push('/notes/new'),
+        child: const Icon(PhosphorIconsRegular.plus, size: 24),
+      ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          color: AppColors.nearBlack,
+          backgroundColor: AppColors.primarySurface,
+          onRefresh: () =>
+              ref.read(notesViewModelProvider.notifier).loadNotes(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryText,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: TextField(
+                    onChanged: (value) {
+                      // Optional search
+                    },
+                    style: const TextStyle(
+                      color: AppColors.primaryText,
+                      fontSize: 14,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'Buscar notas...',
+                      prefixIcon: Icon(
+                        PhosphorIconsRegular.magnifyingGlass,
+                        color: AppColors.secondaryText,
+                        size: 18,
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
-          if (state.viewState == NotesViewState.error) {
-            return EmptyState(
-              icon: PhosphorIconsRegular.warningCircle,
-              title: 'Error al cargar notas',
-              message: state.errorMessage,
-              actionLabel: 'Reintentar',
-              onAction: () =>
-                  ref.read(notesViewModelProvider.notifier).loadNotes(),
-              isError: true,
-            );
-          }
+              // Filter Chips
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 4,
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildCategoryChip(
+                        ref,
+                        label: 'Todas',
+                        isSelected: state.selectedFolder == null,
+                        folder: null,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildCategoryChip(
+                        ref,
+                        label: 'Estudio',
+                        isSelected: state.selectedFolder == 'Estudio',
+                        folder: 'Estudio',
+                      ),
+                      const SizedBox(width: 8),
+                      _buildCategoryChip(
+                        ref,
+                        label: 'Ideas',
+                        isSelected: state.selectedFolder == 'Ideas',
+                        folder: 'Ideas',
+                      ),
+                      const SizedBox(width: 8),
+                      _buildCategoryChip(
+                        ref,
+                        label: 'Trabajo',
+                        isSelected: state.selectedFolder == 'Trabajo',
+                        folder: 'Trabajo',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
 
-          if (state.isEmpty) {
-            return EmptyState(
-              icon: PhosphorIconsRegular.note,
-              title: 'No hay notas',
-              message: 'Crea notas libres para capturar tus pensamientos o usa la IA.',
-              actionLabel: 'Crear nota',
-              onAction: () async {
-                await context.push('/notes/new');
-                ref.read(notesViewModelProvider.notifier).loadNotes();
-              },
-            );
-          }
-
-          return RefreshIndicator(
-            color: AppColors.white,
-            backgroundColor: AppColors.primarySurface,
-            onRefresh: () => ref
-                .read(notesViewModelProvider.notifier)
-                .loadNotes(isRefresh: true),
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: state.notes.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final note = state.notes[index];
-                return _NoteCard(
-                  note: note,
-                  onTap: () async {
-                    await context.push('/notes/${note.id}', extra: note);
-                    ref.read(notesViewModelProvider.notifier).loadNotes();
-                  },
-                );
-              },
-            ),
-          );
-        },
+              Expanded(
+                child: state.isLoading && notes.isEmpty
+                    ? const LoadingView(message: 'Cargando notas...')
+                    : notes.isEmpty
+                    ? const EmptyState(
+                        icon: PhosphorIconsRegular.note,
+                        title: 'No hay notas',
+                        message: 'Crea una nueva nota para capturar tus ideas.',
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        itemCount: notes.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final note = notes[index];
+                          return _buildNoteCard(context, note);
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
-}
 
-class _NoteCard extends StatelessWidget {
-  final Note note;
-  final VoidCallback onTap;
+  Widget _buildCategoryChip(
+    WidgetRef ref, {
+    required String label,
+    required bool isSelected,
+    required String? folder,
+  }) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) {
+        ref.read(notesViewModelProvider.notifier).setFilter(folder: folder);
+      },
+      selectedColor: AppColors.lightSurfaceSecondary,
+      backgroundColor: AppColors.secondarySurface,
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.pureBlack : AppColors.primaryText,
+        fontSize: 13,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? AppColors.nearBlack : AppColors.border,
+        ),
+      ),
+    );
+  }
 
-  const _NoteCard({
-    required this.note,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildNoteCard(BuildContext context, Note note) {
     return AppCard(
-      onTap: onTap,
+      onTap: () => context.push('/notes/${note.id}', extra: note),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
@@ -116,19 +202,21 @@ class _NoteCard extends StatelessWidget {
                     color: AppColors.primaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: -0.2,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (note.folder != null && note.folder!.isNotEmpty)
+              if (note.folder != null && note.folder!.isNotEmpty) ...[
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 2,
+                    vertical: 3,
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.secondarySurface,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(6),
                     border: Border.all(color: AppColors.border),
                   ),
                   child: Text(
@@ -136,37 +224,43 @@ class _NoteCard extends StatelessWidget {
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 11,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 6),
           Text(
             note.content,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: AppColors.secondaryText,
               fontSize: 13,
-              height: 1.4,
+              height: 1.3,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          if (note.tags.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              children: note.tags.map((tag) {
-                return Text(
-                  '#$tag',
-                  style: const TextStyle(
-                    color: AppColors.secondaryText,
-                    fontSize: 11,
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const Icon(
+                PhosphorIconsRegular.clock,
+                size: 12,
+                color: AppColors.secondaryText,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                AppDateUtils.formatShort(note.updatedAt ?? note.createdAt),
+                style: const TextStyle(
+                  color: AppColors.secondaryText,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

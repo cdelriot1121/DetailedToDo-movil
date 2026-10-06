@@ -70,6 +70,7 @@ class _AppTextFieldState extends State<AppTextField> {
           const SizedBox(height: 6),
         ],
         TextFormField(
+          cursorColor: AppColors.nearBlack,
           controller: widget.controller,
           initialValue: widget.initialValue,
           focusNode: widget.focusNode,
@@ -82,9 +83,9 @@ class _AppTextFieldState extends State<AppTextField> {
           onTap: widget.onTap,
           onChanged: widget.onChanged,
           validator: widget.validator,
-          style: const TextStyle(
-            color: AppColors.primaryText,
-            fontSize: 14,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 15,
           ),
           decoration: InputDecoration(
             hintText: widget.hint,

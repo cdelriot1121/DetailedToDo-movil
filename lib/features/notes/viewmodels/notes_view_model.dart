@@ -112,6 +112,31 @@ class NotesViewModel extends Notifier<NotesState> {
     loadNotes();
   }
 
+  Future<bool> createQuickNote({
+    required String title,
+    required String content,
+    String? color,
+    List<String> tags = const [],
+  }) async {
+    try {
+      final newNote = await _repository.createNote(
+        title: title,
+        content: content,
+        color: color,
+        tags: tags,
+      );
+      state = state.copyWith(
+        notes: [newNote, ...state.notes],
+        viewState: NotesViewState.success,
+      );
+      return true;
+    } catch (_) {
+      // Fallback reload
+      await loadNotes();
+      return false;
+    }
+  }
+
   Future<bool> deleteNote(String id) async {
     try {
       await _repository.deleteNote(id);

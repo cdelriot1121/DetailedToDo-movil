@@ -2,13 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../app/theme.dart';
 
-enum AppButtonVariant {
-  primary,
-  secondary,
-  outline,
-  danger,
-  ai,
-}
+enum AppButtonVariant { primary, secondary, outline, danger, ai }
 
 class AppButton extends StatelessWidget {
   final String label;
@@ -38,8 +32,8 @@ class AppButton extends StatelessWidget {
 
     switch (variant) {
       case AppButtonVariant.primary:
-        backgroundColor = AppColors.white;
-        foregroundColor = AppColors.pureBlack;
+        backgroundColor = AppColors.nearBlack;
+        foregroundColor = AppColors.white;
         break;
       case AppButtonVariant.secondary:
         backgroundColor = AppColors.secondarySurface;
@@ -54,11 +48,14 @@ class AppButton extends StatelessWidget {
       case AppButtonVariant.danger:
         backgroundColor = AppColors.error.withValues(alpha: 0.15);
         foregroundColor = AppColors.error;
-        borderSide = BorderSide(color: AppColors.error.withValues(alpha: 0.3), width: 1);
+        borderSide = BorderSide(
+          color: AppColors.error.withValues(alpha: 0.3),
+          width: 1,
+        );
         break;
       case AppButtonVariant.ai:
-        backgroundColor = AppColors.white;
-        foregroundColor = AppColors.pureBlack;
+        backgroundColor = AppColors.nearBlack;
+        foregroundColor = AppColors.white;
         break;
     }
 
@@ -69,12 +66,18 @@ class AppButton extends StatelessWidget {
       height: height,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: isClickable ? backgroundColor : AppColors.secondarySurface,
-          foregroundColor: isClickable ? foregroundColor : AppColors.disabledText,
+          backgroundColor: isClickable
+              ? backgroundColor
+              : AppColors.secondarySurface,
+          foregroundColor: isClickable
+              ? foregroundColor
+              : AppColors.disabledText,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            side: isClickable ? borderSide : const BorderSide(color: AppColors.border),
+            side: isClickable
+                ? borderSide
+                : const BorderSide(color: AppColors.border),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
@@ -86,9 +89,10 @@ class AppButton extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    variant == AppButtonVariant.primary || variant == AppButtonVariant.ai
-                        ? AppColors.pureBlack
-                        : AppColors.white,
+                    variant == AppButtonVariant.primary ||
+                            variant == AppButtonVariant.ai
+                        ? AppColors.white
+                        : AppColors.nearBlack,
                   ),
                 ),
               )

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
 import '../../../core/utils/date_utils.dart';
@@ -16,133 +17,250 @@ class EventsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(eventsViewModelProvider);
+    final events = state.events;
+    final selectedDate = state.fromDate ?? DateTime.now();
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
-        title: const Text('Eventos'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Eventos'),
+            Text(
+              '${_monthName(selectedDate.month)} ${selectedDate.year}',
+              style: const TextStyle(
+                color: AppColors.secondaryText,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: const Icon(PhosphorIconsRegular.plus),
-            onPressed: () async {
-              await context.push('/events/new');
-              ref.read(eventsViewModelProvider.notifier).loadEvents();
-            },
+            icon: const Icon(PhosphorIconsRegular.sparkle, size: 20),
+            onPressed: () => context.push('/events/ai'),
+            tooltip: 'Agendar con IA',
           ),
-          const SizedBox(width: 8),
         ],
       ),
-      body: Builder(
-        builder: (context) {
-          if (state.isLoading) {
-            return const LoadingView(message: 'Cargando eventos...');
-          }
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.nearBlack,
+        foregroundColor: AppColors.white,
+        shape: const CircleBorder(),
+        onPressed: () => context.push('/events/new'),
+        child: const Icon(PhosphorIconsRegular.plus, size: 24),
+      ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          color: AppColors.nearBlack,
+          backgroundColor: AppColors.primarySurface,
+          onRefresh: () =>
+              ref.read(eventsViewModelProvider.notifier).loadEvents(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Horizontal Week Strip
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                child: SizedBox(
+                  height: 70,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 7,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final date = DateTime.now().add(
+                        Duration(days: index - 2),
+                      );
+                      final selectedDate = state.fromDate;
+                      final isSelected = selectedDate == null
+                          ? index == 2
+                          : selectedDate.year == date.year &&
+                                selectedDate.month == date.month &&
+                                selectedDate.day == date.day;
 
-          if (state.viewState == EventsViewState.error) {
-            return EmptyState(
-              icon: PhosphorIconsRegular.warningCircle,
-              title: 'Error al cargar eventos',
-              message: state.errorMessage,
-              actionLabel: 'Reintentar',
-              onAction: () =>
-                  ref.read(eventsViewModelProvider.notifier).loadEvents(),
-              isError: true,
-            );
-          }
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          final start = DateTime(
+                            date.year,
+                            date.month,
+                            date.day,
+                          );
+                          ref
+                              .read(eventsViewModelProvider.notifier)
+                              .setDateRange(
+                                start,
+                                start.add(const Duration(days: 1)),
+                              );
+                        },
+                        child: Container(
+                          width: 44,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.nearBlack
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.nearBlack
+                                  : Colors.transparent,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                _weekdayLetter(date),
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? AppColors.white
+                                      : AppColors.secondaryText,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${date.day}',
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? AppColors.white
+                                      : AppColors.primaryText,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
 
-          if (state.isEmpty) {
-            return EmptyState(
-              icon: PhosphorIconsRegular.calendarBlank,
-              title: 'No hay eventos',
-              message: 'Agenda tus reuniones, entregas y actividades importantes.',
-              actionLabel: 'Crear evento',
-              onAction: () async {
-                await context.push('/events/new');
-                ref.read(eventsViewModelProvider.notifier).loadEvents();
-              },
-            );
-          }
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
+                child: Text(
+                  selectedDate.year == DateTime.now().year &&
+                          selectedDate.month == DateTime.now().month &&
+                          selectedDate.day == DateTime.now().day
+                      ? 'Agenda de hoy'
+                      : 'Agenda · ${AppDateUtils.formatEventBadge(selectedDate)}',
+                  style: const TextStyle(
+                    color: AppColors.primaryText,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
 
-          return RefreshIndicator(
-            color: AppColors.white,
-            backgroundColor: AppColors.primarySurface,
-            onRefresh: () => ref
-                .read(eventsViewModelProvider.notifier)
-                .loadEvents(isRefresh: true),
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: state.events.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final event = state.events[index];
-                return _EventCard(
-                  event: event,
-                  onTap: () async {
-                    await context.push('/events/${event.id}', extra: event);
-                    ref.read(eventsViewModelProvider.notifier).loadEvents();
-                  },
-                );
-              },
-            ),
-          );
-        },
+              Expanded(
+                child: state.isLoading && events.isEmpty
+                    ? const LoadingView(message: 'Cargando eventos...')
+                    : state.errorMessage != null && events.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            state.errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AppColors.secondaryText,
+                            ),
+                          ),
+                        ),
+                      )
+                    : events.isEmpty
+                    ? const EmptyState(
+                        icon: PhosphorIconsRegular.calendarBlank,
+                        title: 'No hay eventos',
+                        message:
+                            'Programa un evento o usa la IA para agendar automáticamente.',
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        itemCount: events.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final event = events[index];
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 64,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 8,
+                                    right: 8,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        DateFormat(
+                                          'h:mm',
+                                        ).format(event.startDate.toLocal()),
+                                        style: const TextStyle(
+                                          color: AppColors.primaryText,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        event.startDate.toLocal().hour < 12
+                                            ? 'a. m.'
+                                            : 'p. m.',
+                                        style: const TextStyle(
+                                          color: AppColors.secondaryText,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Expanded(child: _buildEventCard(context, event)),
+                            ],
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
-}
 
-class _EventCard extends StatelessWidget {
-  final Event event;
-  final VoidCallback onTap;
-
-  const _EventCard({
-    required this.event,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildEventCard(BuildContext context, Event event) {
     return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(14),
+      onTap: () => context.push('/events/${event.id}', extra: event),
+      padding: const EdgeInsets.all(16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Date Badge Block
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            width: 4,
+            height: 48,
             decoration: BoxDecoration(
-              color: AppColors.secondarySurface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  AppDateUtils.formatEventBadge(event.startDate),
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  AppDateUtils.formatTime(event.startDate),
-                  style: const TextStyle(
-                    color: AppColors.secondaryText,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+              color: AppColors.nearBlack,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(width: 14),
-
-          // Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,44 +271,42 @@ class _EventCard extends StatelessWidget {
                     color: AppColors.primaryText,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: -0.2,
                   ),
                 ),
-                if (event.description != null &&
-                    event.description!.trim().isNotEmpty) ...[
+                if (event.location?.isNotEmpty == true) ...[
                   const SizedBox(height: 4),
-                  Text(
-                    event.description!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-                if (event.location != null && event.location!.isNotEmpty) ...[
-                  const SizedBox(height: 6),
                   Row(
                     children: [
                       const Icon(
                         PhosphorIconsRegular.mapPin,
-                        size: 14,
+                        size: 12,
                         color: AppColors.secondaryText,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           event.location!,
-                          style: const TextStyle(
-                            color: AppColors.secondaryText,
-                            fontSize: 12,
-                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppColors.secondaryText,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                     ],
+                  ),
+                ],
+                if (event.description?.isNotEmpty == true) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    event.description!,
+                    style: const TextStyle(
+                      color: AppColors.secondaryText,
+                      fontSize: 13,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ],
@@ -200,4 +316,27 @@ class _EventCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _weekdayLetter(DateTime date) {
+  const weekdays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  return weekdays[date.weekday - 1];
+}
+
+String _monthName(int month) {
+  const months = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ];
+  return months[month - 1];
 }

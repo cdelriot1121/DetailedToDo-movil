@@ -179,7 +179,7 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
         decoration: BoxDecoration(
           color: AppColors.primarySurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.white.withValues(alpha: 0.3), width: 1.2),
+          border: Border.all(color: AppColors.border, width: 1.2),
         ),
         child: Row(
           children: [
@@ -194,7 +194,7 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
                 ),
                 child: const Icon(
                   PhosphorIconsFill.microphone,
-                  color: AppColors.white,
+                  color: AppColors.primaryText,
                   size: 18,
                 ),
               ),
@@ -211,7 +211,7 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
                       const Text(
                         'Grabando nota de voz...',
                         style: TextStyle(
-                          color: AppColors.white,
+                          color: AppColors.primaryText,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -229,8 +229,8 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
                   const SizedBox(height: 4),
                   Text(
                     _currentWords.isNotEmpty
-                      ? _currentWords
-                      : 'Escuchando tu voz en español (máx. 15s)...',
+                        ? _currentWords
+                        : 'Escuchando tu voz en español (máx. 15s)...',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -253,7 +253,7 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
                 ),
                 child: const Icon(
                   PhosphorIconsFill.stop,
-                  color: AppColors.white,
+                  color: AppColors.primaryText,
                   size: 16,
                 ),
               ),
@@ -268,7 +268,7 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.secondarySurface,
+          color: AppColors.nearBlack,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: AppColors.border),
         ),
