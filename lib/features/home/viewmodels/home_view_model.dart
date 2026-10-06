@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../events/data/event_repository.dart';
 import '../../events/models/event.dart';
 import '../../tasks/data/task_repository.dart';
 import '../../tasks/models/task.dart';
+import '../data/home_api_service.dart';
 
 class HomeState {
   final bool isLoading;
@@ -11,6 +13,8 @@ class HomeState {
   final int pendingTasksCount;
   final int upcomingEventsCount;
   final int remindersCount;
+  final String aiSummary;
+  final bool isSummaryLoading;
   final String? errorMessage;
 
   const HomeState({
@@ -20,6 +24,8 @@ class HomeState {
     this.pendingTasksCount = 0,
     this.upcomingEventsCount = 0,
     this.remindersCount = 0,
+    this.aiSummary = 'Revisando tus tareas para recomendarte por dónde empezar…',
+    this.isSummaryLoading = false,
     this.errorMessage,
   });
 
@@ -30,6 +36,8 @@ class HomeState {
     int? pendingTasksCount,
     int? upcomingEventsCount,
     int? remindersCount,
+    String? aiSummary,
+    bool? isSummaryLoading,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -40,6 +48,8 @@ class HomeState {
       pendingTasksCount: pendingTasksCount ?? this.pendingTasksCount,
       upcomingEventsCount: upcomingEventsCount ?? this.upcomingEventsCount,
       remindersCount: remindersCount ?? this.remindersCount,
+      aiSummary: aiSummary ?? this.aiSummary,
+      isSummaryLoading: isSummaryLoading ?? this.isSummaryLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -52,6 +62,8 @@ final homeViewModelProvider = NotifierProvider<HomeViewModel, HomeState>(
 class HomeViewModel extends Notifier<HomeState> {
   TaskRepository get _taskRepository => ref.read(taskRepositoryProvider);
   EventRepository get _eventRepository => ref.read(eventRepositoryProvider);
+  HomeApiService get _homeApiService => ref.read(homeApiServiceProvider);
+  int _summaryRequestId = 0;
 
   @override
   HomeState build() {
@@ -130,5 +142,24 @@ class HomeViewModel extends Notifier<HomeState> {
       remindersCount: reminders,
       errorMessage: errorMessage,
     );
+    unawaited(_loadAISummary(pending));
+  }
+
+  Future<void> _loadAISummary(List<Task> pendingTasks) async {
+    final requestId = ++_summaryRequestId;
+    state = state.copyWith(isSummaryLoading: true);
+    try {
+      final summary = await _homeApiService.getAISummary();
+      if (requestId != _summaryRequestId) return;
+      state = state.copyWith(aiSummary: summary, isSummaryLoading: false);
+    } catch (_) {
+      if (requestId != _summaryRequestId) return;
+      state = state.copyWith(
+        aiSummary: pendingTasks.isEmpty
+            ? 'No tienes tareas pendientes. Agrega una y te ayudaré a elegir por dónde empezar.'
+            : 'Empieza por «${pendingTasks.first.title}» y avanza en un paso pequeño; después continúa con tus otras tareas.',
+        isSummaryLoading: false,
+      );
+    }
   }
 }

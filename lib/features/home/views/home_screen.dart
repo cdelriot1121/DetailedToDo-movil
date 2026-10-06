@@ -184,18 +184,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           color: const Color(0xFF444444),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text(
-                          'Resumen con IA',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Resumen con IA',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (homeState.isSummaryLoading) ...[
+                              const SizedBox(width: 7),
+                              const SizedBox(
+                                width: 10,
+                                height: 10,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Tienes ${homeState.pendingTasksCount} tareas para hoy. Te sugiero empezar por priorizar tus actividades pendientes.',
+                        homeState.aiSummary,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
