@@ -140,10 +140,10 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
     }
   }
 
-  Future<bool> addSubtask(String title) async {
+  Future<bool> addSubtask(String title, String description) async {
     if (title.trim().isEmpty) return false;
     try {
-      final newSubtask = await _repository.addSubtask(taskId, title.trim());
+      final newSubtask = await _repository.addSubtask(taskId, title.trim(), description.trim());
       final currentTask = state.task;
       if (currentTask != null) {
         final updatedSubtasks = [...currentTask.subtasks, newSubtask];
@@ -174,7 +174,7 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
 
     try {
       final subtask = currentTask.subtasks.firstWhere((s) => s.id == subtaskId);
-      await _repository.toggleSubtask(taskId, subtaskId, completed, subtask.title);
+      await _repository.toggleSubtask(taskId, subtaskId, completed, subtask.title, subtask.description);
     } catch (_) {
       state = state.copyWith(task: currentTask);
     }

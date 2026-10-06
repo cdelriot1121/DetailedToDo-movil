@@ -9,11 +9,64 @@ import '../../tasks/models/task.dart';
 import '../../tasks/viewmodels/tasks_view_model.dart';
 import '../viewmodels/home_view_model.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
+  GoRouter? _router;
+  bool _wasHome = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final router = GoRouter.of(context);
+    if (_router == router) return;
+    _router?.routerDelegate.removeListener(_onRouteChanged);
+    _router = router;
+    _wasHome = _isHomeRoute(router);
+    router.routerDelegate.addListener(_onRouteChanged);
+  }
+
+  bool _isHomeRoute(GoRouter router) =>
+      router.routerDelegate.currentConfiguration.uri.path == '/home';
+
+  void _onRouteChanged() {
+    final router = _router;
+    if (router == null) return;
+    final isHome = _isHomeRoute(router);
+    if (isHome && !_wasHome) {
+      ref.read(homeViewModelProvider.notifier).loadHomeData();
+    }
+    _wasHome = isHome;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _router != null && _isHomeRoute(_router!)) {
+      ref.read(homeViewModelProvider.notifier).loadHomeData();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _router?.routerDelegate.removeListener(_onRouteChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
     final homeState = ref.watch(homeViewModelProvider);
     final userName = authState.user?.name ?? 'Carlos';

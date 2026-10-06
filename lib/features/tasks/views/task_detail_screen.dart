@@ -22,10 +22,12 @@ class TaskDetailScreen extends ConsumerStatefulWidget {
 
 class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
   final _subtaskTextController = TextEditingController();
+  final _subtaskDescriptionController = TextEditingController();
 
   @override
   void dispose() {
     _subtaskTextController.dispose();
+    _subtaskDescriptionController.dispose();
     super.dispose();
   }
 
@@ -43,22 +45,23 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
             'Nueva subtarea',
             style: TextStyle(color: AppColors.primaryText, fontSize: 18),
           ),
-          content: TextField(
-            controller: _subtaskTextController,
-            autofocus: true,
-            style: const TextStyle(color: AppColors.primaryText),
-            decoration: const InputDecoration(
-              hintText: 'Ej. Leer material preparatorio',
-            ),
-            onSubmitted: (value) async {
-              if (value.trim().isNotEmpty) {
-                Navigator.pop(ctx);
-                await ref
-                    .read(taskDetailViewModelProvider(widget.taskId).notifier)
-                    .addSubtask(value.trim());
-                _subtaskTextController.clear();
-              }
-            },
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _subtaskTextController,
+                autofocus: true,
+                style: const TextStyle(color: AppColors.primaryText),
+                decoration: const InputDecoration(hintText: 'Título'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _subtaskDescriptionController,
+                maxLines: 3,
+                style: const TextStyle(color: AppColors.primaryText),
+                decoration: const InputDecoration(hintText: 'Descripción'),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -72,11 +75,13 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               onPressed: () async {
                 final value = _subtaskTextController.text;
                 if (value.trim().isNotEmpty) {
+                  final description = _subtaskDescriptionController.text;
                   Navigator.pop(ctx);
                   await ref
                       .read(taskDetailViewModelProvider(widget.taskId).notifier)
-                      .addSubtask(value.trim());
+                      .addSubtask(value.trim(), description);
                   _subtaskTextController.clear();
+                  _subtaskDescriptionController.clear();
                 }
               },
               child: const Text(
@@ -409,17 +414,34 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              subtask.title,
-                              style: TextStyle(
-                                color: subtask.completed
-                                    ? AppColors.secondaryText
-                                    : AppColors.primaryText,
-                                fontSize: 14,
-                                decoration: subtask.completed
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  subtask.title,
+                                  style: TextStyle(
+                                    color: subtask.completed
+                                        ? AppColors.secondaryText
+                                        : AppColors.primaryText,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: subtask.completed
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  ),
+                                ),
+                                if (subtask.description?.isNotEmpty == true) ...[
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    subtask.description!,
+                                    style: const TextStyle(
+                                      color: AppColors.secondaryText,
+                                      fontSize: 12,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                           IconButton(

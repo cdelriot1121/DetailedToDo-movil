@@ -106,13 +106,14 @@ class TaskApiService {
     }
   }
 
-  Future<Subtask> createSubtask(String taskId, String title) async {
+  Future<Subtask> createSubtask(String taskId, String title, String description) async {
     try {
       final response = await _dio.post(
         '/tasks/$taskId/subtasks',
-        data: {'title': title},
+        data: {'title': title, 'description': description},
       );
-      return Subtask.fromJson(response.data as Map<String, dynamic>);
+      final task = Task.fromJson(response.data as Map<String, dynamic>);
+      return task.subtasks.last;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -128,7 +129,8 @@ class TaskApiService {
         '/tasks/$taskId/subtasks/$subtaskId',
         data: subtaskData,
       );
-      return Subtask.fromJson(response.data as Map<String, dynamic>);
+      final task = Task.fromJson(response.data as Map<String, dynamic>);
+      return task.subtasks.firstWhere((subtask) => subtask.id == subtaskId);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
