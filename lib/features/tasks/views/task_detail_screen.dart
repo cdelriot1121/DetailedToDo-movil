@@ -280,33 +280,234 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                         ),
                       ),
                     ],
-                    if (task.dueDate != null) ...[
-                      const SizedBox(height: 16),
-                      const Divider(color: AppColors.border),
-                      const SizedBox(height: 12),
-                      Row(
+                    if (task.folder != null && task.folder!.isNotEmpty || task.tags.isNotEmpty) ...[
+                      const SizedBox(height: 14),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          const Icon(
-                            PhosphorIconsRegular.calendarBlank,
-                            size: 16,
-                            color: AppColors.secondaryText,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Fecha límite: ${AppDateUtils.formatFull(task.dueDate!)}',
-                            style: const TextStyle(
-                              color: AppColors.primaryText,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
+                          if (task.folder != null && task.folder!.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.secondarySurface,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    PhosphorIconsRegular.folderSimple,
+                                    size: 14,
+                                    color: AppColors.secondaryText,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    task.folder!,
+                                    style: const TextStyle(
+                                      color: AppColors.primaryText,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ...task.tags.map(
+                            (tag) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 9,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.lightSurfaceSecondary,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    PhosphorIconsRegular.tag,
+                                    size: 12,
+                                    color: AppColors.secondaryText,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    tag.startsWith('#') ? tag : '#$tag',
+                                    style: const TextStyle(
+                                      color: AppColors.secondaryText,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ],
+                    if (task.dueDate != null || task.reminderDate != null) ...[
+                      const SizedBox(height: 16),
+                      const Divider(color: AppColors.border),
+                      const SizedBox(height: 10),
+                      if (task.dueDate != null)
+                        Row(
+                          children: [
+                            const Icon(
+                              PhosphorIconsRegular.calendarBlank,
+                              size: 16,
+                              color: AppColors.secondaryText,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Fecha límite: ${AppDateUtils.formatFull(task.dueDate!)}',
+                              style: const TextStyle(
+                                color: AppColors.primaryText,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      if (task.reminderDate != null) ...[
+                        if (task.dueDate != null) const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(
+                              PhosphorIconsRegular.bell,
+                              size: 16,
+                              color: AppColors.secondaryText,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Recordatorio: ${AppDateUtils.formatFull(task.reminderDate!)}',
+                              style: const TextStyle(
+                                color: AppColors.primaryText,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+
+              // Subtasks Progress Section (Barra de proceso)
+              if (task.subtasks.isNotEmpty) ...[
+                AppCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                PhosphorIconsRegular.chartBar,
+                                size: 18,
+                                color: AppColors.nearBlack,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Progreso de subtareas',
+                                style: TextStyle(
+                                  color: AppColors.primaryText,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: task.completedSubtasksCount == task.totalSubtasksCount
+                                  ? AppColors.success.withValues(alpha: 0.15)
+                                  : AppColors.secondarySurface,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '${(task.subtasksProgress * 100).toInt()}%',
+                              style: TextStyle(
+                                color: task.completedSubtasksCount == task.totalSubtasksCount
+                                    ? AppColors.success
+                                    : AppColors.nearBlack,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: task.subtasksProgress,
+                          minHeight: 8,
+                          backgroundColor: AppColors.secondarySurface,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            task.completedSubtasksCount == task.totalSubtasksCount
+                                ? AppColors.success
+                                : AppColors.nearBlack,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Llevas ${task.completedSubtasksCount}/${task.totalSubtasksCount} subtareas completadas',
+                            style: const TextStyle(
+                              color: AppColors.secondaryText,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (task.completedSubtasksCount == task.totalSubtasksCount &&
+                              task.totalSubtasksCount > 0)
+                            const Row(
+                              children: [
+                                Icon(
+                                  PhosphorIconsBold.checkCircle,
+                                  size: 14,
+                                  color: AppColors.success,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  '¡Completadas!',
+                                  style: TextStyle(
+                                    color: AppColors.success,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
 
               // Subtasks Section header
               Row(
