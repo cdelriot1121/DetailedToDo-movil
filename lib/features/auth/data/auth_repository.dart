@@ -47,6 +47,12 @@ class AuthRepository {
     return await _apiService.getCurrentUser();
   }
 
+  Future<void> requestPasswordReset(String email) => _apiService.requestPasswordReset(email);
+  Future<void> resendRegistrationOtp(String email) => _apiService.resendRegistrationOtp(email);
+
+  Future<void> resetPassword(String email, String code, String newPassword) =>
+      _apiService.resetPassword(email: email, code: code, newPassword: newPassword);
+
   Future<User?> checkAuth() async {
     final token = await _storageService.getToken();
     if (token == null || token.isEmpty) {

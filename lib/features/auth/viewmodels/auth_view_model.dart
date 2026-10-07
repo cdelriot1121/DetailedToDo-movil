@@ -165,6 +165,51 @@ class AuthViewModel extends Notifier<AuthState> {
     }
   }
 
+  Future<bool> requestPasswordReset(String email) async {
+    state = state.copyWith(status: AuthStatus.loading, clearError: true);
+    try {
+      await _repository.requestPasswordReset(email.trim());
+      state = state.copyWith(status: AuthStatus.unauthenticated, clearError: true);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(status: AuthStatus.error, errorMessage: 'No se pudo solicitar el código.');
+      return false;
+    }
+  }
+
+  Future<bool> resendRegistrationOtp(String email) async {
+    state = state.copyWith(status: AuthStatus.loading, clearError: true);
+    try {
+      await _repository.resendRegistrationOtp(email.trim());
+      state = state.copyWith(status: AuthStatus.unauthenticated, clearError: true);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(status: AuthStatus.error, errorMessage: 'No se pudo reenviar el código.');
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword(String email, String code, String password) async {
+    state = state.copyWith(status: AuthStatus.loading, clearError: true);
+    try {
+      await _repository.resetPassword(email, code.trim(), password);
+      state = state.copyWith(status: AuthStatus.unauthenticated, clearError: true);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(status: AuthStatus.error, errorMessage: 'No se pudo cambiar la contraseña.');
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await _repository.logout();
     ref.invalidate(tasksViewModelProvider);

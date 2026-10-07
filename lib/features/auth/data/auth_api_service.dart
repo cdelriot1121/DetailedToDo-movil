@@ -73,6 +73,26 @@ class AuthApiService {
     }
   }
 
+  Future<void> requestPasswordReset(String email) async {
+    try {
+      await _dio.post('/auth/forgot-password', data: {'email': email});
+    } on DioException catch (e) { throw ApiException.fromDioError(e); }
+  }
+
+  Future<void> resendRegistrationOtp(String email) async {
+    try {
+      await _dio.post('/auth/resend-registration-otp', data: {'email': email});
+    } on DioException catch (e) { throw ApiException.fromDioError(e); }
+  }
+
+  Future<void> resetPassword({required String email, required String code, required String newPassword}) async {
+    try {
+      await _dio.post('/auth/reset-password', data: {
+        'email': email, 'code': code, 'newPassword': newPassword,
+      });
+    } on DioException catch (e) { throw ApiException.fromDioError(e); }
+  }
+
   Future<User> getCurrentUser() async {
     try {
       final response = await _dio.get('/users/me');

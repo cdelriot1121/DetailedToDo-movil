@@ -20,7 +20,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   // Contador de reenvio
-  int _resendSeconds = 42;
+  int _resendSeconds = 60;
   Timer? _timer;
 
   @override
@@ -34,7 +34,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   void _startTimer() {
     _timer?.cancel();
-    setState(() => _resendSeconds = 42);
+    setState(() => _resendSeconds = 60);
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (_resendSeconds == 0) {
         t.cancel();
@@ -42,6 +42,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         setState(() => _resendSeconds--);
       }
     });
+  }
+
+  Future<void> _resend() async {
+    final sent = await ref.read(authViewModelProvider.notifier)
+        .resendRegistrationOtp(widget.email);
+    if (sent && mounted) _startTimer();
   }
 
   @override
@@ -321,7 +327,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         ),
                       )
                     : GestureDetector(
-                        onTap: _startTimer,
+                        onTap: authState.isLoading ? null : _resend,
                         child: RichText(
                           text: const TextSpan(
                             style: TextStyle(
