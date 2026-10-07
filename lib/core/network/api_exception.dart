@@ -47,6 +47,8 @@ class ApiException implements Exception {
           userMessage = apiError?.message ?? 'El recurso solicitado no fue encontrado.';
         } else if (status == 409) {
           userMessage = apiError?.message ?? 'Ese dato o correo ya se encuentra registrado.';
+        } else if (status == 429) {
+          userMessage = apiError?.message ?? 'Espera un minuto antes de solicitar otro código.';
         } else if (status != null && status >= 500) {
           userMessage = 'No pudimos completar la operación en el servidor. Inténtalo nuevamente.';
         } else {
