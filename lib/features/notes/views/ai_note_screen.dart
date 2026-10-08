@@ -62,7 +62,7 @@ class _AINoteScreenState extends ConsumerState<AINoteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(
         title: const Row(
           children: [
@@ -78,20 +78,20 @@ class _AINoteScreenState extends ConsumerState<AINoteScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              Text(
                 'Escribe tus pensamientos o ideas sueltas',
                 style: TextStyle(
-                  color: AppColors.primaryText,
+                  color: context.palette.primaryText,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.4,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'La IA organizará un título descriptivo, cuerpo estructurado, carpeta y etiquetas relevantes.',
                 style: TextStyle(
-                  color: AppColors.secondaryText,
+                  color: context.palette.secondaryText,
                   fontSize: 14,
                   height: 1.4,
                 ),

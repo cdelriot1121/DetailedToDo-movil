@@ -53,7 +53,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authViewModelProvider);
     return Scaffold(
-      backgroundColor: AppColors.lightScaffold,
+      backgroundColor: context.palette.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -64,17 +64,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 onPressed: () => context.pop(), icon: const Icon(Icons.arrow_back_ios_new_rounded),
               )),
               const SizedBox(height: 36),
-              const Icon(Icons.lock_reset_rounded, size: 64, color: AppColors.nearBlack),
+              Icon(Icons.lock_reset_rounded, size: 64, color: context.palette.accent),
               const SizedBox(height: 24),
               Text(_codeRequested ? 'Crea una nueva contraseña' : '¿Olvidaste tu contraseña?',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.lightPrimaryText, fontSize: 27, fontWeight: FontWeight.w800)),
+                style: TextStyle(color: context.palette.primaryText, fontSize: 27, fontWeight: FontWeight.w800)),
               const SizedBox(height: 12),
               Text(_codeRequested
                   ? 'Ingresa el código de 6 dígitos que enviamos a tu correo.'
                   : 'Te enviaremos un código de 6 dígitos al correo de tu cuenta.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.lightSecondaryText, fontSize: 15, height: 1.45)),
+                style: TextStyle(color: context.palette.secondaryText, fontSize: 15, height: 1.45)),
               const SizedBox(height: 32),
               if (auth.errorMessage != null) ...[
                 Text(auth.errorMessage!, style: const TextStyle(color: AppColors.error)),
@@ -102,10 +102,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ],
               const SizedBox(height: 28),
               SizedBox(height: 52, child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.nearBlack, foregroundColor: AppColors.white),
+                style: ElevatedButton.styleFrom(backgroundColor: context.palette.accent, foregroundColor: context.palette.onAccent),
                 onPressed: auth.isLoading ? null : (_codeRequested ? _reset : _requestCode),
                 child: auth.isLoading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: context.palette.onAccent,
+                        ),
+                      )
                     : Text(_codeRequested ? 'Restablecer contraseña' : 'Enviar código'),
               )),
               if (_codeRequested) ...[

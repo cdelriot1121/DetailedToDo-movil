@@ -18,6 +18,7 @@ import '../features/notes/views/ai_note_screen.dart';
 import '../features/notes/views/note_detail_screen.dart';
 import '../features/notes/views/note_form_screen.dart';
 import '../features/notes/views/notes_screen.dart';
+import '../features/profile/views/customization_screen.dart';
 import '../features/profile/views/profile_screen.dart';
 import '../features/tasks/models/task.dart';
 import '../features/tasks/views/ai_task_screen.dart';
@@ -184,6 +185,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ProfileScreen(),
       ),
+      GoRoute(
+        path: '/profile/customization',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CustomizationScreen(),
+      ),
     ],
   );
 });
@@ -196,12 +202,14 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       body: navigationShell,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.primarySurface,
-          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
+        decoration: BoxDecoration(
+          color: context.palette.surface,
+          border: Border(
+            top: BorderSide(color: context.palette.border, width: 1),
+          ),
         ),
         child: SafeArea(
           child: Padding(
@@ -210,24 +218,28 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(
+                  context: context,
                   index: 0,
                   icon: PhosphorIconsRegular.house,
                   activeIcon: PhosphorIconsFill.house,
                   label: 'Inicio',
                 ),
                 _buildNavItem(
+                  context: context,
                   index: 1,
                   icon: PhosphorIconsRegular.checkCircle,
                   activeIcon: PhosphorIconsFill.checkCircle,
                   label: 'Tareas',
                 ),
                 _buildNavItem(
+                  context: context,
                   index: 2,
                   icon: PhosphorIconsRegular.note,
                   activeIcon: PhosphorIconsFill.note,
                   label: 'Notas',
                 ),
                 _buildNavItem(
+                  context: context,
                   index: 3,
                   icon: PhosphorIconsRegular.calendarBlank,
                   activeIcon: PhosphorIconsFill.calendarBlank,
@@ -242,6 +254,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem({
+    required BuildContext context,
     required int index,
     required IconData icon,
     required IconData activeIcon,
@@ -263,15 +276,17 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
             Icon(
               isSelected ? activeIcon : icon,
               size: 22,
-              color: isSelected ? AppColors.nearBlack : AppColors.secondaryText,
+              color: isSelected
+                  ? context.palette.accent
+                  : context.palette.secondaryText,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 color: isSelected
-                    ? AppColors.nearBlack
-                    : AppColors.secondaryText,
+                    ? context.palette.accent
+                    : context.palette.secondaryText,
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),

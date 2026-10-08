@@ -35,7 +35,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -44,15 +44,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.primarySurface,
+                color: context.palette.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.border, width: 1.5),
+                border: Border.all(color: context.palette.border, width: 1.5),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
                   'D',
                   style: TextStyle(
-                    color: AppColors.white,
+                    color: context.palette.onAccent,
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -1,
@@ -61,30 +61,30 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'DetailedToDo',
               style: TextStyle(
-                color: AppColors.white,
+                color: context.palette.onAccent,
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Organización personal asistida',
               style: TextStyle(
-                color: AppColors.secondaryText,
+                color: context.palette.secondaryText,
                 fontSize: 13,
               ),
             ),
             const SizedBox(height: 36),
-            const SizedBox(
+            SizedBox(
               width: 22,
               height: 22,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondaryText),
+                valueColor: AlwaysStoppedAnimation<Color>(context.palette.secondaryText),
               ),
             ),
           ],

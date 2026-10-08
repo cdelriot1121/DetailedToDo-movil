@@ -71,7 +71,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Completa los 6 digitos del codigo.'),
-          backgroundColor: AppColors.nearBlack,
+          backgroundColor: context.palette.accent,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
@@ -95,7 +95,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     final seconds = (_resendSeconds % 60).toString().padLeft(2, '0');
 
     return Scaffold(
-      backgroundColor: AppColors.lightScaffold,
+      backgroundColor: context.palette.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -111,14 +111,14 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.lightSurface,
+                      color: context.palette.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.lightBorder),
+                      border: Border.all(color: context.palette.border),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.arrow_back_ios_new_rounded,
                       size: 18,
-                      color: AppColors.lightPrimaryText,
+                      color: context.palette.primaryText,
                     ),
                   ),
                 ),
@@ -134,8 +134,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     Container(
                       width: 140,
                       height: 140,
-                      decoration: const BoxDecoration(
-                        color: AppColors.lightDecoration1,
+                      decoration: BoxDecoration(
+                        color: context.palette.decoration1,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -144,12 +144,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       width: 80,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: AppColors.nearBlack,
+                        color: context.palette.accent,
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.mark_email_unread_outlined,
-                        color: AppColors.white,
+                        color: context.palette.onAccent,
                         size: 32,
                       ),
                     ),
@@ -159,11 +159,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               const SizedBox(height: 32),
 
               // Titulo
-              const Text(
+              Text(
                 'Verifica tu correo',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.lightPrimaryText,
+                  color: context.palette.primaryText,
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
@@ -175,8 +175,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               Text(
                 'Enviamos un codigo de 6 digitos a\n${widget.email}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.lightSecondaryText,
+                style: TextStyle(
+                  color: context.palette.secondaryText,
                   fontSize: 15,
                   height: 1.5,
                 ),
@@ -230,8 +230,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
                       maxLength: 1,
-                      style: const TextStyle(
-                        color: AppColors.lightPrimaryText,
+                      style: TextStyle(
+                        color: context.palette.primaryText,
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
                       ),
@@ -239,16 +239,16 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         counterText: '',
                         contentPadding: EdgeInsets.zero,
                         filled: true,
-                        fillColor: AppColors.lightSurface,
+                        fillColor: context.palette.surface,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(
-                              color: AppColors.lightBorder, width: 1.2),
+                          borderSide: BorderSide(
+                              color: context.palette.border, width: 1.2),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(
-                              color: AppColors.nearBlack, width: 1.8),
+                          borderSide: BorderSide(
+                              color: context.palette.accent, width: 1.8),
                         ),
                       ),
                       onChanged: (value) {
@@ -276,8 +276,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.nearBlack,
-                    foregroundColor: AppColors.white,
+                    backgroundColor: context.palette.accent,
+                    foregroundColor: context.palette.onAccent,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -285,13 +285,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   ),
                   onPressed: authState.isLoading ? null : _submit,
                   child: authState.isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
+                                AlwaysStoppedAnimation<Color>(context.palette.onAccent),
                           ),
                         )
                       : const Text(
@@ -310,16 +310,16 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 child: _resendSeconds > 0
                     ? RichText(
                         text: TextSpan(
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.lightSecondaryText,
+                            color: context.palette.secondaryText,
                           ),
                           children: [
                             const TextSpan(text: 'No te llego?  '),
                             TextSpan(
                               text: 'Reenviar codigo en $minutes:$seconds',
-                              style: const TextStyle(
-                                color: AppColors.lightPlaceholder,
+                              style: TextStyle(
+                                color: context.palette.placeholder,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -329,17 +329,17 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     : GestureDetector(
                         onTap: authState.isLoading ? null : _resend,
                         child: RichText(
-                          text: const TextSpan(
+                          text: TextSpan(
                             style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.lightSecondaryText,
+                              color: context.palette.secondaryText,
                             ),
                             children: [
                               TextSpan(text: 'No te llego?  '),
                               TextSpan(
                                 text: 'Reenviar codigo',
                                 style: TextStyle(
-                                  color: AppColors.lightPrimaryText,
+                                  color: context.palette.primaryText,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),

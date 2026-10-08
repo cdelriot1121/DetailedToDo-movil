@@ -177,9 +177,9 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.primarySurface,
+          color: context.palette.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border, width: 1.2),
+          border: Border.all(color: context.palette.border, width: 1.2),
         ),
         child: Row(
           children: [
@@ -192,9 +192,9 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
                   color: AppColors.error,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   PhosphorIconsFill.microphone,
-                  color: AppColors.primaryText,
+                  color: context.palette.primaryText,
                   size: 18,
                 ),
               ),
@@ -208,10 +208,10 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Grabando nota de voz...',
                         style: TextStyle(
-                          color: AppColors.primaryText,
+                          color: context.palette.primaryText,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -233,8 +233,8 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
                         : 'Escuchando tu voz en español (máx. 15s)...',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
+                    style: TextStyle(
+                      color: context.palette.secondaryText,
                       fontSize: 12,
                     ),
                   ),
@@ -247,13 +247,13 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppColors.secondarySurface,
+                  color: context.palette.surfaceSecondary,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: context.palette.border),
                 ),
-                child: const Icon(
+                child: Icon(
                   PhosphorIconsFill.stop,
-                  color: AppColors.primaryText,
+                  color: context.palette.primaryText,
                   size: 16,
                 ),
               ),
@@ -268,24 +268,24 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.nearBlack,
+          color: context.palette.accent,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.palette.border),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               PhosphorIconsRegular.microphone,
-              color: AppColors.white,
+              color: context.palette.onAccent,
               size: 18,
             ),
             SizedBox(width: 8),
             Text(
               'Dictar con voz (15s máx)',
               style: TextStyle(
-                color: AppColors.white,
+                color: context.palette.onAccent,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),

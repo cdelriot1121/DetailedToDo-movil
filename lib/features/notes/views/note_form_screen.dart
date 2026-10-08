@@ -141,7 +141,7 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
     final isEditing = widget.noteToEdit != null;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(title: Text(isEditing ? 'Editar nota' : 'Nueva nota')),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -170,9 +170,9 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
                 AppTextField(
                   label: 'Carpeta (opcional)',
                   controller: _folderController,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     PhosphorIconsRegular.folderSimple,
-                    color: AppColors.secondaryText,
+                    color: context.palette.secondaryText,
                     size: 20,
                   ),
                 ),
@@ -181,9 +181,9 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
                 AppTextField(
                   label: 'Etiquetas (separadas por comas)',
                   controller: _tagsController,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     PhosphorIconsRegular.tag,
-                    color: AppColors.secondaryText,
+                    color: context.palette.secondaryText,
                     size: 20,
                   ),
                 ),

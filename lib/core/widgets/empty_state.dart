@@ -33,23 +33,23 @@ class EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.secondarySurface,
+                color: context.palette.surfaceSecondary,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isError ? AppColors.error.withValues(alpha: 0.3) : AppColors.border,
+                  color: isError ? AppColors.error.withValues(alpha: 0.3) : context.palette.border,
                 ),
               ),
               child: Icon(
                 icon,
                 size: 36,
-                color: isError ? AppColors.error : AppColors.secondaryText,
+                color: isError ? AppColors.error : context.palette.secondaryText,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               title,
               style: TextStyle(
-                color: isError ? AppColors.error : AppColors.primaryText,
+                color: isError ? AppColors.error : context.palette.primaryText,
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.3,
@@ -60,8 +60,8 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 message!,
-                style: const TextStyle(
-                  color: AppColors.secondaryText,
+                style: TextStyle(
+                  color: context.palette.secondaryText,
                   fontSize: 14,
                   height: 1.4,
                 ),

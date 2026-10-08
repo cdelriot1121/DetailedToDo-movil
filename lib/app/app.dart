@@ -9,13 +9,19 @@ class DetailedToDoApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeId = ref.watch(appThemeProvider);
+    final themeData = AppTheme.build(themeId);
 
     return MaterialApp.router(
       title: 'DetailedToDo',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.lightTheme,
-      themeMode: ThemeMode.light,
+      // Un único ThemeData por tema: se asigna a `theme` y `darkTheme`, y el
+      // ThemeMode acompaña al brillo de la paleta elegida.
+      theme: themeData,
+      darkTheme: themeData,
+      themeMode: themeId.isDark ? ThemeMode.dark : ThemeMode.light,
+      themeAnimationDuration: const Duration(milliseconds: 300),
+      themeAnimationCurve: Curves.easeInOut,
       routerConfig: router,
     );
   }

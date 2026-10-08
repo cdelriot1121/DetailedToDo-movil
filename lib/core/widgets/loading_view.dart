@@ -13,20 +13,20 @@ class LoadingView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 28,
             height: 28,
             child: CircularProgressIndicator(
               strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.nearBlack),
+              valueColor: AlwaysStoppedAnimation<Color>(context.palette.accent),
             ),
           ),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(
               message!,
-              style: const TextStyle(
-                color: AppColors.secondaryText,
+              style: TextStyle(
+                color: context.palette.secondaryText,
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -56,7 +56,7 @@ class AppSkeletonLoader extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.secondarySurface,
+        color: context.palette.surfaceSecondary,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
     );

@@ -64,7 +64,7 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(
         title: const Row(
           children: [
@@ -80,20 +80,20 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              Text(
                 'Cuéntame qué necesitas hacer',
                 style: TextStyle(
-                  color: AppColors.primaryText,
+                  color: context.palette.primaryText,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.4,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Escribe de forma natural. La IA detectará fechas, prioridades, carpetas y creará subtareas paso a paso.',
                 style: TextStyle(
-                  color: AppColors.secondaryText,
+                  color: context.palette.secondaryText,
                   fontSize: 14,
                   height: 1.4,
                 ),
@@ -161,10 +161,10 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
               const Spacer(),
 
               // Quick ideas
-              const Text(
+              Text(
                 'Sugerencias rápidas:',
                 style: TextStyle(
-                  color: AppColors.secondaryText,
+                  color: context.palette.secondaryText,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -198,13 +198,13 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.secondarySurface,
+          color: context.palette.surfaceSecondary,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.palette.border),
         ),
         child: Text(
           text,
-          style: const TextStyle(color: AppColors.secondaryText, fontSize: 12),
+          style: TextStyle(color: context.palette.secondaryText, fontSize: 12),
         ),
       ),
     );

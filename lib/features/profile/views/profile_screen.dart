@@ -25,34 +25,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
   }
 
+  Widget _sectionTitle(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: context.palette.primaryText,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
   void _showEditNameDialog(BuildContext context, String currentName) {
     final controller = TextEditingController(text: currentName);
 
     showDialog(
       context: context,
       builder: (ctx) {
+        final palette = ctx.palette;
         return AlertDialog(
-          backgroundColor: AppColors.primarySurface,
+          backgroundColor: palette.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppColors.border),
+            side: BorderSide(color: palette.border),
           ),
-          title: const Text(
+          title: Text(
             'Editar nombre',
-            style: TextStyle(color: AppColors.primaryText),
+            style: TextStyle(color: palette.primaryText),
           ),
           content: TextField(
             controller: controller,
             autofocus: true,
-            style: const TextStyle(color: AppColors.primaryText),
+            style: TextStyle(color: palette.primaryText),
             decoration: const InputDecoration(hintText: 'Tu nombre completo'),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(color: AppColors.secondaryText),
+                style: TextStyle(color: palette.secondaryText),
               ),
             ),
             TextButton(
@@ -65,10 +77,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       .updateProfile(name: newName);
                 }
               },
-              child: const Text(
+              child: Text(
                 'Guardar',
                 style: TextStyle(
-                  color: AppColors.nearBlack,
+                  color: palette.accent,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -83,26 +95,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) {
+        final palette = ctx.palette;
         return AlertDialog(
-          backgroundColor: AppColors.primarySurface,
+          backgroundColor: palette.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppColors.border),
+            side: BorderSide(color: palette.border),
           ),
-          title: const Text(
+          title: Text(
             '¿Cerrar sesión?',
-            style: TextStyle(color: AppColors.primaryText),
+            style: TextStyle(color: palette.primaryText),
           ),
-          content: const Text(
+          content: Text(
             'Tendrás que ingresar tus credenciales nuevamente para acceder.',
-            style: TextStyle(color: AppColors.secondaryText),
+            style: TextStyle(color: palette.secondaryText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(color: AppColors.secondaryText),
+                style: TextStyle(color: palette.secondaryText),
               ),
             ),
             TextButton(
@@ -130,11 +143,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(profileViewModelProvider);
+    final selectedTheme = ref.watch(appThemeProvider);
+    final palette = context.palette;
 
     if (state.isLoading && state.user == null) {
-      return const Scaffold(
-        backgroundColor: AppColors.scaffoldBackground,
-        body: LoadingView(message: 'Cargando perfil...'),
+      return Scaffold(
+        backgroundColor: palette.scaffoldBackground,
+        body: const LoadingView(message: 'Cargando perfil...'),
       );
     }
 
@@ -142,7 +157,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final quota = state.quota;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: palette.scaffoldBackground,
       appBar: AppBar(title: const Text('Perfil')),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -158,17 +173,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: AppColors.nearBlack,
+                        color: palette.accent,
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.border, width: 1.5),
+                        border: Border.all(color: palette.border, width: 1.5),
                       ),
                       child: Center(
                         child: Text(
                           (user?.name.isNotEmpty == true)
                               ? user!.name[0].toUpperCase()
                               : 'U',
-                          style: const TextStyle(
-                            color: AppColors.white,
+                          style: TextStyle(
+                            color: palette.onAccent,
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                           ),
@@ -178,8 +193,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 12),
                     Text(
                       user?.name ?? 'Usuario',
-                      style: const TextStyle(
-                        color: AppColors.primaryText,
+                      style: TextStyle(
+                        color: palette.primaryText,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.4,
@@ -188,8 +203,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 4),
                     Text(
                       user?.email ?? '',
-                      style: const TextStyle(
-                        color: AppColors.secondaryText,
+                      style: TextStyle(
+                        color: palette.secondaryText,
                         fontSize: 14,
                       ),
                     ),
@@ -199,18 +214,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 32),
 
               // AI Quota Section
-              const Text(
-                'Cuota de IA diaria',
-                style: TextStyle(
-                  color: AppColors.primaryText,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              _sectionTitle('Cuota de IA diaria'),
               const SizedBox(height: 10),
               AppCard(
-                backgroundColor: AppColors.nearBlack,
-                borderColor: AppColors.nearBlack,
+                backgroundColor: palette.accentContainer,
+                borderColor: palette.accentContainer,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,16 +228,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               PhosphorIconsRegular.sparkle,
                               size: 18,
-                              color: AppColors.white,
+                              color: palette.onAccentContainer,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               'Plan ${quota?.plan ?? user?.plan ?? 'FREE'}',
-                              style: const TextStyle(
-                                color: AppColors.white,
+                              style: TextStyle(
+                                color: palette.onAccentContainer,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -238,8 +246,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         Text(
                           '${quota?.used ?? 0} de ${quota?.limit ?? 5} usadas',
-                          style: const TextStyle(
-                            color: Color(0xFFCCCCCC),
+                          style: TextStyle(
+                            color: palette.onAccentContainerMuted,
                             fontSize: 13,
                           ),
                         ),
@@ -253,17 +261,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: LinearProgressIndicator(
                         value: quota?.progressPercentage ?? 0.0,
                         minHeight: 8,
-                        backgroundColor: const Color(0xFF444444),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.white,
+                        backgroundColor: palette.onAccentContainer.withValues(
+                          alpha: 0.22,
+                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          palette.onAccentContainer,
                         ),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Te quedan ${quota?.remaining ?? 5} solicitudes hoy.',
-                      style: const TextStyle(
-                        color: Color(0xFFCCCCCC),
+                      style: TextStyle(
+                        color: palette.onAccentContainerMuted,
                         fontSize: 12,
                       ),
                     ),
@@ -272,37 +282,65 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Account Options
-              const Text(
-                'Cuenta',
-                style: TextStyle(
-                  color: AppColors.primaryText,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+              // Personalización
+              _sectionTitle('Personalización'),
+              const SizedBox(height: 10),
+              AppCard(
+                padding: EdgeInsets.zero,
+                child: ListTile(
+                  leading: Icon(
+                    PhosphorIconsRegular.fadersHorizontal,
+                    color: palette.primaryText,
+                    size: 20,
+                  ),
+                  title: Text(
+                    'Tema de la aplicación',
+                    style: TextStyle(
+                      color: palette.primaryText,
+                      fontSize: 14,
+                    ),
+                  ),
+                  subtitle: Text(
+                    selectedTheme.label,
+                    style: TextStyle(
+                      color: palette.secondaryText,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                  trailing: Icon(
+                    PhosphorIconsRegular.caretRight,
+                    size: 16,
+                    color: palette.secondaryText,
+                  ),
+                  onTap: () => context.push('/profile/customization'),
                 ),
               ),
+              const SizedBox(height: 24),
+
+              // Account Options
+              _sectionTitle('Cuenta'),
               const SizedBox(height: 10),
               AppCard(
                 padding: EdgeInsets.zero,
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(
+                      leading: Icon(
                         PhosphorIconsRegular.pencilSimple,
-                        color: AppColors.primaryText,
+                        color: palette.primaryText,
                         size: 20,
                       ),
-                      title: const Text(
+                      title: Text(
                         'Modificar nombre',
                         style: TextStyle(
-                          color: AppColors.primaryText,
+                          color: palette.primaryText,
                           fontSize: 14,
                         ),
                       ),
-                      trailing: const Icon(
+                      trailing: Icon(
                         PhosphorIconsRegular.caretRight,
                         size: 16,
-                        color: AppColors.secondaryText,
+                        color: palette.secondaryText,
                       ),
                       onTap: () =>
                           _showEditNameDialog(context, user?.name ?? ''),

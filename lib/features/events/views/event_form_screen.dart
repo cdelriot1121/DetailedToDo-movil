@@ -68,15 +68,9 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
       builder: (context, child) {
+        // El selector de fecha/hora respeta el tema activo.
         return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.nearBlack,
-              onPrimary: AppColors.white,
-              surface: AppColors.white,
-              onSurface: AppColors.primaryText,
-            ),
-          ),
+          data: AppTheme.fromPalette(context.palette),
           child: child!,
         );
       },
@@ -88,15 +82,9 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
       context: context,
       initialTime: TimeOfDay.fromDateTime(initialDate),
       builder: (context, child) {
+        // El selector de fecha/hora respeta el tema activo.
         return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.nearBlack,
-              onPrimary: AppColors.white,
-              surface: AppColors.white,
-              onSurface: AppColors.primaryText,
-            ),
-          ),
+          data: AppTheme.fromPalette(context.palette),
           child: child!,
         );
       },
@@ -222,7 +210,7 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
     final isEditing = widget.eventToEdit != null;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(title: Text(isEditing ? 'Editar evento' : 'Nuevo evento')),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -287,9 +275,9 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
                 AppTextField(
                   label: 'Ubicación o enlace (opcional)',
                   controller: _locationController,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     PhosphorIconsRegular.mapPin,
-                    color: AppColors.secondaryText,
+                    color: context.palette.secondaryText,
                     size: 20,
                   ),
                 ),
@@ -329,13 +317,13 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.inputBackground,
+          color: context.palette.inputBackground,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.palette.border),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.secondaryText),
+            Icon(icon, size: 20, color: context.palette.secondaryText),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -343,16 +331,16 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
+                    style: TextStyle(
+                      color: context.palette.secondaryText,
                       fontSize: 11,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: const TextStyle(
-                      color: AppColors.primaryText,
+                    style: TextStyle(
+                      color: context.palette.primaryText,
                       fontSize: 14,
                     ),
                   ),
@@ -361,18 +349,18 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
             ),
             if (onClear != null)
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   PhosphorIconsRegular.x,
                   size: 16,
-                  color: AppColors.secondaryText,
+                  color: context.palette.secondaryText,
                 ),
                 onPressed: onClear,
               )
             else
-              const Icon(
+              Icon(
                 PhosphorIconsRegular.caretRight,
                 size: 16,
-                color: AppColors.secondaryText,
+                color: context.palette.secondaryText,
               ),
           ],
         ),

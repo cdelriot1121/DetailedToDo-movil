@@ -26,10 +26,10 @@ class AppCard extends StatelessWidget {
     return Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.primarySurface,
+        color: backgroundColor ?? context.palette.surface,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: borderColor ?? AppColors.border,
+          color: borderColor ?? context.palette.border,
           width: 1,
         ),
       ),

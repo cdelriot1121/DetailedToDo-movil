@@ -11,6 +11,9 @@ class SecureStorageService {
   static const String _tokenKey = 'detailed_to_do_auth_token';
   static const String _userEmailKey = 'detailed_to_do_user_email';
 
+  /// Preferencias visuales (tema). No se borran al cerrar sesión.
+  static const String _themeKey = 'detailed_to_do_theme_preference';
+
   SecureStorageService(this._storage);
 
   Future<void> saveToken(String token) async {
@@ -33,7 +36,19 @@ class SecureStorageService {
     return await _storage.read(key: _userEmailKey);
   }
 
+  Future<void> saveThemeId(String themeId) async {
+    await _storage.write(key: _themeKey, value: themeId);
+  }
+
+  Future<String?> getThemeId() async {
+    return await _storage.read(key: _themeKey);
+  }
+
+  /// Borra los datos de sesión (token y email).
+  ///
+  /// Las preferencias de la interfaz, como el tema elegido, se conservan.
   Future<void> clearAll() async {
-    await _storage.deleteAll();
+    await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: _userEmailKey);
   }
 }
