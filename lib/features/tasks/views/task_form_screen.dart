@@ -68,15 +68,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       firstDate: now.subtract(const Duration(days: 365)),
       lastDate: now.add(const Duration(days: 365 * 5)),
       builder: (context, child) {
+        // El selector de fecha/hora respeta el tema activo.
         return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.nearBlack,
-              onPrimary: AppColors.white,
-              surface: AppColors.white,
-              onSurface: AppColors.primaryText,
-            ),
-          ),
+          data: AppTheme.fromPalette(context.palette),
           child: child!,
         );
       },
@@ -88,15 +82,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       context: context,
       initialTime: TimeOfDay.fromDateTime(initialDate),
       builder: (context, child) {
+        // El selector de fecha/hora respeta el tema activo.
         return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.nearBlack,
-              onPrimary: AppColors.white,
-              surface: AppColors.white,
-              onSurface: AppColors.primaryText,
-            ),
-          ),
+          data: AppTheme.fromPalette(context.palette),
           child: child!,
         );
       },
@@ -227,7 +215,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     final isEditing = widget.taskToEdit != null;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(title: Text(isEditing ? 'Editar tarea' : 'Nueva tarea')),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -255,10 +243,10 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 const SizedBox(height: 20),
 
                 // Priority Selector
-                const Text(
+                Text(
                   'Prioridad',
                   style: TextStyle(
-                    color: AppColors.primaryText,
+                    color: context.palette.primaryText,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -279,12 +267,12 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                   SwitchListTile.adaptive(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                     value: _isCompleted,
-                    activeTrackColor: AppColors.nearBlack,
+                    activeTrackColor: context.palette.accent,
                     title: const Text('Marcar como completada'),
                     onChanged: (value) => setState(() => _isCompleted = value),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
-                      side: const BorderSide(color: AppColors.border),
+                      side: BorderSide(color: context.palette.border),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -322,9 +310,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 AppTextField(
                   label: 'Carpeta / Categoría (opcional)',
                   controller: _folderController,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     PhosphorIconsRegular.folderSimple,
-                    color: AppColors.secondaryText,
+                    color: context.palette.secondaryText,
                     size: 20,
                   ),
                 ),
@@ -334,9 +322,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 AppTextField(
                   label: 'Etiquetas (separadas por comas)',
                   controller: _tagsController,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     PhosphorIconsRegular.tag,
-                    color: AppColors.secondaryText,
+                    color: context.palette.secondaryText,
                     size: 20,
                   ),
                 ),
@@ -375,18 +363,22 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.lightSurfaceSecondary
-                : AppColors.white,
+                ? context.palette.surfaceSecondary
+                : context.palette.surface,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? AppColors.nearBlack : AppColors.border,
+              color: isSelected
+                  ? context.palette.accent
+                  : context.palette.border,
             ),
           ),
           child: Center(
             child: Text(
               p.label,
               style: TextStyle(
-                color: isSelected ? AppColors.pureBlack : AppColors.primaryText,
+                color: isSelected
+                    ? context.palette.accent
+                    : context.palette.primaryText,
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -409,13 +401,13 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.inputBackground,
+          color: context.palette.inputBackground,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.palette.border),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.secondaryText),
+            Icon(icon, size: 20, color: context.palette.secondaryText),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -423,16 +415,16 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
+                    style: TextStyle(
+                      color: context.palette.secondaryText,
                       fontSize: 11,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: const TextStyle(
-                      color: AppColors.primaryText,
+                    style: TextStyle(
+                      color: context.palette.primaryText,
                       fontSize: 14,
                     ),
                   ),
@@ -441,18 +433,18 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
             ),
             if (onClear != null)
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   PhosphorIconsRegular.x,
                   size: 16,
-                  color: AppColors.secondaryText,
+                  color: context.palette.secondaryText,
                 ),
                 onPressed: onClear,
               )
             else
-              const Icon(
+              Icon(
                 PhosphorIconsRegular.caretRight,
                 size: 16,
-                color: AppColors.secondaryText,
+                color: context.palette.secondaryText,
               ),
           ],
         ),

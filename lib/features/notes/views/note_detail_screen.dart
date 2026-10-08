@@ -59,25 +59,25 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: AppColors.primarySurface,
+          backgroundColor: context.palette.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppColors.border),
+            side: BorderSide(color: context.palette.border),
           ),
-          title: const Text(
+          title: Text(
             '¿Eliminar nota?',
-            style: TextStyle(color: AppColors.primaryText),
+            style: TextStyle(color: context.palette.primaryText),
           ),
-          content: const Text(
+          content: Text(
             'Esta nota se eliminará de forma permanente.',
-            style: TextStyle(color: AppColors.secondaryText),
+            style: TextStyle(color: context.palette.secondaryText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(color: AppColors.secondaryText),
+                style: TextStyle(color: context.palette.secondaryText),
               ),
             ),
             TextButton(
@@ -107,15 +107,15 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: AppColors.scaffoldBackground,
+      return Scaffold(
+        backgroundColor: context.palette.scaffoldBackground,
         body: LoadingView(message: 'Cargando nota...'),
       );
     }
 
     if (_errorMessage != null || _note == null) {
       return Scaffold(
-        backgroundColor: AppColors.scaffoldBackground,
+        backgroundColor: context.palette.scaffoldBackground,
         appBar: AppBar(),
         body: EmptyState(
           icon: PhosphorIconsRegular.warningCircle,
@@ -131,7 +131,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
     final note = _note!;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(
         title: const Text('Nota'),
         actions: [
@@ -157,8 +157,8 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
             children: [
               Text(
                 note.title,
-                style: const TextStyle(
-                  color: AppColors.primaryText,
+                style: TextStyle(
+                  color: context.palette.primaryText,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
@@ -173,23 +173,23 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.secondarySurface,
+                    color: context.palette.surfaceSecondary,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: context.palette.border),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         PhosphorIconsRegular.folderSimple,
                         size: 14,
-                        color: AppColors.secondaryText,
+                        color: context.palette.secondaryText,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         note.folder!,
-                        style: const TextStyle(
-                          color: AppColors.primaryText,
+                        style: TextStyle(
+                          color: context.palette.primaryText,
                           fontSize: 12,
                         ),
                       ),
@@ -205,8 +205,8 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
               // Content Document Style
               Text(
                 note.content,
-                style: const TextStyle(
-                  color: AppColors.primaryText,
+                style: TextStyle(
+                  color: context.palette.primaryText,
                   fontSize: 15,
                   height: 1.6,
                 ),
@@ -223,13 +223,13 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.secondarySurface,
+                        color: context.palette.surfaceSecondary,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         '#$tag',
-                        style: const TextStyle(
-                          color: AppColors.secondaryText,
+                        style: TextStyle(
+                          color: context.palette.secondaryText,
                           fontSize: 12,
                         ),
                       ),

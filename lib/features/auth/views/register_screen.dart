@@ -37,7 +37,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Debes aceptar los terminos de uso.'),
-          backgroundColor: AppColors.nearBlack,
+          backgroundColor: context.palette.accent,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
@@ -61,7 +61,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authViewModelProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.lightScaffold,
+      backgroundColor: context.palette.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -79,14 +79,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.lightSurface,
+                          color: context.palette.surface,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.lightBorder),
+                          border: Border.all(color: context.palette.border),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_back_ios_new_rounded,
                           size: 18,
-                          color: AppColors.lightPrimaryText,
+                          color: context.palette.primaryText,
                         ),
                       ),
                     ),
@@ -95,10 +95,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 28),
 
                 // Titulo
-                const Text(
+                Text(
                   'Crea tu cuenta',
                   style: TextStyle(
-                    color: AppColors.lightPrimaryText,
+                    color: context.palette.primaryText,
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.6,
@@ -107,10 +107,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 10),
 
                 // Subtitulo
-                const Text(
+                Text(
                   'Empieza gratis y organiza tareas, notas y eventos en un solo lugar.',
                   style: TextStyle(
-                    color: AppColors.lightSecondaryText,
+                    color: context.palette.secondaryText,
                     fontSize: 15,
                     height: 1.4,
                   ),
@@ -152,10 +152,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ],
 
                 // Campo: Nombre completo
-                const Text(
+                Text(
                   'Nombre completo',
                   style: TextStyle(
-                    color: AppColors.lightSecondaryText,
+                    color: context.palette.secondaryText,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -165,19 +165,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   hint: 'Tu nombre',
                   controller: _nameController,
                   validator: (v) => Validators.requiredField(v, 'El nombre'),
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.person_outline_rounded,
-                    color: AppColors.lightPlaceholder,
+                    color: context.palette.placeholder,
                     size: 20,
                   ),
                 ),
                 const SizedBox(height: 18),
 
                 // Campo: Correo electronico
-                const Text(
+                Text(
                   'Correo electronico',
                   style: TextStyle(
-                    color: AppColors.lightSecondaryText,
+                    color: context.palette.secondaryText,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -188,19 +188,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: Validators.email,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.mail_outline_rounded,
-                    color: AppColors.lightPlaceholder,
+                    color: context.palette.placeholder,
                     size: 20,
                   ),
                 ),
                 const SizedBox(height: 18),
 
                 // Campo: Contrasena
-                const Text(
+                Text(
                   'Contrasena',
                   style: TextStyle(
-                    color: AppColors.lightSecondaryText,
+                    color: context.palette.secondaryText,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -211,19 +211,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   controller: _passwordController,
                   isPassword: true,
                   validator: Validators.password,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.lock_outline_rounded,
-                    color: AppColors.lightPlaceholder,
+                    color: context.palette.placeholder,
                     size: 20,
                   ),
                 ),
                 const SizedBox(height: 18),
 
                 // Campo: Confirmar contrasena
-                const Text(
+                Text(
                   'Confirmar contrasena',
                   style: TextStyle(
-                    color: AppColors.lightSecondaryText,
+                    color: context.palette.secondaryText,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -235,9 +235,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   isPassword: true,
                   validator: (v) =>
                       Validators.confirmPassword(v, _passwordController.text),
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.lock_outline_rounded,
-                    color: AppColors.lightPlaceholder,
+                    color: context.palette.placeholder,
                     size: 20,
                   ),
                 ),
@@ -255,30 +255,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         height: 22,
                         decoration: BoxDecoration(
                           color: _acceptedTerms
-                              ? AppColors.nearBlack
-                              : AppColors.lightSurface,
+                              ? context.palette.accent
+                              : context.palette.surface,
                           borderRadius: BorderRadius.circular(7),
                           border: Border.all(
                             color: _acceptedTerms
-                                ? AppColors.nearBlack
-                                : AppColors.lightBorder,
+                                ? context.palette.accent
+                                : context.palette.border,
                             width: 1.5,
                           ),
                         ),
                         child: _acceptedTerms
-                            ? const Icon(
+                            ? Icon(
                                 Icons.check_rounded,
                                 size: 14,
-                                color: AppColors.white,
+                                color: context.palette.onAccent,
                               )
                             : null,
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Acepto los terminos de uso y la politica de privacidad',
                           style: TextStyle(
-                            color: AppColors.lightSecondaryText,
+                            color: context.palette.secondaryText,
                             fontSize: 13,
                             height: 1.4,
                           ),
@@ -294,8 +294,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   height: 52,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.nearBlack,
-                      foregroundColor: AppColors.white,
+                      backgroundColor: context.palette.accent,
+                      foregroundColor: context.palette.onAccent,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -303,13 +303,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     onPressed: authState.isLoading ? null : _submitRegister,
                     child: authState.isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.white),
+                                  context.palette.onAccent),
                             ),
                           )
                         : const Text(
@@ -327,19 +327,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       'Ya tienes cuenta?  ',
                       style: TextStyle(
-                        color: AppColors.lightSecondaryText,
+                        color: context.palette.secondaryText,
                         fontSize: 14,
                       ),
                     ),
                     GestureDetector(
                       onTap: () => context.pop(),
-                      child: const Text(
+                      child: Text(
                         'Inicia sesion',
                         style: TextStyle(
-                          color: AppColors.lightPrimaryText,
+                          color: context.palette.primaryText,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),

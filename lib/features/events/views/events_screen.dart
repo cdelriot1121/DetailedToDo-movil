@@ -21,7 +21,7 @@ class EventsScreen extends ConsumerWidget {
     final selectedDate = state.fromDate ?? DateTime.now();
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,8 +29,8 @@ class EventsScreen extends ConsumerWidget {
             const Text('Eventos'),
             Text(
               '${_monthName(selectedDate.month)} ${selectedDate.year}',
-              style: const TextStyle(
-                color: AppColors.secondaryText,
+              style: TextStyle(
+                color: context.palette.secondaryText,
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
               ),
@@ -46,16 +46,16 @@ class EventsScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.nearBlack,
-        foregroundColor: AppColors.white,
+        backgroundColor: context.palette.accent,
+        foregroundColor: context.palette.onAccent,
         shape: const CircleBorder(),
         onPressed: () => context.push('/events/new'),
         child: const Icon(PhosphorIconsRegular.plus, size: 24),
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.nearBlack,
-          backgroundColor: AppColors.primarySurface,
+          color: context.palette.accent,
+          backgroundColor: context.palette.surface,
           onRefresh: () =>
               ref.read(eventsViewModelProvider.notifier).loadEvents(),
           child: Column(
@@ -103,12 +103,12 @@ class EventsScreen extends ConsumerWidget {
                           width: 44,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.nearBlack
+                                ? context.palette.accent
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: isSelected
-                                  ? AppColors.nearBlack
+                                  ? context.palette.accent
                                   : Colors.transparent,
                             ),
                           ),
@@ -119,8 +119,8 @@ class EventsScreen extends ConsumerWidget {
                                 _weekdayLetter(date),
                                 style: TextStyle(
                                   color: isSelected
-                                      ? AppColors.white
-                                      : AppColors.secondaryText,
+                                      ? context.palette.onAccent
+                                      : context.palette.secondaryText,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -130,8 +130,8 @@ class EventsScreen extends ConsumerWidget {
                                 '${date.day}',
                                 style: TextStyle(
                                   color: isSelected
-                                      ? AppColors.white
-                                      : AppColors.primaryText,
+                                      ? context.palette.onAccent
+                                      : context.palette.primaryText,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -156,8 +156,8 @@ class EventsScreen extends ConsumerWidget {
                           selectedDate.day == DateTime.now().day
                       ? 'Agenda de hoy'
                       : 'Agenda · ${AppDateUtils.formatEventBadge(selectedDate)}',
-                  style: const TextStyle(
-                    color: AppColors.primaryText,
+                  style: TextStyle(
+                    color: context.palette.primaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -174,8 +174,8 @@ class EventsScreen extends ConsumerWidget {
                           child: Text(
                             state.errorMessage!,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: AppColors.secondaryText,
+                            style: TextStyle(
+                              color: context.palette.secondaryText,
                             ),
                           ),
                         ),
@@ -213,8 +213,8 @@ class EventsScreen extends ConsumerWidget {
                                         DateFormat(
                                           'h:mm',
                                         ).format(event.startDate.toLocal()),
-                                        style: const TextStyle(
-                                          color: AppColors.primaryText,
+                                        style: TextStyle(
+                                          color: context.palette.primaryText,
                                           fontSize: 17,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -223,8 +223,8 @@ class EventsScreen extends ConsumerWidget {
                                         event.startDate.toLocal().hour < 12
                                             ? 'a. m.'
                                             : 'p. m.',
-                                        style: const TextStyle(
-                                          color: AppColors.secondaryText,
+                                        style: TextStyle(
+                                          color: context.palette.secondaryText,
                                           fontSize: 11,
                                         ),
                                       ),
@@ -256,7 +256,7 @@ class EventsScreen extends ConsumerWidget {
             width: 4,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.nearBlack,
+              color: context.palette.accent,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -267,8 +267,8 @@ class EventsScreen extends ConsumerWidget {
               children: [
                 Text(
                   event.title,
-                  style: const TextStyle(
-                    color: AppColors.primaryText,
+                  style: TextStyle(
+                    color: context.palette.primaryText,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -277,10 +277,10 @@ class EventsScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         PhosphorIconsRegular.mapPin,
                         size: 12,
-                        color: AppColors.secondaryText,
+                        color: context.palette.secondaryText,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -288,8 +288,8 @@ class EventsScreen extends ConsumerWidget {
                           event.location!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.secondaryText,
+                          style: TextStyle(
+                            color: context.palette.secondaryText,
                             fontSize: 11,
                           ),
                         ),
@@ -301,8 +301,8 @@ class EventsScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     event.description!,
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
+                    style: TextStyle(
+                      color: context.palette.secondaryText,
                       fontSize: 13,
                     ),
                     maxLines: 1,

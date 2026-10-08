@@ -60,7 +60,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     final folderList = dynamicFolders.toList()..sort();
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(
         title: const Text('Notas'),
         actions: [
@@ -88,16 +88,16 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.nearBlack,
-        foregroundColor: AppColors.white,
+        backgroundColor: context.palette.accent,
+        foregroundColor: context.palette.onAccent,
         shape: const CircleBorder(),
         onPressed: () => context.push('/notes/new'),
         child: const Icon(PhosphorIconsRegular.plus, size: 24),
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.nearBlack,
-          backgroundColor: AppColors.primarySurface,
+          color: context.palette.accent,
+          backgroundColor: context.palette.surface,
           onRefresh: () =>
               ref.read(notesViewModelProvider.notifier).loadNotes(isRefresh: true),
           child: Column(
@@ -114,9 +114,9 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: context.palette.surface,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: context.palette.border),
                         ),
                         child: TextField(
                           controller: _searchController,
@@ -125,27 +125,27 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                               _searchQuery = value;
                             });
                           },
-                          style: const TextStyle(
-                            color: AppColors.primaryText,
+                          style: TextStyle(
+                            color: context.palette.primaryText,
                             fontSize: 14,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Buscar notas o etiquetas...',
-                            hintStyle: const TextStyle(
-                              color: AppColors.disabledText,
+                            hintStyle: TextStyle(
+                              color: context.palette.placeholder,
                               fontSize: 14,
                             ),
-                            prefixIcon: const Icon(
+                            prefixIcon: Icon(
                               PhosphorIconsRegular.magnifyingGlass,
-                              color: AppColors.secondaryText,
+                              color: context.palette.secondaryText,
                               size: 18,
                             ),
                             suffixIcon: _searchQuery.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(
+                                    icon: Icon(
                                       PhosphorIconsRegular.xCircle,
                                       size: 16,
-                                      color: AppColors.secondaryText,
+                                      color: context.palette.secondaryText,
                                     ),
                                     onPressed: () {
                                       _searchController.clear();
@@ -169,13 +169,13 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                     const SizedBox(width: 10),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.nearBlack,
+                        color: context.palette.accent,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           PhosphorIconsRegular.sparkle,
-                          color: AppColors.white,
+                          color: context.palette.onAccent,
                           size: 20,
                         ),
                         onPressed: () => context.push('/notes/ai'),
@@ -239,8 +239,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                   children: [
                     Text(
                       '${notes.length} ${notes.length == 1 ? 'nota' : 'notas'}${state.selectedFolder != null ? ' en ${state.selectedFolder}' : ''}',
-                      style: const TextStyle(
-                        color: AppColors.secondaryText,
+                      style: TextStyle(
+                        color: context.palette.secondaryText,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -249,8 +249,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                       children: [
                         Text(
                           _isGalleryView ? 'Galería' : 'Lista',
-                          style: const TextStyle(
-                            color: AppColors.secondaryText,
+                          style: TextStyle(
+                            color: context.palette.secondaryText,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -261,7 +261,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                               ? PhosphorIconsRegular.squaresFour
                               : PhosphorIconsRegular.listDashes,
                           size: 14,
-                          color: AppColors.secondaryText,
+                          color: context.palette.secondaryText,
                         ),
                       ],
                     ),
@@ -314,8 +314,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.nearBlack.withValues(alpha: 0.12)
-                    : AppColors.secondaryText.withValues(alpha: 0.12),
+                    ? context.palette.accent.withValues(alpha: 0.12)
+                    : context.palette.secondaryText.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -323,7 +323,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  color: isSelected ? AppColors.pureBlack : AppColors.secondaryText,
+                  color: isSelected ? context.palette.accent : context.palette.secondaryText,
                 ),
               ),
             ),
@@ -332,17 +332,17 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       ),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.lightSurfaceSecondary,
-      backgroundColor: AppColors.secondarySurface,
+      selectedColor: context.palette.surfaceSecondary,
+      backgroundColor: context.palette.surfaceSecondary,
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.pureBlack : AppColors.primaryText,
+        color: isSelected ? context.palette.accent : context.palette.primaryText,
         fontSize: 13,
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? AppColors.nearBlack : AppColors.border,
+          color: isSelected ? context.palette.accent : context.palette.border,
         ),
       ),
     );
@@ -392,9 +392,9 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.palette.border),
         boxShadow: [
           BoxStyle.softShadow,
         ],
@@ -420,24 +420,24 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.secondarySurface,
+                          color: context.palette.surfaceSecondary,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: context.palette.border),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               PhosphorIconsRegular.folderSimple,
                               size: 11,
-                              color: AppColors.secondaryText,
+                              color: context.palette.secondaryText,
                             ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
                                 note.folder!,
-                                style: const TextStyle(
-                                  color: AppColors.primaryText,
+                                style: TextStyle(
+                                  color: context.palette.primaryText,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -456,8 +456,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 // Title
                 Text(
                   note.title.isNotEmpty ? note.title : 'Sin título',
-                  style: const TextStyle(
-                    color: AppColors.primaryText,
+                  style: TextStyle(
+                    color: context.palette.primaryText,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.3,
@@ -471,8 +471,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 if (note.content.isNotEmpty)
                   Text(
                     note.content,
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
+                    style: TextStyle(
+                      color: context.palette.secondaryText,
                       fontSize: 13,
                       height: 1.35,
                     ),
@@ -493,13 +493,13 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.lightSurfaceSecondary,
+                          color: context.palette.surfaceSecondary,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           tag.startsWith('#') ? tag : '#$tag',
-                          style: const TextStyle(
-                            color: AppColors.secondaryText,
+                          style: TextStyle(
+                            color: context.palette.secondaryText,
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
                           ),
@@ -513,18 +513,22 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 // Footer: Date
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       PhosphorIconsRegular.clock,
                       size: 11,
-                      color: AppColors.disabledText,
+                      color: context.palette.placeholder,
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      date != null ? AppDateUtils.formatShort(date) : '',
-                      style: const TextStyle(
-                        color: AppColors.disabledText,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
+                    Expanded(
+                      child: Text(
+                        date != null ? AppDateUtils.formatShort(date) : '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: context.palette.placeholder,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -565,8 +569,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
               Expanded(
                 child: Text(
                   note.title.isNotEmpty ? note.title : 'Sin título',
-                  style: const TextStyle(
-                    color: AppColors.primaryText,
+                  style: TextStyle(
+                    color: context.palette.primaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.3,
@@ -583,23 +587,23 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.secondarySurface,
+                    color: context.palette.surfaceSecondary,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: context.palette.border),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         PhosphorIconsRegular.folderSimple,
                         size: 11,
-                        color: AppColors.secondaryText,
+                        color: context.palette.secondaryText,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         note.folder!,
-                        style: const TextStyle(
-                          color: AppColors.primaryText,
+                        style: TextStyle(
+                          color: context.palette.primaryText,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
@@ -614,8 +618,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
             const SizedBox(height: 6),
             Text(
               note.content,
-              style: const TextStyle(
-                color: AppColors.secondaryText,
+              style: TextStyle(
+                color: context.palette.secondaryText,
                 fontSize: 13,
                 height: 1.35,
               ),
@@ -639,13 +643,13 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.lightSurfaceSecondary,
+                          color: context.palette.surfaceSecondary,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           tag.startsWith('#') ? tag : '#$tag',
-                          style: const TextStyle(
-                            color: AppColors.secondaryText,
+                          style: TextStyle(
+                            color: context.palette.secondaryText,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
@@ -658,17 +662,21 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 const Spacer(),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     PhosphorIconsRegular.clock,
                     size: 12,
-                    color: AppColors.secondaryText,
+                    color: context.palette.secondaryText,
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    date != null ? AppDateUtils.formatShort(date) : '',
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
-                      fontSize: 11,
+                  Expanded(
+                    child: Text(
+                      date != null ? AppDateUtils.formatShort(date) : '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: context.palette.secondaryText,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
                 ],
@@ -683,7 +691,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
 class BoxStyle {
   static BoxShadow softShadow = BoxShadow(
-    color: Colors.black.withValues(alpha: 0.03),
+    color: AppColors.pureBlack.withValues(alpha: 0.03),
     blurRadius: 10,
     offset: const Offset(0, 4),
   );

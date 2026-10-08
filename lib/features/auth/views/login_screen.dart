@@ -43,7 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authViewModelProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.lightScaffold,
+      backgroundColor: context.palette.scaffoldBackground,
       body: Stack(
         children: [
           // Decoraciones de fondo (circulos sutiles del prototipo)
@@ -53,8 +53,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Container(
               width: 260,
               height: 260,
-              decoration: const BoxDecoration(
-                color: AppColors.lightDecoration1,
+              decoration: BoxDecoration(
+                color: context.palette.decoration1,
                 shape: BoxShape.circle,
               ),
             ),
@@ -65,8 +65,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Container(
               width: 160,
               height: 160,
-              decoration: const BoxDecoration(
-                color: AppColors.lightDecoration2,
+              decoration: BoxDecoration(
+                color: context.palette.decoration2,
                 shape: BoxShape.circle,
               ),
             ),
@@ -86,22 +86,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: AppColors.nearBlack,
+                        color: context.palette.accent,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.check_rounded,
-                        color: AppColors.white,
+                        color: context.palette.onAccent,
                         size: 32,
                       ),
                     ),
                     const SizedBox(height: 56),
 
                     // Titulo
-                    const Text(
+                    Text(
                       'Bienvenido de vuelta',
                       style: TextStyle(
-                        color: AppColors.lightPrimaryText,
+                        color: context.palette.primaryText,
                         fontSize: 30,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.6,
@@ -110,10 +110,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 10),
 
                     // Subtitulo
-                    const Text(
+                    Text(
                       'Organiza tu dia con DetailedToDo y deja que la IA te ayude a priorizar.',
                       style: TextStyle(
-                        color: AppColors.lightSecondaryText,
+                        color: context.palette.secondaryText,
                         fontSize: 15,
                         height: 1.4,
                       ),
@@ -155,10 +155,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ],
 
                     // Campo: Correo electronico
-                    const Text(
+                    Text(
                       'Correo electronico',
                       style: TextStyle(
-                        color: AppColors.lightSecondaryText,
+                        color: context.palette.secondaryText,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -169,19 +169,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: Validators.email,
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.mail_outline_rounded,
-                        color: AppColors.lightPlaceholder,
+                        color: context.palette.placeholder,
                         size: 20,
                       ),
                     ),
                     const SizedBox(height: 20),
 
                     // Campo: Contrasena
-                    const Text(
+                    Text(
                       'Contrasena',
                       style: TextStyle(
-                        color: AppColors.lightSecondaryText,
+                        color: context.palette.secondaryText,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -192,9 +192,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       controller: _passwordController,
                       isPassword: true,
                       validator: Validators.password,
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.lock_outline_rounded,
-                        color: AppColors.lightPlaceholder,
+                        color: context.palette.placeholder,
                         size: 20,
                       ),
                     ),
@@ -205,10 +205,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                       onTap: () => context.push('/forgot-password'),
-                        child: const Text(
+                        child: Text(
                           'Olvidaste tu contrasena?',
                           style: TextStyle(
-                            color: AppColors.lightPrimaryText,
+                            color: context.palette.primaryText,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -222,8 +222,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       height: 52,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.nearBlack,
-                          foregroundColor: AppColors.white,
+                          backgroundColor: context.palette.accent,
+                          foregroundColor: context.palette.onAccent,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -231,13 +231,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         onPressed: authState.isLoading ? null : _submit,
                         child: authState.isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.white),
+                                      context.palette.onAccent),
                                 ),
                               )
                             : const Text(
@@ -256,23 +256,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         Expanded(
                           child: Divider(
-                            color: AppColors.lightDivider,
+                            color: context.palette.divider,
                             thickness: 1,
                           ),
                         ),
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             'o',
                             style: TextStyle(
-                              color: AppColors.lightSecondaryText,
+                              color: context.palette.secondaryText,
                               fontSize: 14,
                             ),
                           ),
                         ),
                         Expanded(
                           child: Divider(
-                            color: AppColors.lightDivider,
+                            color: context.palette.divider,
                             thickness: 1,
                           ),
                         ),
@@ -285,19 +285,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       height: 52,
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: AppColors.lightSurface,
-                          foregroundColor: AppColors.lightPrimaryText,
-                          side: const BorderSide(
-                              color: AppColors.lightBorder, width: 1),
+                          backgroundColor: context.palette.surface,
+                          foregroundColor: context.palette.primaryText,
+                          side: BorderSide(
+                              color: context.palette.border, width: 1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                         onPressed: () {},
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.g_mobiledata_rounded,
                           size: 24,
-                          color: AppColors.lightPrimaryText,
+                          color: context.palette.primaryText,
                         ),
                         label: const Text(
                           'Continuar con Google',
@@ -314,19 +314,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           'No tienes cuenta?  ',
                           style: TextStyle(
-                            color: AppColors.lightSecondaryText,
+                            color: context.palette.secondaryText,
                             fontSize: 14,
                           ),
                         ),
                         GestureDetector(
                           onTap: () => context.push('/register'),
-                          child: const Text(
+                          child: Text(
                             'Registrate',
                             style: TextStyle(
-                              color: AppColors.lightPrimaryText,
+                              color: context.palette.primaryText,
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                             ),

@@ -61,8 +61,8 @@ class _AppTextFieldState extends State<AppTextField> {
         if (widget.label != null) ...[
           Text(
             widget.label!,
-            style: const TextStyle(
-              color: AppColors.primaryText,
+            style: TextStyle(
+              color: context.palette.primaryText,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -70,7 +70,7 @@ class _AppTextFieldState extends State<AppTextField> {
           const SizedBox(height: 6),
         ],
         TextFormField(
-          cursorColor: AppColors.nearBlack,
+          cursorColor: context.palette.accent,
           controller: widget.controller,
           initialValue: widget.initialValue,
           focusNode: widget.focusNode,
@@ -94,7 +94,7 @@ class _AppTextFieldState extends State<AppTextField> {
                 ? IconButton(
                     icon: Icon(
                       _obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: AppColors.secondaryText,
+                      color: context.palette.secondaryText,
                       size: 20,
                     ),
                     onPressed: () {

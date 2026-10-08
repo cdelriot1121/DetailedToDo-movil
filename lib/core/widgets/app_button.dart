@@ -32,18 +32,18 @@ class AppButton extends StatelessWidget {
 
     switch (variant) {
       case AppButtonVariant.primary:
-        backgroundColor = AppColors.nearBlack;
-        foregroundColor = AppColors.white;
+        backgroundColor = context.palette.accent;
+        foregroundColor = context.palette.onAccent;
         break;
       case AppButtonVariant.secondary:
-        backgroundColor = AppColors.secondarySurface;
-        foregroundColor = AppColors.primaryText;
-        borderSide = const BorderSide(color: AppColors.border, width: 1);
+        backgroundColor = context.palette.surfaceSecondary;
+        foregroundColor = context.palette.primaryText;
+        borderSide = BorderSide(color: context.palette.border, width: 1);
         break;
       case AppButtonVariant.outline:
         backgroundColor = Colors.transparent;
-        foregroundColor = AppColors.primaryText;
-        borderSide = const BorderSide(color: AppColors.border, width: 1);
+        foregroundColor = context.palette.primaryText;
+        borderSide = BorderSide(color: context.palette.border, width: 1);
         break;
       case AppButtonVariant.danger:
         backgroundColor = AppColors.error.withValues(alpha: 0.15);
@@ -54,8 +54,8 @@ class AppButton extends StatelessWidget {
         );
         break;
       case AppButtonVariant.ai:
-        backgroundColor = AppColors.nearBlack;
-        foregroundColor = AppColors.white;
+        backgroundColor = context.palette.accent;
+        foregroundColor = context.palette.onAccent;
         break;
     }
 
@@ -68,16 +68,16 @@ class AppButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: isClickable
               ? backgroundColor
-              : AppColors.secondarySurface,
+              : context.palette.surfaceSecondary,
           foregroundColor: isClickable
               ? foregroundColor
-              : AppColors.disabledText,
+              : context.palette.placeholder,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
             side: isClickable
                 ? borderSide
-                : const BorderSide(color: AppColors.border),
+                : BorderSide(color: context.palette.border),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
@@ -91,8 +91,8 @@ class AppButton extends StatelessWidget {
                   valueColor: AlwaysStoppedAnimation<Color>(
                     variant == AppButtonVariant.primary ||
                             variant == AppButtonVariant.ai
-                        ? AppColors.white
-                        : AppColors.nearBlack,
+                        ? context.palette.onAccent
+                        : context.palette.accent,
                   ),
                 ),
               )

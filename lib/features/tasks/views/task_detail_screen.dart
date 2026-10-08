@@ -36,14 +36,14 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: AppColors.primarySurface,
+          backgroundColor: context.palette.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppColors.border),
+            side: BorderSide(color: context.palette.border),
           ),
-          title: const Text(
+          title: Text(
             'Nueva subtarea',
-            style: TextStyle(color: AppColors.primaryText, fontSize: 18),
+            style: TextStyle(color: context.palette.primaryText, fontSize: 18),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -51,14 +51,14 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               TextField(
                 controller: _subtaskTextController,
                 autofocus: true,
-                style: const TextStyle(color: AppColors.primaryText),
+                style: TextStyle(color: context.palette.primaryText),
                 decoration: const InputDecoration(hintText: 'Título'),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _subtaskDescriptionController,
                 maxLines: 3,
-                style: const TextStyle(color: AppColors.primaryText),
+                style: TextStyle(color: context.palette.primaryText),
                 decoration: const InputDecoration(hintText: 'Descripción'),
               ),
             ],
@@ -66,9 +66,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(color: AppColors.secondaryText),
+                style: TextStyle(color: context.palette.secondaryText),
               ),
             ),
             TextButton(
@@ -84,10 +84,10 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   _subtaskDescriptionController.clear();
                 }
               },
-              child: const Text(
+              child: Text(
                 'Agregar',
                 style: TextStyle(
-                  color: AppColors.nearBlack,
+                  color: context.palette.accent,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -103,25 +103,25 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: AppColors.primarySurface,
+          backgroundColor: context.palette.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppColors.border),
+            side: BorderSide(color: context.palette.border),
           ),
-          title: const Text(
+          title: Text(
             '¿Eliminar tarea?',
-            style: TextStyle(color: AppColors.primaryText),
+            style: TextStyle(color: context.palette.primaryText),
           ),
-          content: const Text(
+          content: Text(
             'Esta acción eliminará la tarea y todas sus subtareas permanentemente.',
-            style: TextStyle(color: AppColors.secondaryText),
+            style: TextStyle(color: context.palette.secondaryText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(color: AppColors.secondaryText),
+                style: TextStyle(color: context.palette.secondaryText),
               ),
             ),
             TextButton(
@@ -153,8 +153,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     final state = ref.watch(taskDetailViewModelProvider(widget.taskId));
 
     if (state.isLoading && state.task == null) {
-      return const Scaffold(
-        backgroundColor: AppColors.scaffoldBackground,
+      return Scaffold(
+        backgroundColor: context.palette.scaffoldBackground,
         body: LoadingView(message: 'Cargando detalles de la tarea...'),
       );
     }
@@ -162,7 +162,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     final task = state.task;
     if (task == null) {
       return Scaffold(
-        backgroundColor: AppColors.scaffoldBackground,
+        backgroundColor: context.palette.scaffoldBackground,
         appBar: AppBar(title: const Text('Detalle')),
         body: const EmptyState(
           icon: PhosphorIconsRegular.warningCircle,
@@ -183,7 +183,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(
         title: const Text('Detalle de Tarea'),
         actions: [
@@ -242,16 +242,16 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                         ),
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               PhosphorIconsRegular.circle,
                               size: 14,
-                              color: AppColors.secondaryText,
+                              color: context.palette.secondaryText,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               task.status.label,
-                              style: const TextStyle(
-                                color: AppColors.secondaryText,
+                              style: TextStyle(
+                                color: context.palette.secondaryText,
                                 fontSize: 12,
                               ),
                             ),
@@ -262,8 +262,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                     const SizedBox(height: 14),
                     Text(
                       task.title,
-                      style: const TextStyle(
-                        color: AppColors.primaryText,
+                      style: TextStyle(
+                        color: context.palette.primaryText,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.4,
@@ -273,8 +273,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                       const SizedBox(height: 8),
                       Text(
                         task.description!,
-                        style: const TextStyle(
-                          color: AppColors.secondaryText,
+                        style: TextStyle(
+                          color: context.palette.secondaryText,
                           fontSize: 14,
                           height: 1.4,
                         ),
@@ -294,23 +294,23 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.secondarySurface,
+                                color: context.palette.surfaceSecondary,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.border),
+                                border: Border.all(color: context.palette.border),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     PhosphorIconsRegular.folderSimple,
                                     size: 14,
-                                    color: AppColors.secondaryText,
+                                    color: context.palette.secondaryText,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     task.folder!,
-                                    style: const TextStyle(
-                                      color: AppColors.primaryText,
+                                    style: TextStyle(
+                                      color: context.palette.primaryText,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -325,23 +325,23 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.lightSurfaceSecondary,
+                                color: context.palette.surfaceSecondary,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: AppColors.border),
+                                border: Border.all(color: context.palette.border),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     PhosphorIconsRegular.tag,
                                     size: 12,
-                                    color: AppColors.secondaryText,
+                                    color: context.palette.secondaryText,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     tag.startsWith('#') ? tag : '#$tag',
-                                    style: const TextStyle(
-                                      color: AppColors.secondaryText,
+                                    style: TextStyle(
+                                      color: context.palette.secondaryText,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -355,23 +355,28 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                     ],
                     if (task.dueDate != null || task.reminderDate != null) ...[
                       const SizedBox(height: 16),
-                      const Divider(color: AppColors.border),
+                      Divider(color: context.palette.border),
                       const SizedBox(height: 10),
                       if (task.dueDate != null)
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
+                            Icon(
                               PhosphorIconsRegular.calendarBlank,
                               size: 16,
-                              color: AppColors.secondaryText,
+                              color: context.palette.secondaryText,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Fecha límite: ${AppDateUtils.formatFull(task.dueDate!)}',
-                              style: const TextStyle(
-                                color: AppColors.primaryText,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
+                            Expanded(
+                              child: Text(
+                                'Fecha límite: ${AppDateUtils.formatFull(task.dueDate!)}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: context.palette.primaryText,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],
@@ -379,19 +384,24 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                       if (task.reminderDate != null) ...[
                         if (task.dueDate != null) const SizedBox(height: 8),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
+                            Icon(
                               PhosphorIconsRegular.bell,
                               size: 16,
-                              color: AppColors.secondaryText,
+                              color: context.palette.secondaryText,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Recordatorio: ${AppDateUtils.formatFull(task.reminderDate!)}',
-                              style: const TextStyle(
-                                color: AppColors.primaryText,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
+                            Expanded(
+                              child: Text(
+                                'Recordatorio: ${AppDateUtils.formatFull(task.reminderDate!)}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: context.palette.primaryText,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],
@@ -415,16 +425,16 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                         children: [
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 PhosphorIconsRegular.chartBar,
                                 size: 18,
-                                color: AppColors.nearBlack,
+                                color: context.palette.accent,
                               ),
                               const SizedBox(width: 8),
-                              const Text(
+                              Text(
                                 'Progreso de subtareas',
                                 style: TextStyle(
-                                  color: AppColors.primaryText,
+                                  color: context.palette.primaryText,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -439,7 +449,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                             decoration: BoxDecoration(
                               color: task.completedSubtasksCount == task.totalSubtasksCount
                                   ? AppColors.success.withValues(alpha: 0.15)
-                                  : AppColors.secondarySurface,
+                                  : context.palette.surfaceSecondary,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -447,7 +457,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                               style: TextStyle(
                                 color: task.completedSubtasksCount == task.totalSubtasksCount
                                     ? AppColors.success
-                                    : AppColors.nearBlack,
+                                    : context.palette.accent,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -461,11 +471,11 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                         child: LinearProgressIndicator(
                           value: task.subtasksProgress,
                           minHeight: 8,
-                          backgroundColor: AppColors.secondarySurface,
+                          backgroundColor: context.palette.surfaceSecondary,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             task.completedSubtasksCount == task.totalSubtasksCount
                                 ? AppColors.success
-                                : AppColors.nearBlack,
+                                : context.palette.accent,
                           ),
                         ),
                       ),
@@ -475,8 +485,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                         children: [
                           Text(
                             'Llevas ${task.completedSubtasksCount}/${task.totalSubtasksCount} subtareas completadas',
-                            style: const TextStyle(
-                              color: AppColors.secondaryText,
+                            style: TextStyle(
+                              color: context.palette.secondaryText,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -513,25 +523,25 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Subtareas',
                     style: TextStyle(
-                      color: AppColors.primaryText,
+                      color: context.palette.primaryText,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   TextButton.icon(
                     onPressed: _showAddSubtaskDialog,
-                    icon: const Icon(
+                    icon: Icon(
                       PhosphorIconsRegular.plus,
                       size: 16,
-                      color: AppColors.nearBlack,
+                      color: context.palette.accent,
                     ),
-                    label: const Text(
+                    label: Text(
                       'Agregar',
                       style: TextStyle(
-                        color: AppColors.nearBlack,
+                        color: context.palette.accent,
                         fontSize: 13,
                       ),
                     ),
@@ -545,17 +555,17 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   padding: const EdgeInsets.all(20),
                   child: Center(
                     child: Column(
-                      children: const [
+                      children: [
                         Icon(
                           PhosphorIconsRegular.listChecks,
                           size: 28,
-                          color: AppColors.secondaryText,
+                          color: context.palette.secondaryText,
                         ),
                         SizedBox(height: 8),
                         Text(
                           'No hay subtareas registradas',
                           style: TextStyle(
-                            color: AppColors.secondaryText,
+                            color: context.palette.secondaryText,
                             fontSize: 13,
                           ),
                         ),
@@ -594,20 +604,20 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: subtask.completed
-                                      ? AppColors.white
-                                      : AppColors.secondaryText,
+                                      ? context.palette.onAccent
+                                      : context.palette.secondaryText,
                                   width: 2,
                                 ),
                                 color: subtask.completed
-                                    ? AppColors.nearBlack
+                                    ? context.palette.accent
                                     : Colors.transparent,
                               ),
                               child: subtask.completed
-                                  ? const Center(
+                                  ? Center(
                                       child: Icon(
                                         PhosphorIconsBold.check,
                                         size: 10,
-                                        color: AppColors.white,
+                                        color: context.palette.onAccent,
                                       ),
                                     )
                                   : null,
@@ -622,8 +632,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                   subtask.title,
                                   style: TextStyle(
                                     color: subtask.completed
-                                        ? AppColors.secondaryText
-                                        : AppColors.primaryText,
+                                        ? context.palette.secondaryText
+                                        : context.palette.primaryText,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
                                     decoration: subtask.completed
@@ -635,8 +645,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                   const SizedBox(height: 3),
                                   Text(
                                     subtask.description!,
-                                    style: const TextStyle(
-                                      color: AppColors.secondaryText,
+                                    style: TextStyle(
+                                      color: context.palette.secondaryText,
                                       fontSize: 12,
                                       height: 1.3,
                                     ),
@@ -646,10 +656,10 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               PhosphorIconsRegular.trash,
                               size: 16,
-                              color: AppColors.secondaryText,
+                              color: context.palette.secondaryText,
                             ),
                             onPressed: () {
                               ref

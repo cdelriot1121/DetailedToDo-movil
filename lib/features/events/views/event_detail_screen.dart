@@ -64,25 +64,25 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: AppColors.primarySurface,
+          backgroundColor: context.palette.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppColors.border),
+            side: BorderSide(color: context.palette.border),
           ),
-          title: const Text(
+          title: Text(
             '¿Eliminar evento?',
-            style: TextStyle(color: AppColors.primaryText),
+            style: TextStyle(color: context.palette.primaryText),
           ),
-          content: const Text(
+          content: Text(
             'Este evento se eliminará permanentemente.',
-            style: TextStyle(color: AppColors.secondaryText),
+            style: TextStyle(color: context.palette.secondaryText),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(color: AppColors.secondaryText),
+                style: TextStyle(color: context.palette.secondaryText),
               ),
             ),
             TextButton(
@@ -112,15 +112,15 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: AppColors.scaffoldBackground,
+      return Scaffold(
+        backgroundColor: context.palette.scaffoldBackground,
         body: LoadingView(message: 'Cargando evento...'),
       );
     }
 
     if (_errorMessage != null || _event == null) {
       return Scaffold(
-        backgroundColor: AppColors.scaffoldBackground,
+        backgroundColor: context.palette.scaffoldBackground,
         appBar: AppBar(),
         body: EmptyState(
           icon: PhosphorIconsRegular.warningCircle,
@@ -136,7 +136,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
     final event = _event!;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(
         title: const Text('Evento'),
         actions: [
@@ -162,8 +162,8 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
             children: [
               Text(
                 event.title,
-                style: const TextStyle(
-                  color: AppColors.primaryText,
+                style: TextStyle(
+                  color: context.palette.primaryText,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
@@ -175,9 +175,9 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
+                  color: context.palette.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: context.palette.border),
                 ),
                 child: Column(
                   children: [
@@ -218,10 +218,10 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
 
               if (event.description != null &&
                   event.description!.trim().isNotEmpty) ...[
-                const Text(
+                Text(
                   'Descripción',
                   style: TextStyle(
-                    color: AppColors.primaryText,
+                    color: context.palette.primaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -229,8 +229,8 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                 const SizedBox(height: 8),
                 Text(
                   event.description!,
-                  style: const TextStyle(
-                    color: AppColors.secondaryText,
+                  style: TextStyle(
+                    color: context.palette.secondaryText,
                     fontSize: 15,
                     height: 1.5,
                   ),
@@ -250,28 +250,30 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: AppColors.secondaryText),
+        Icon(icon, size: 20, color: context.palette.secondaryText),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: AppColors.secondaryText,
-                fontSize: 11,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: context.palette.secondaryText,
+                  fontSize: 11,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(
-                color: AppColors.primaryText,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  color: context.palette.primaryText,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

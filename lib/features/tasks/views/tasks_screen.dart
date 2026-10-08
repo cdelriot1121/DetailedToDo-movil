@@ -22,7 +22,7 @@ class TasksScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.primarySurface,
+      backgroundColor: context.palette.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -38,10 +38,10 @@ class TasksScreen extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Filtros',
                         style: TextStyle(
-                          color: AppColors.primaryText,
+                          color: context.palette.primaryText,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -53,18 +53,18 @@ class TasksScreen extends ConsumerWidget {
                               .clearFilters();
                           Navigator.pop(context);
                         },
-                        child: const Text(
+                        child: Text(
                           'Limpiar',
-                          style: TextStyle(color: AppColors.secondaryText),
+                          style: TextStyle(color: context.palette.secondaryText),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Estado',
                     style: TextStyle(
-                      color: AppColors.primaryText,
+                      color: context.palette.primaryText,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -74,21 +74,25 @@ class TasksScreen extends ConsumerWidget {
                     spacing: 8,
                     children: [
                       _buildChip(
+                        context,
                         'Todos',
                         tempStatus == null,
                         () => setModalState(() => tempStatus = null),
                       ),
                       _buildChip(
+                        context,
                         'Pendiente',
                         tempStatus == 'PENDING',
                         () => setModalState(() => tempStatus = 'PENDING'),
                       ),
                       _buildChip(
+                        context,
                         'En progreso',
                         tempStatus == 'IN_PROGRESS',
                         () => setModalState(() => tempStatus = 'IN_PROGRESS'),
                       ),
                       _buildChip(
+                        context,
                         'Completada',
                         tempStatus == 'COMPLETED',
                         () => setModalState(() => tempStatus = 'COMPLETED'),
@@ -96,10 +100,10 @@ class TasksScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Prioridad',
                     style: TextStyle(
-                      color: AppColors.primaryText,
+                      color: context.palette.primaryText,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -109,21 +113,25 @@ class TasksScreen extends ConsumerWidget {
                     spacing: 8,
                     children: [
                       _buildChip(
+                        context,
                         'Todas',
                         tempPriority == null,
                         () => setModalState(() => tempPriority = null),
                       ),
                       _buildChip(
+                        context,
                         'Baja',
                         tempPriority == 'LOW',
                         () => setModalState(() => tempPriority = 'LOW'),
                       ),
                       _buildChip(
+                        context,
                         'Media',
                         tempPriority == 'MEDIUM',
                         () => setModalState(() => tempPriority = 'MEDIUM'),
                       ),
                       _buildChip(
+                        context,
                         'Alta',
                         tempPriority == 'HIGH',
                         () => setModalState(() => tempPriority = 'HIGH'),
@@ -152,22 +160,27 @@ class TasksScreen extends ConsumerWidget {
     );
   }
 
-  static Widget _buildChip(String label, bool isSelected, VoidCallback onTap) {
+  static Widget _buildChip(
+    BuildContext context,
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.lightSurfaceSecondary,
-      backgroundColor: AppColors.secondarySurface,
+      selectedColor: context.palette.surfaceSecondary,
+      backgroundColor: context.palette.surfaceSecondary,
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.pureBlack : AppColors.primaryText,
+        color: isSelected ? context.palette.accent : context.palette.primaryText,
         fontSize: 13,
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? AppColors.nearBlack : AppColors.border,
+          color: isSelected ? context.palette.accent : context.palette.border,
         ),
       ),
     );
@@ -179,7 +192,7 @@ class TasksScreen extends ConsumerWidget {
     final tasks = state.tasks;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: context.palette.scaffoldBackground,
       appBar: AppBar(
         title: const Text('Tareas'),
         actions: [
@@ -191,16 +204,16 @@ class TasksScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.nearBlack,
-        foregroundColor: AppColors.white,
+        backgroundColor: context.palette.accent,
+        foregroundColor: context.palette.onAccent,
         shape: const CircleBorder(),
         onPressed: () => context.push('/tasks/new'),
         child: const Icon(PhosphorIconsRegular.plus, size: 24),
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.nearBlack,
-          backgroundColor: AppColors.primarySurface,
+          color: context.palette.accent,
+          backgroundColor: context.palette.surface,
           onRefresh: () =>
               ref.read(tasksViewModelProvider.notifier).loadTasks(),
           child: Column(
@@ -217,23 +230,23 @@ class TasksScreen extends ConsumerWidget {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: context.palette.surface,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: context.palette.border),
                         ),
                         child: TextField(
                           onChanged: (value) {
                             // Search filtering if supported
                           },
-                          style: const TextStyle(
-                            color: AppColors.primaryText,
+                          style: TextStyle(
+                            color: context.palette.primaryText,
                             fontSize: 14,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'Buscar tareas...',
                             prefixIcon: Icon(
                               PhosphorIconsRegular.magnifyingGlass,
-                              color: AppColors.secondaryText,
+                              color: context.palette.secondaryText,
                               size: 18,
                             ),
                             border: InputBorder.none,
@@ -250,13 +263,13 @@ class TasksScreen extends ConsumerWidget {
                     const SizedBox(width: 10),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.nearBlack,
+                        color: context.palette.accent,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           PhosphorIconsRegular.sparkle,
-                          color: AppColors.white,
+                          color: context.palette.onAccent,
                           size: 20,
                         ),
                         onPressed: () => context.push('/tasks/ai'),
@@ -324,20 +337,20 @@ class TasksScreen extends ConsumerWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: task.isCompleted
-                      ? AppColors.white
-                      : AppColors.secondaryText,
+                      ? context.palette.onAccent
+                      : context.palette.secondaryText,
                   width: 2,
                 ),
                 color: task.isCompleted
-                    ? AppColors.nearBlack
+                    ? context.palette.accent
                     : Colors.transparent,
               ),
               child: task.isCompleted
-                  ? const Center(
+                  ? Center(
                       child: Icon(
                         PhosphorIconsBold.check,
                         size: 12,
-                        color: AppColors.white,
+                        color: context.palette.onAccent,
                       ),
                     )
                   : null,
@@ -352,8 +365,8 @@ class TasksScreen extends ConsumerWidget {
                   task.title,
                   style: TextStyle(
                     color: task.isCompleted
-                        ? AppColors.secondaryText
-                        : AppColors.primaryText,
+                        ? context.palette.secondaryText
+                        : context.palette.primaryText,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     decoration: task.isCompleted
@@ -365,8 +378,8 @@ class TasksScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     task.description!,
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
+                    style: TextStyle(
+                      color: context.palette.secondaryText,
                       fontSize: 13,
                     ),
                     maxLines: 2,
@@ -374,39 +387,55 @@ class TasksScreen extends ConsumerWidget {
                   ),
                 ],
                 const SizedBox(height: 8),
-                Row(
+                // Wrap: si la fecha es larga, el contador de subtareas baja
+                // a la siguiente línea en lugar de desbordar.
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    if (task.dueDate != null) ...[
-                      const Icon(
-                        PhosphorIconsRegular.clock,
-                        size: 12,
-                        color: AppColors.secondaryText,
+                    if (task.dueDate != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            PhosphorIconsRegular.clock,
+                            size: 12,
+                            color: context.palette.secondaryText,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              AppDateUtils.formatShort(task.dueDate!),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: context.palette.secondaryText,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        AppDateUtils.formatShort(task.dueDate!),
-                        style: const TextStyle(
-                          color: AppColors.secondaryText,
-                          fontSize: 11,
-                        ),
+                    if (task.subtasks.isNotEmpty)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            PhosphorIconsRegular.listChecks,
+                            size: 12,
+                            color: context.palette.secondaryText,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${task.subtasks.where((s) => s.completed).length}/${task.subtasks.length}',
+                            style: TextStyle(
+                              color: context.palette.secondaryText,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                    ],
-                    if (task.subtasks.isNotEmpty) ...[
-                      const Icon(
-                        PhosphorIconsRegular.listChecks,
-                        size: 12,
-                        color: AppColors.secondaryText,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${task.subtasks.where((s) => s.completed).length}/${task.subtasks.length}',
-                        style: const TextStyle(
-                          color: AppColors.secondaryText,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import '../../../app/theme.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../auth/viewmodels/auth_view_model.dart';
@@ -73,11 +74,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : 'C';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: context.palette.scaffoldBackground,
       body: SafeArea(
         child: RefreshIndicator(
-          color: const Color(0xFF111111),
-          backgroundColor: Colors.white,
+          color: context.palette.primaryText,
+          backgroundColor: context.palette.surface,
           onRefresh: () =>
               ref.read(homeViewModelProvider.notifier).loadHomeData(),
           child: SingleChildScrollView(
@@ -96,8 +97,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Text(
                           'Hola, $userName',
-                          style: const TextStyle(
-                            color: Color(0xFF111111),
+                          style: TextStyle(
+                            color: context.palette.primaryText,
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.6,
@@ -106,8 +107,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(height: 4),
                         Text(
                           AppDateUtils.formatFull(DateTime.now()),
-                          style: const TextStyle(
-                            color: Color(0xFF666666),
+                          style: TextStyle(
+                            color: context.palette.secondaryText,
                             fontSize: 13,
                           ),
                         ),
@@ -122,14 +123,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF111111),
+                              color: context.palette.accent,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Text(
                                 '✦',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: context.palette.onAccent,
                                   fontSize: 18,
                                 ),
                               ),
@@ -143,15 +144,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           child: Container(
                             width: 40,
                             height: 40,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF111111),
+                            decoration: BoxDecoration(
+                              color: context.palette.accent,
                               shape: BoxShape.circle,
                             ),
                             child: Center(
                               child: Text(
                                 userInitial,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: context.palette.onAccent,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -169,7 +170,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF111111),
+                    color: context.palette.accentContainer,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -181,28 +182,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF444444),
+                          color: context.palette.track,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
+                            Text(
                               'Resumen con IA',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: context.palette.onAccentContainer,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             if (homeState.isSummaryLoading) ...[
                               const SizedBox(width: 7),
-                              const SizedBox(
+                              SizedBox(
                                 width: 10,
                                 height: 10,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 1.5,
-                                  color: Colors.white,
+                                  color: context.palette.onAccentContainer,
                                 ),
                               ),
                             ],
@@ -212,8 +213,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       const SizedBox(height: 12),
                       Text(
                         homeState.aiSummary,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: context.palette.onAccentContainer,
                           fontSize: 14,
                           height: 1.4,
                         ),
@@ -228,25 +229,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   children: [
                     Expanded(
                       child: _buildStatBox(
+                        context: context,
                         count: '${homeState.pendingTasksCount}',
                         label: 'Pendientes',
-                        numberColor: const Color(0xFF111111),
+                        numberColor: context.palette.primaryText,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildStatBox(
+                        context: context,
                         count: '${homeState.remindersCount}',
                         label: 'Recordatorios',
-                        numberColor: const Color(0xFF333333),
+                        numberColor: context.palette.primaryText,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildStatBox(
+                        context: context,
                         count: '${homeState.upcomingEventsCount}',
                         label: 'Eventos hoy',
-                        numberColor: const Color(0xFF111111),
+                        numberColor: context.palette.primaryText,
                       ),
                     ),
                   ],
@@ -257,10 +261,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Tareas de hoy',
                       style: TextStyle(
-                        color: Color(0xFF111111),
+                        color: context.palette.primaryText,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.4,
@@ -268,10 +272,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                     GestureDetector(
                       onTap: () => context.go('/tasks'),
-                      child: const Text(
+                      child: Text(
                         'Ver todas',
                         style: TextStyle(
-                          color: Color(0xFF111111),
+                          color: context.palette.primaryText,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -286,22 +290,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF4E5),
+                      color: context.palette.warningContainer,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.info_outline,
                           size: 18,
-                          color: Color(0xFF8A5200),
+                          color: context.palette.onWarningContainer,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             homeState.errorMessage!,
-                            style: const TextStyle(
-                              color: Color(0xFF6B4300),
+                            style: TextStyle(
+                              color: context.palette.onWarningContainer,
                               fontSize: 12,
                             ),
                           ),
@@ -317,15 +321,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.palette.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E2E2)),
+                      border: Border.all(color: context.palette.border),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         'No hay tareas pendientes para hoy',
                         style: TextStyle(
-                          color: Color(0xFF666666),
+                          color: context.palette.secondaryText,
                           fontSize: 14,
                         ),
                       ),
@@ -347,10 +351,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Próximo evento',
                       style: TextStyle(
-                        color: Color(0xFF111111),
+                        color: context.palette.primaryText,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.4,
@@ -358,10 +362,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                     GestureDetector(
                       onTap: () => context.go('/events'),
-                      child: const Text(
+                      child: Text(
                         'Ver agenda',
                         style: TextStyle(
-                          color: Color(0xFF111111),
+                          color: context.palette.primaryText,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -377,15 +381,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.palette.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E2E2)),
+                      border: Border.all(color: context.palette.border),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         'No hay próximos eventos',
                         style: TextStyle(
-                          color: Color(0xFF666666),
+                          color: context.palette.secondaryText,
                           fontSize: 14,
                         ),
                       ),
@@ -399,10 +403,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: context.palette.surface,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: const Color(0xFFE2E2E2),
+                                color: context.palette.border,
                               ),
                             ),
                             child: ClipRRect(
@@ -412,7 +416,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   children: [
                                     Container(
                                       width: 6,
-                                      color: const Color(0xFF444444),
+                                      color: context.palette.track,
                                     ),
                                     Expanded(
                                       child: InkWell(
@@ -428,8 +432,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                             children: [
                                               Text(
                                                 event.title,
-                                                style: const TextStyle(
-                                                  color: Color(0xFF111111),
+                                                style: TextStyle(
+                                                  color: context.palette.primaryText,
                                                   fontSize: 15,
                                                   fontWeight: FontWeight.w600,
                                                 ),
@@ -437,8 +441,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                               const SizedBox(height: 4),
                                               Text(
                                                 '${AppDateUtils.formatShort(event.startDate)}${event.location?.isNotEmpty == true ? ' · ${event.location}' : ''}',
-                                                style: const TextStyle(
-                                                  color: Color(0xFF666666),
+                                                style: TextStyle(
+                                                  color: context.palette.secondaryText,
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -452,8 +456,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                                   maxLines: 1,
                                                   overflow:
                                                       TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                    color: Color(0xFF666666),
+                                                  style: TextStyle(
+                                                    color: context.palette.secondaryText,
                                                     fontSize: 12,
                                                   ),
                                                 ),
@@ -480,6 +484,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildStatBox({
+    required BuildContext context,
     required String count,
     required String label,
     required Color numberColor,
@@ -487,9 +492,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E2E2)),
+        border: Border.all(color: context.palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,7 +510,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(color: Color(0xFF666666), fontSize: 12),
+            style: TextStyle(color: context.palette.secondaryText, fontSize: 12),
           ),
         ],
       ),
@@ -514,24 +519,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildTaskCard(BuildContext context, WidgetRef ref, Task task) {
     String priorityText = 'Media';
-    Color chipBg = const Color(0xFFEEEEEE);
-    Color chipFg = const Color(0xFF555555);
+    Color chipBg = context.palette.surfaceSecondary;
+    Color chipFg = context.palette.secondaryText;
 
     if (task.priority == TaskPriority.high) {
       priorityText = 'Alta';
-      chipBg = const Color(0xFFE9E9E9);
-      chipFg = const Color(0xFF222222);
+      chipBg = context.palette.surfaceSecondary;
+      chipFg = context.palette.primaryText;
     } else if (task.priority == TaskPriority.low) {
       priorityText = 'Baja';
-      chipBg = const Color(0xFFF2F2F2);
-      chipFg = const Color(0xFF666666);
+      chipBg = context.palette.surfaceSecondary;
+      chipFg = context.palette.secondaryText;
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E2E2)),
+        border: Border.all(color: context.palette.border),
       ),
       child: Material(
         color: Colors.transparent,
@@ -555,20 +560,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: task.isCompleted
-                            ? const Color(0xFF111111)
-                            : const Color(0xFFCCCCCC),
+                            ? context.palette.accent
+                            : context.palette.placeholder,
                         width: 2,
                       ),
                       color: task.isCompleted
-                          ? const Color(0xFF111111)
+                          ? context.palette.accent
                           : Colors.transparent,
                     ),
                     child: task.isCompleted
-                        ? const Center(
+                        ? Center(
                             child: Icon(
                               PhosphorIconsBold.check,
                               size: 12,
-                              color: Colors.white,
+                              color: context.palette.onAccent,
                             ),
                           )
                         : null,
@@ -583,8 +588,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         task.title,
                         style: TextStyle(
                           color: task.isCompleted
-                              ? const Color(0xFF666666)
-                              : const Color(0xFF111111),
+                              ? context.palette.secondaryText
+                              : context.palette.primaryText,
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                           decoration: task.isCompleted
@@ -597,8 +602,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         task.dueDate != null
                             ? AppDateUtils.formatShort(task.dueDate!)
                             : 'Hoy',
-                        style: const TextStyle(
-                          color: Color(0xFF666666),
+                        style: TextStyle(
+                          color: context.palette.secondaryText,
                           fontSize: 12,
                         ),
                       ),
