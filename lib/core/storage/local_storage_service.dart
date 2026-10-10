@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../../features/auth/models/user.dart';
 import '../../features/events/models/event.dart';
 import '../../features/notes/models/note.dart';
 import '../../features/tasks/models/task.dart';
@@ -13,6 +14,7 @@ class LocalStorageService {
   static const String notesBoxName = 'detailed_todo_notes';
   static const String eventsBoxName = 'detailed_todo_events';
   static const String syncQueueBoxName = 'detailed_todo_sync_queue';
+  static const String userBoxName = 'detailed_todo_user';
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -21,6 +23,7 @@ class LocalStorageService {
       Hive.openBox<Map>(notesBoxName),
       Hive.openBox<Map>(eventsBoxName),
       Hive.openBox<Map>(syncQueueBoxName),
+      Hive.openBox<Map>(userBoxName),
     ]);
   }
 
@@ -28,6 +31,23 @@ class LocalStorageService {
   Box<Map> get _notesBox => Hive.box<Map>(notesBoxName);
   Box<Map> get _eventsBox => Hive.box<Map>(eventsBoxName);
   Box<Map> get _syncQueueBox => Hive.box<Map>(syncQueueBoxName);
+  Box<Map> get _userBox => Hive.box<Map>(userBoxName);
+
+  // ===================== USER =====================
+
+  User? getUser() {
+    final raw = _userBox.get('current_user');
+    if (raw == null) return null;
+    return User.fromJson(Map<String, dynamic>.from(raw));
+  }
+
+  Future<void> saveUser(User user) async {
+    await _userBox.put('current_user', user.toJson());
+  }
+
+  Future<void> deleteUser() async {
+    await _userBox.delete('current_user');
+  }
 
   // ===================== TASKS =====================
 
@@ -202,6 +222,7 @@ class LocalStorageService {
       _notesBox.clear(),
       _eventsBox.clear(),
       _syncQueueBox.clear(),
+      _userBox.clear(),
     ]);
   }
 }
