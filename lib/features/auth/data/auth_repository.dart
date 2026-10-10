@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../models/user.dart';
@@ -26,10 +27,14 @@ class AuthRepository {
     }
     await _storageService.saveUserEmail(email);
 
+    User user;
     if (response['user'] is Map<String, dynamic>) {
-      return User.fromJson(response['user'] as Map<String, dynamic>);
+      user = User.fromJson(response['user'] as Map<String, dynamic>);
+    } else {
+      user = await _apiService.getCurrentUser();
     }
-    return await _apiService.getCurrentUser();
+    await _localStorage.saveUser(user);
+    return user;
   }
 
   Future<void> register(String name, String email, String password) async {
@@ -44,10 +49,14 @@ class AuthRepository {
     }
     await _storageService.saveUserEmail(email);
 
+    User user;
     if (response['user'] is Map<String, dynamic>) {
-      return User.fromJson(response['user'] as Map<String, dynamic>);
+      user = User.fromJson(response['user'] as Map<String, dynamic>);
+    } else {
+      user = await _apiService.getCurrentUser();
     }
-    return await _apiService.getCurrentUser();
+    await _localStorage.saveUser(user);
+    return user;
   }
 
   Future<void> requestPasswordReset(String email) => _apiService.requestPasswordReset(email);
@@ -61,20 +70,52 @@ class AuthRepository {
     if (token == null || token.isEmpty) {
       return null;
     }
+
+    final cachedUser = _localStorage.getUser();
+
     try {
-      return await _apiService.getCurrentUser();
+      final freshUser = await _apiService.getCurrentUser();
+      await _localStorage.saveUser(freshUser);
+      return freshUser;
+    } on ApiException catch (e) {
+      // Only clear token if unauthorized (401)
+      if (e.statusCode == 401) {
+        await _storageService.deleteToken();
+        await _localStorage.deleteUser();
+        return null;
+      }
+      // On network/timeout/offline errors, preserve session and return cached user
+      if (cachedUser != null) {
+        return cachedUser;
+      }
+      final email = await _storageService.getUserEmail() ?? '';
+      return User(id: 'offline_user', name: email.split('@').first, email: email);
     } catch (_) {
-      await _storageService.deleteToken();
-      return null;
+      if (cachedUser != null) {
+        return cachedUser;
+      }
+      final email = await _storageService.getUserEmail() ?? '';
+      return User(id: 'offline_user', name: email.split('@').first, email: email);
     }
   }
 
   Future<User> getCurrentUser() async {
-    return await _apiService.getCurrentUser();
+    try {
+      final user = await _apiService.getCurrentUser();
+      await _localStorage.saveUser(user);
+      return user;
+    } catch (_) {
+      final cached = _localStorage.getUser();
+      if (cached != null) return cached;
+      final email = await _storageService.getUserEmail() ?? '';
+      return User(id: 'offline_user', name: email.split('@').first, email: email);
+    }
   }
 
   Future<User> updateProfile({String? name, String? email}) async {
-    return await _apiService.updateCurrentUser(name: name, email: email);
+    final user = await _apiService.updateCurrentUser(name: name, email: email);
+    await _localStorage.saveUser(user);
+    return user;
   }
 
   Future<void> logout() async {

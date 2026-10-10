@@ -2,25 +2,36 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/storage/local_storage_service.dart';
 import '../../../shared/models/ai_quota.dart';
 import '../../auth/models/user.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final dio = ref.watch(dioClientProvider);
-  return UserRepository(dio);
+  final localStorage = ref.watch(localStorageServiceProvider);
+  return UserRepository(dio, localStorage);
 });
 
 class UserRepository {
   final Dio _dio;
+  final LocalStorageService _localStorage;
 
-  UserRepository(this._dio);
+  UserRepository(this._dio, this._localStorage);
 
   Future<User> getProfile() async {
     try {
       final response = await _dio.get('/users/me');
-      return User.fromJson(response.data as Map<String, dynamic>);
+      final user = User.fromJson(response.data as Map<String, dynamic>);
+      await _localStorage.saveUser(user);
+      return user;
     } on DioException catch (e) {
+      final cached = _localStorage.getUser();
+      if (cached != null) return cached;
       throw ApiException.fromDioError(e);
+    } catch (_) {
+      final cached = _localStorage.getUser();
+      if (cached != null) return cached;
+      rethrow;
     }
   }
 
@@ -31,7 +42,9 @@ class UserRepository {
       if (email != null) data['email'] = email;
 
       final response = await _dio.put('/users/me', data: data);
-      return User.fromJson(response.data as Map<String, dynamic>);
+      final user = User.fromJson(response.data as Map<String, dynamic>);
+      await _localStorage.saveUser(user);
+      return user;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
