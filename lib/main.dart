@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'app/app.dart';
 import 'app/theme.dart';
 import 'core/notifications/notification_service.dart';
+import 'core/storage/local_storage_service.dart';
 import 'core/storage/secure_storage_service.dart';
 
 void main() async {
@@ -12,6 +13,9 @@ void main() async {
 
   // Initialize Spanish date formatting for intl
   await initializeDateFormatting('es', null);
+
+  // Initialize local storage (Hive: Web IndexedDB / Mobile disk)
+  await LocalStorageService.init();
 
   // Initialize notification service gracefully
   final notificationService = NotificationService();

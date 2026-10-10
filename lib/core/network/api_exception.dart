@@ -70,6 +70,18 @@ class ApiException implements Exception {
     );
   }
 
+  bool get isNetworkError {
+    if (statusCode == null) return true;
+    if (originalError is DioException) {
+      final type = (originalError as DioException).type;
+      return type == DioExceptionType.connectionError ||
+          type == DioExceptionType.connectionTimeout ||
+          type == DioExceptionType.sendTimeout ||
+          type == DioExceptionType.receiveTimeout;
+    }
+    return false;
+  }
+
   @override
   String toString() => message;
 }
