@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/storage/local_storage_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../models/user.dart';
 import 'auth_api_service.dart';
@@ -6,14 +7,16 @@ import 'auth_api_service.dart';
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final apiService = ref.watch(authApiServiceProvider);
   final storageService = ref.watch(secureStorageServiceProvider);
-  return AuthRepository(apiService, storageService);
+  final localStorage = ref.watch(localStorageServiceProvider);
+  return AuthRepository(apiService, storageService, localStorage);
 });
 
 class AuthRepository {
   final AuthApiService _apiService;
   final SecureStorageService _storageService;
+  final LocalStorageService _localStorage;
 
-  AuthRepository(this._apiService, this._storageService);
+  AuthRepository(this._apiService, this._storageService, this._localStorage);
 
   Future<User> login(String email, String password) async {
     final response = await _apiService.login(email: email, password: password);
@@ -76,6 +79,7 @@ class AuthRepository {
 
   Future<void> logout() async {
     await _storageService.clearAll();
+    await _localStorage.clearAllData();
   }
 
   Future<bool> isAuthenticated() async {

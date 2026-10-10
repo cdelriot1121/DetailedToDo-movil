@@ -1,26 +1,53 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
+import '../../../core/storage/local_storage_service.dart';
+import '../../../core/sync/sync_service.dart';
 import '../models/event.dart';
 import 'event_api_service.dart';
 
 final eventRepositoryProvider = Provider<EventRepository>((ref) {
   final apiService = ref.watch(eventApiServiceProvider);
-  return EventRepository(apiService);
+  final localStorage = ref.watch(localStorageServiceProvider);
+  final syncService = ref.watch(syncServiceProvider);
+  return EventRepository(apiService, localStorage, syncService);
 });
 
 class EventRepository {
   final EventApiService _apiService;
+  final LocalStorageService _localStorage;
+  final SyncService _syncService;
+  final _uuid = const Uuid();
 
-  EventRepository(this._apiService);
+  EventRepository(
+    this._apiService,
+    this._localStorage,
+    this._syncService,
+  );
 
   Future<List<Event>> getEvents({
     DateTime? from,
     DateTime? to,
   }) async {
-    return await _apiService.getEvents(from: from, to: to);
+    try {
+      final remoteEvents = await _apiService.getEvents(from: from, to: to);
+      await _localStorage.saveEvents(remoteEvents);
+      _syncService.syncPending().ignore();
+      return remoteEvents;
+    } catch (_) {
+      return _localStorage.getEvents(from: from, to: to);
+    }
   }
 
   Future<Event> getEvent(String id) async {
-    return await _apiService.getEvent(id);
+    try {
+      final remoteEvent = await _apiService.getEvent(id);
+      await _localStorage.saveEvent(remoteEvent);
+      return remoteEvent;
+    } catch (_) {
+      final local = _localStorage.getEvent(id);
+      if (local != null) return local;
+      rethrow;
+    }
   }
 
   Future<Event> createEvent({
@@ -32,8 +59,28 @@ class EventRepository {
     DateTime? reminderDate,
     List<String> tags = const [],
   }) async {
+    final newId = _uuid.v4();
+    final now = DateTime.now();
+
+    final newEvent = Event(
+      id: newId,
+      title: title,
+      description: description,
+      startDate: startDate,
+      endDate: endDate,
+      location: location,
+      reminderDate: reminderDate,
+      tags: tags,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    // Save locally immediately
+    await _localStorage.saveEvent(newEvent);
+
     final isoDate = startDate.toIso8601String();
     final payload = <String, dynamic>{
+      'id': newId,
       'title': title,
       'dateTime': isoDate,
       'startDate': isoDate,
@@ -52,7 +99,18 @@ class EventRepository {
       payload['reminderDate'] = reminderDate.toIso8601String();
     }
 
-    return await _apiService.createEvent(payload);
+    // Register sync item
+    await _localStorage.addSyncItem({
+      'id': _uuid.v4(),
+      'action': 'create_event',
+      'resourceId': newId,
+      'payload': payload,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+
+    _syncService.syncPending().ignore();
+
+    return newEvent;
   }
 
   Future<Event> updateEvent(
@@ -65,6 +123,27 @@ class EventRepository {
     DateTime? reminderDate,
     List<String> tags = const [],
   }) async {
+    final existing = _localStorage.getEvent(id);
+    final updatedEvent = (existing ??
+            Event(
+              id: id,
+              title: title,
+              startDate: startDate,
+            ))
+        .copyWith(
+      title: title,
+      description: description,
+      startDate: startDate,
+      endDate: endDate,
+      location: location,
+      reminderDate: reminderDate,
+      tags: tags,
+      updatedAt: DateTime.now(),
+    );
+
+    // Save locally immediately
+    await _localStorage.saveEvent(updatedEvent);
+
     final isoDate = startDate.toIso8601String();
     final payload = <String, dynamic>{
       'title': title,
@@ -81,14 +160,37 @@ class EventRepository {
       payload['reminderDate'] = reminderDate.toIso8601String();
     }
 
-    return await _apiService.updateEvent(id, payload);
+    // Register sync item
+    await _localStorage.addSyncItem({
+      'id': _uuid.v4(),
+      'action': 'update_event',
+      'resourceId': id,
+      'payload': payload,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+
+    _syncService.syncPending().ignore();
+
+    return updatedEvent;
   }
 
   Future<void> deleteEvent(String id) async {
-    await _apiService.deleteEvent(id);
+    await _localStorage.deleteEvent(id);
+
+    await _localStorage.addSyncItem({
+      'id': _uuid.v4(),
+      'action': 'delete_event',
+      'resourceId': id,
+      'payload': {},
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+
+    _syncService.syncPending().ignore();
   }
 
   Future<Event> createEventWithAI(String content) async {
-    return await _apiService.createEventWithAI(content);
+    final event = await _apiService.createEventWithAI(content);
+    await _localStorage.saveEvent(event);
+    return event;
   }
 }
