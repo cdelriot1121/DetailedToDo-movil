@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
 import '../../../core/widgets/app_button.dart';
@@ -8,6 +9,7 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../auth/viewmodels/auth_view_model.dart';
 import '../viewmodels/profile_view_model.dart';
+import 'subscription_modal.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -145,6 +147,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final state = ref.watch(profileViewModelProvider);
     final selectedTheme = ref.watch(appThemeProvider);
     final palette = context.palette;
+    final dateFormat = DateFormat('dd/MM/yyyy');
 
     if (state.isLoading && state.user == null) {
       return Scaffold(
@@ -155,6 +158,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final user = state.user;
     final quota = state.quota;
+    final isPlus = user?.isPlus ?? false;
 
     return Scaffold(
       backgroundColor: palette.scaffoldBackground,
@@ -213,8 +217,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 32),
 
-              // AI Quota Section
-              _sectionTitle('Cuota de IA diaria'),
+              // AI Quota & Plan Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _sectionTitle('Plan y cuota de IA'),
+                  GestureDetector(
+                    onTap: () => SubscriptionModal.show(context),
+                    child: Text(
+                      isPlus ? 'Gestionar Plus' : 'Mejorar a Plus',
+                      style: TextStyle(
+                        color: palette.accent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 10),
               AppCard(
                 backgroundColor: palette.accentContainer,
@@ -229,23 +249,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Row(
                           children: [
                             Icon(
-                              PhosphorIconsRegular.sparkle,
+                              isPlus
+                                  ? PhosphorIconsFill.sparkle
+                                  : PhosphorIconsRegular.sparkle,
                               size: 18,
                               color: palette.onAccentContainer,
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Plan ${quota?.plan ?? user?.plan ?? 'FREE'}',
+                              'Plan ${user?.plan ?? quota?.plan ?? 'FREE'}',
                               style: TextStyle(
                                 color: palette.onAccentContainer,
                                 fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
+                            if (isPlus) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: palette.onAccentContainer.withValues(
+                                    alpha: 0.18,
+                                  ),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  user?.subscriptionStatus ?? 'ACTIVO',
+                                  style: TextStyle(
+                                    color: palette.onAccentContainer,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                         Text(
-                          '${quota?.used ?? 0} de ${quota?.limit ?? 5} usadas',
+                          '${quota?.used ?? 0} de ${quota?.limit ?? (isPlus ? 15 : 5)} usadas',
                           style: TextStyle(
                             color: palette.onAccentContainerMuted,
                             fontSize: 13,
@@ -270,13 +315,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'Te quedan ${quota?.remaining ?? 5} solicitudes hoy.',
-                      style: TextStyle(
-                        color: palette.onAccentContainerMuted,
-                        fontSize: 12,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Te quedan ${quota?.remaining ?? (isPlus ? 15 : 5)} solicitudes hoy.',
+                          style: TextStyle(
+                            color: palette.onAccentContainerMuted,
+                            fontSize: 12,
+                          ),
+                        ),
+                        if (user?.subscriptionExpiresAt != null)
+                          Text(
+                            'Vence: ${dateFormat.format(user!.subscriptionExpiresAt!)}',
+                            style: TextStyle(
+                              color: palette.onAccentContainerMuted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                      ],
                     ),
+                    if (!isPlus) ...[
+                      const SizedBox(height: 12),
+                      InkWell(
+                        onTap: () => SubscriptionModal.show(context),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: palette.surface,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: palette.border),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                PhosphorIconsRegular.lightning,
+                                size: 16,
+                                color: palette.accent,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Obtener 15 solicitudes con Plus (\$3.500 COP)',
+                                style: TextStyle(
+                                  color: palette.primaryText,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
