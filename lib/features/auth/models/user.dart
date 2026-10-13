@@ -3,6 +3,8 @@ class User {
   final String name;
   final String email;
   final String plan;
+  final String subscriptionStatus;
+  final DateTime? subscriptionExpiresAt;
   final DateTime? createdAt;
 
   const User({
@@ -10,8 +12,17 @@ class User {
     required this.name,
     required this.email,
     this.plan = 'FREE',
+    this.subscriptionStatus = 'NONE',
+    this.subscriptionExpiresAt,
     this.createdAt,
   });
+
+  bool get isPlus => plan.toUpperCase() == 'PLUS';
+
+  bool get hasActiveSubscription =>
+      isPlus &&
+      (subscriptionExpiresAt == null ||
+          subscriptionExpiresAt!.isAfter(DateTime.now()));
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -19,6 +30,10 @@ class User {
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
       plan: json['plan'] as String? ?? 'FREE',
+      subscriptionStatus: json['subscriptionStatus'] as String? ?? 'NONE',
+      subscriptionExpiresAt: json['subscriptionExpiresAt'] != null
+          ? DateTime.tryParse(json['subscriptionExpiresAt'].toString())
+          : null,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
@@ -31,6 +46,8 @@ class User {
       'name': name,
       'email': email,
       'plan': plan,
+      'subscriptionStatus': subscriptionStatus,
+      'subscriptionExpiresAt': subscriptionExpiresAt?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
     };
   }
@@ -40,6 +57,8 @@ class User {
     String? name,
     String? email,
     String? plan,
+    String? subscriptionStatus,
+    DateTime? subscriptionExpiresAt,
     DateTime? createdAt,
   }) {
     return User(
@@ -47,6 +66,9 @@ class User {
       name: name ?? this.name,
       email: email ?? this.email,
       plan: plan ?? this.plan,
+      subscriptionStatus: subscriptionStatus ?? this.subscriptionStatus,
+      subscriptionExpiresAt:
+          subscriptionExpiresAt ?? this.subscriptionExpiresAt,
       createdAt: createdAt ?? this.createdAt,
     );
   }
