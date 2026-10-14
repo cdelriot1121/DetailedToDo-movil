@@ -224,33 +224,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 const SizedBox(height: 16),
 
-                // 3 Stat Boxes (Pendientes, Recordatorios, Eventos hoy)
+                // Dashboard Stat Cards (Pendientes, Recordatorios, Eventos hoy)
                 Row(
                   children: [
                     Expanded(
-                      child: _buildStatBox(
+                      child: _buildDashboardMetric(
                         context: context,
+                        icon: PhosphorIconsRegular.checkCircle,
                         count: '${homeState.pendingTasksCount}',
                         label: 'Pendientes',
-                        numberColor: context.palette.primaryText,
+                        subtitle: 'Por resolver',
+                        accentColor: context.palette.accent,
+                        onTap: () => context.go('/tasks'),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: _buildStatBox(
+                      child: _buildDashboardMetric(
                         context: context,
+                        icon: PhosphorIconsRegular.bell,
                         count: '${homeState.remindersCount}',
                         label: 'Recordatorios',
-                        numberColor: context.palette.primaryText,
+                        subtitle: 'Activos hoy',
+                        accentColor: AppColors.mediumPriority,
+                        onTap: () => context.go('/tasks'),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: _buildStatBox(
+                      child: _buildDashboardMetric(
                         context: context,
+                        icon: PhosphorIconsRegular.calendarCheck,
                         count: '${homeState.upcomingEventsCount}',
                         label: 'Eventos hoy',
-                        numberColor: context.palette.primaryText,
+                        subtitle: 'En agenda',
+                        accentColor: AppColors.lowPriority,
+                        onTap: () => context.go('/events'),
                       ),
                     ),
                   ],
@@ -483,36 +492,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildStatBox({
+  Widget _buildDashboardMetric({
     required BuildContext context,
+    required IconData icon,
     required String count,
     required String label,
-    required Color numberColor,
+    required String subtitle,
+    required Color accentColor,
+    required VoidCallback onTap,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       decoration: BoxDecoration(
         color: context.palette.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.palette.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            count,
-            style: TextStyle(
-              color: numberColor,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 16,
+                        color: accentColor,
+                      ),
+                    ),
+                    Icon(
+                      PhosphorIconsRegular.arrowUpRight,
+                      size: 12,
+                      color: context.palette.placeholder,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  count,
+                  style: TextStyle(
+                    color: context.palette.primaryText,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: context.palette.primaryText,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: context.palette.secondaryText,
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(color: context.palette.secondaryText, fontSize: 12),
-          ),
-        ],
+        ),
       ),
     );
   }

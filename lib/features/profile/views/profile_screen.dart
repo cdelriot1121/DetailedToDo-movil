@@ -218,162 +218,233 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 32),
 
               // AI Quota & Plan Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _sectionTitle('Plan y cuota de IA'),
-                  GestureDetector(
-                    onTap: () => SubscriptionModal.show(context),
-                    child: Text(
-                      isPlus ? 'Gestionar Plus' : 'Mejorar a Plus',
-                      style: TextStyle(
-                        color: palette.accent,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              _sectionTitle('Plan y cuota de IA'),
               const SizedBox(height: 10),
               AppCard(
-                backgroundColor: palette.accentContainer,
-                borderColor: palette.accentContainer,
+                backgroundColor: palette.surface,
+                borderColor: palette.border,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Plan header row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Row(
                           children: [
-                            Icon(
-                              isPlus
-                                  ? PhosphorIconsFill.sparkle
-                                  : PhosphorIconsRegular.sparkle,
-                              size: 18,
-                              color: palette.onAccentContainer,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Plan ${user?.plan ?? quota?.plan ?? 'FREE'}',
-                              style: TextStyle(
-                                color: palette.onAccentContainer,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: palette.accentContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                isPlus
+                                    ? PhosphorIconsFill.sparkle
+                                    : PhosphorIconsRegular.sparkle,
+                                size: 18,
+                                color: palette.accent,
                               ),
                             ),
-                            if (isPlus) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Plan ${user?.plan ?? quota?.plan ?? 'FREE'}',
+                                      style: TextStyle(
+                                        color: palette.primaryText,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    if (isPlus) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 7,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: palette.accentContainer,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          user?.subscriptionStatus ?? 'ACTIVO',
+                                          style: TextStyle(
+                                            color: palette.accent,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.3,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
-                                decoration: BoxDecoration(
-                                  color: palette.onAccentContainer.withValues(
-                                    alpha: 0.18,
+                                if (user?.subscriptionExpiresAt != null)
+                                  Text(
+                                    'Vence: ${dateFormat.format(user!.subscriptionExpiresAt!)}',
+                                    style: TextStyle(
+                                      color: palette.secondaryText,
+                                      fontSize: 11,
+                                    ),
                                   ),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  user?.subscriptionStatus ?? 'ACTIVO',
-                                  style: TextStyle(
-                                    color: palette.onAccentContainer,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ],
                         ),
-                        Text(
-                          '${quota?.used ?? 0} de ${quota?.limit ?? (isPlus ? 15 : 5)} usadas',
-                          style: TextStyle(
-                            color: palette.onAccentContainerMuted,
-                            fontSize: 13,
+                        TextButton(
+                          onPressed: () => SubscriptionModal.show(context),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            isPlus ? 'Gestionar' : 'Ver plan',
+                            style: TextStyle(
+                              color: palette.accent,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 14),
 
-                    // Progress Bar
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: quota?.progressPercentage ?? 0.0,
-                        minHeight: 8,
-                        backgroundColor: palette.onAccentContainer.withValues(
-                          alpha: 0.22,
-                        ),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          palette.onAccentContainer,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    // Usage Progress & Details
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Te quedan ${quota?.remaining ?? (isPlus ? 15 : 5)} solicitudes hoy.',
+                          'Uso de IA hoy',
                           style: TextStyle(
-                            color: palette.onAccentContainerMuted,
-                            fontSize: 12,
+                            color: palette.secondaryText,
+                            fontSize: 12.5,
                           ),
                         ),
-                        if (user?.subscriptionExpiresAt != null)
-                          Text(
-                            'Vence: ${dateFormat.format(user!.subscriptionExpiresAt!)}',
-                            style: TextStyle(
-                              color: palette.onAccentContainerMuted,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        Text(
+                          '${quota?.used ?? 0} de ${quota?.limit ?? (isPlus ? 15 : 5)} usadas',
+                          style: TextStyle(
+                            color: palette.primaryText,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
                           ),
+                        ),
                       ],
                     ),
-                    if (!isPlus) ...[
-                      const SizedBox(height: 12),
-                      InkWell(
-                        onTap: () => SubscriptionModal.show(context),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: palette.surface,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: palette.border),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                PhosphorIconsRegular.lightning,
-                                size: 16,
-                                color: palette.accent,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Obtener 15 solicitudes con Plus (\$3.500 COP)',
-                                style: TextStyle(
-                                  color: palette.primaryText,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: quota?.progressPercentage ?? 0.0,
+                        minHeight: 6,
+                        backgroundColor: palette.track,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          palette.accent,
                         ),
                       ),
-                    ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Te quedan ${quota?.remaining ?? (isPlus ? 15 : 5)} solicitudes hoy.',
+                      style: TextStyle(
+                        color: palette.secondaryText,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
+
+              // Upgrade to Plus banner (Only for Free users)
+              if (!isPlus) ...[
+                const SizedBox(height: 12),
+                AppCard(
+                  backgroundColor: palette.surface,
+                  borderColor: palette.accent.withValues(alpha: 0.35),
+                  padding: const EdgeInsets.all(14),
+                  onTap: () => SubscriptionModal.show(context),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: palette.accentContainer,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          PhosphorIconsFill.sparkle,
+                          size: 20,
+                          color: palette.accent,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Pásate a Plus',
+                                  style: TextStyle(
+                                    color: palette.primaryText,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: palette.accentContainer,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '\$3.500/mes',
+                                    style: TextStyle(
+                                      color: palette.accent,
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Triplica tus consultas de IA a 15 por día.',
+                              style: TextStyle(
+                                color: palette.secondaryText,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        PhosphorIconsRegular.caretRight,
+                        size: 16,
+                        color: palette.secondaryText,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
 
               // Personalización

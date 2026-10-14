@@ -37,13 +37,7 @@ class EventsScreen extends ConsumerWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(PhosphorIconsRegular.sparkle, size: 20),
-            onPressed: () => context.push('/events/ai'),
-            tooltip: 'Agendar con IA',
-          ),
-        ],
+        actions: const [],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: context.palette.accent,
@@ -61,6 +55,64 @@ class EventsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // AI Quick Action Row matching Tasks and Notes
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 13,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.palette.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: context.palette.border),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              PhosphorIconsRegular.calendarBlank,
+                              color: context.palette.secondaryText,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Agenda y eventos',
+                              style: TextStyle(
+                                color: context.palette.secondaryText,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: context.palette.accent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          PhosphorIconsRegular.sparkle,
+                          color: context.palette.onAccent,
+                          size: 20,
+                        ),
+                        onPressed: () => context.push('/events/ai'),
+                        tooltip: 'Agendar con IA',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               // Horizontal Week Strip
               Padding(
                 padding: const EdgeInsets.symmetric(

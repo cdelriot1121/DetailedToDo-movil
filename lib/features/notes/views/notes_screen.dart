@@ -20,6 +20,7 @@ class NotesScreen extends ConsumerStatefulWidget {
 class _NotesScreenState extends ConsumerState<NotesScreen> {
   bool _isGalleryView = true;
   String _searchQuery = '';
+  String? _selectedFolder;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -33,26 +34,32 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     final state = ref.watch(notesViewModelProvider);
     final allNotes = state.notes;
 
-    // Filter notes locally by search query if present
-    final notes = _searchQuery.trim().isEmpty
-        ? allNotes
-        : allNotes.where((note) {
-            final query = _searchQuery.toLowerCase();
-            final titleMatch = note.title.toLowerCase().contains(query);
-            final contentMatch = note.content.toLowerCase().contains(query);
-            final folderMatch = note.folder?.toLowerCase().contains(query) ?? false;
-            final tagsMatch = note.tags.any((t) => t.toLowerCase().contains(query));
-            return titleMatch || contentMatch || folderMatch || tagsMatch;
-          }).toList();
+    // Filter notes locally by selected folder AND search query
+    final notes = allNotes.where((note) {
+      if (_selectedFolder != null && _selectedFolder!.isNotEmpty) {
+        if (note.folder != _selectedFolder) {
+          return false;
+        }
+      }
+      if (_searchQuery.trim().isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final titleMatch = note.title.toLowerCase().contains(query);
+        final contentMatch = note.content.toLowerCase().contains(query);
+        final folderMatch = note.folder?.toLowerCase().contains(query) ?? false;
+        final tagsMatch = note.tags.any((t) => t.toLowerCase().contains(query));
+        return titleMatch || contentMatch || folderMatch || tagsMatch;
+      }
+      return true;
+    }).toList();
 
-    // Extract dynamic folders from loaded notes
+    // Extract dynamic folders from all loaded notes
     final Set<String> dynamicFolders = {};
     for (final n in allNotes) {
       if (n.folder != null && n.folder!.trim().isNotEmpty) {
         dynamicFolders.add(n.folder!.trim());
       }
     }
-    // Also add defaults if not present
+    // Also include defaults
     const defaultFolders = ['Estudio', 'Ideas', 'Trabajo'];
     for (final df in defaultFolders) {
       dynamicFolders.add(df);
@@ -72,17 +79,12 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                   : PhosphorIconsRegular.squaresFour,
               size: 22,
             ),
-            tooltip: _isGalleryView ? 'Vista de lista' : 'Vista de galería',
+            tooltip: _isGalleryView ? 'Vista de lista' : 'Vista de cuadrícula',
             onPressed: () {
               setState(() {
                 _isGalleryView = !_isGalleryView;
               });
             },
-          ),
-          IconButton(
-            icon: const Icon(PhosphorIconsRegular.sparkle, size: 20),
-            onPressed: () => context.push('/notes/ai'),
-            tooltip: 'Crear / Resumir con IA',
           ),
           const SizedBox(width: 4),
         ],
@@ -103,7 +105,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Search Bar & AI Action
+              // Search Bar & AI Action (Identical to Tasks and Events)
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -186,7 +188,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 ),
               ),
 
-              // Dynamic Category / Folder Filter Chips
+              // Category / Folder Filter Chips
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 child: SingleChildScrollView(
@@ -196,11 +198,11 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                       _buildCategoryChip(
                         label: 'Todas',
                         count: allNotes.length,
-                        isSelected: state.selectedFolder == null,
+                        isSelected: _selectedFolder == null,
                         onTap: () {
-                          ref
-                              .read(notesViewModelProvider.notifier)
-                              .setFilter(folder: null);
+                          setState(() {
+                            _selectedFolder = null;
+                          });
                         },
                       ),
                       const SizedBox(width: 8),
@@ -212,15 +214,12 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                           child: _buildCategoryChip(
                             label: folder,
                             count: count > 0 ? count : null,
-                            isSelected: state.selectedFolder == folder,
+                            isSelected: _selectedFolder == folder,
                             onTap: () {
-                              ref
-                                  .read(notesViewModelProvider.notifier)
-                                  .setFilter(
-                                    folder: state.selectedFolder == folder
-                                        ? null
-                                        : folder,
-                                  );
+                              setState(() {
+                                _selectedFolder =
+                                    _selectedFolder == folder ? null : folder;
+                              });
                             },
                           ),
                         );
@@ -231,14 +230,14 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
               ),
               const SizedBox(height: 10),
 
-              // View stats bar: Showing count & current mode indicator
+              // View stats bar
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 2),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${notes.length} ${notes.length == 1 ? 'nota' : 'notas'}${state.selectedFolder != null ? ' en ${state.selectedFolder}' : ''}',
+                      '${notes.length} ${notes.length == 1 ? 'nota' : 'notas'}${_selectedFolder != null ? ' en $_selectedFolder' : ''}',
                       style: TextStyle(
                         color: context.palette.secondaryText,
                         fontSize: 12,
