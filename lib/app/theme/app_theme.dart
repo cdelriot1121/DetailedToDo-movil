@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_palette.dart';
 
@@ -56,10 +57,51 @@ class AppTheme {
             surfaceTint: Colors.transparent,
           );
 
+    final customTextTheme = TextTheme(
+      displayLarge: TextStyle(
+        color: p.primaryText,
+        fontSize: 30,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.8,
+      ),
+      displayMedium: TextStyle(
+        color: p.primaryText,
+        fontSize: 28,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.6,
+      ),
+      headlineSmall: TextStyle(
+        color: p.primaryText,
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.4,
+      ),
+      titleLarge: TextStyle(
+        color: p.primaryText,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      ),
+      titleMedium: TextStyle(
+        color: p.primaryText,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+      bodyLarge: TextStyle(color: p.primaryText, fontSize: 15),
+      bodyMedium: TextStyle(color: p.secondaryText, fontSize: 15),
+      bodySmall: TextStyle(color: p.secondaryText, fontSize: 13),
+      labelLarge: TextStyle(
+        color: p.primaryText,
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(customTextTheme),
+      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
       scaffoldBackgroundColor: p.scaffoldBackground,
       extensions: <ThemeExtension<dynamic>>[p],
       iconTheme: IconThemeData(color: p.primaryText),
@@ -147,44 +189,6 @@ class AppTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      textTheme: TextTheme(
-        displayLarge: TextStyle(
-          color: p.primaryText,
-          fontSize: 30,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.8,
-        ),
-        displayMedium: TextStyle(
-          color: p.primaryText,
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.6,
-        ),
-        headlineSmall: TextStyle(
-          color: p.primaryText,
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.4,
-        ),
-        titleLarge: TextStyle(
-          color: p.primaryText,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-        titleMedium: TextStyle(
-          color: p.primaryText,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-        bodyLarge: TextStyle(color: p.primaryText, fontSize: 15),
-        bodyMedium: TextStyle(color: p.secondaryText, fontSize: 15),
-        bodySmall: TextStyle(color: p.secondaryText, fontSize: 13),
-        labelLarge: TextStyle(
-          color: p.primaryText,
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );
