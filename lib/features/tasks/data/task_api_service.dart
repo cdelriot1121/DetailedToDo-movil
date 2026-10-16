@@ -144,6 +144,15 @@ class TaskApiService {
     }
   }
 
+  Future<Task> reorderSubtasks(String taskId, List<String> subtaskIds) async {
+    try {
+      final response = await _dio.put('/tasks/$taskId/subtasks/order', data: {'subtaskIds': subtaskIds});
+      return Task.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
   Future<Task> generateSubtasksWithAI(String taskId) async {
     try {
       final response = await _dio.post('/tasks/$taskId/subtasks/ai');

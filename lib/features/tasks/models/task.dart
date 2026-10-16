@@ -56,6 +56,7 @@ class Task {
   final TaskPriority priority;
   final DateTime? dueDate;
   final DateTime? reminderDate;
+  final int? lastMinuteReminderMinutes;
   final String? folder;
   final List<String> tags;
   final List<Subtask> subtasks;
@@ -71,6 +72,7 @@ class Task {
     this.priority = TaskPriority.medium,
     this.dueDate,
     this.reminderDate,
+    this.lastMinuteReminderMinutes,
     this.folder,
     this.tags = const [],
     this.subtasks = const [],
@@ -96,9 +98,13 @@ class Task {
     var rawSubtasks = json['subtasks'];
     List<Subtask> subtaskList = [];
     if (rawSubtasks is List) {
-      subtaskList = rawSubtasks
-          .map((item) => Subtask.fromJson(item as Map<String, dynamic>))
-          .toList();
+      final indexedSubtasks = rawSubtasks
+          .asMap()
+          .entries
+          .map((entry) => MapEntry(entry.key, Subtask.fromJson(entry.value as Map<String, dynamic>)))
+          .toList()
+        ..sort((a, b) => (a.value.order ?? a.key).compareTo(b.value.order ?? b.key));
+      subtaskList = indexedSubtasks.map((entry) => entry.value).toList();
     }
 
     var rawTags = json['tags'];
@@ -119,6 +125,7 @@ class Task {
       reminderDate: json['reminderDate'] != null
           ? DateTime.tryParse(json['reminderDate'].toString())
           : null,
+      lastMinuteReminderMinutes: (json['lastMinuteReminderMinutes'] as num?)?.toInt(),
       folder: json['folder'] as String?,
       tags: tagList,
       subtasks: subtaskList,
@@ -141,6 +148,7 @@ class Task {
       'priority': priority.value,
       'dueDate': dueDate?.toIso8601String(),
       'reminderDate': reminderDate?.toIso8601String(),
+      'lastMinuteReminderMinutes': lastMinuteReminderMinutes,
       'folder': folder,
       'tags': tags,
       'subtasks': subtasks.map((s) => s.toJson()).toList(),
@@ -158,6 +166,10 @@ class Task {
     TaskPriority? priority,
     DateTime? dueDate,
     DateTime? reminderDate,
+    int? lastMinuteReminderMinutes,
+    bool clearDueDate = false,
+    bool clearReminderDate = false,
+    bool clearLastMinuteReminder = false,
     String? folder,
     List<String>? tags,
     List<Subtask>? subtasks,
@@ -171,8 +183,9 @@ class Task {
       description: description ?? this.description,
       status: status ?? this.status,
       priority: priority ?? this.priority,
-      dueDate: dueDate ?? this.dueDate,
-      reminderDate: reminderDate ?? this.reminderDate,
+      dueDate: clearDueDate ? null : (dueDate ?? this.dueDate),
+      reminderDate: clearReminderDate ? null : (reminderDate ?? this.reminderDate),
+      lastMinuteReminderMinutes: clearLastMinuteReminder ? null : (lastMinuteReminderMinutes ?? this.lastMinuteReminderMinutes),
       folder: folder ?? this.folder,
       tags: tags ?? this.tags,
       subtasks: subtasks ?? this.subtasks,

@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'web_reminder_stub.dart' if (dart.library.html) 'web_reminder_web.dart' as web;
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
@@ -91,5 +92,25 @@ class NotificationService {
     try {
       await _notificationsPlugin.cancel(id: id);
     } catch (_) {}
+  }
+
+  Future<bool> requestWebPermission() => web.requestPermission();
+
+  void scheduleTaskReminders({
+    required String taskId,
+    required String title,
+    DateTime? reminderDate,
+    DateTime? dueDate,
+    int? lastMinuteReminderMinutes,
+  }) {
+    web.cancel('$taskId-reminder');
+    web.cancel('$taskId-last-minute');
+    if (reminderDate != null) {
+      web.schedule('$taskId-reminder', 'Recordatorio: $title', 'Tienes un recordatorio pendiente.', reminderDate);
+    }
+    if (dueDate != null && lastMinuteReminderMinutes != null) {
+      final alertAt = dueDate.subtract(Duration(minutes: lastMinuteReminderMinutes));
+      web.schedule('$taskId-last-minute', 'Último aviso: $title', 'La fecha límite se acerca.', alertAt);
+    }
   }
 }

@@ -73,6 +73,7 @@ class TaskRepository {
     TaskPriority priority = TaskPriority.medium,
     DateTime? dueDate,
     DateTime? reminderDate,
+    int? lastMinuteReminderMinutes,
     String? folder,
     List<String> tags = const [],
   }) async {
@@ -87,6 +88,7 @@ class TaskRepository {
       priority: priority,
       dueDate: dueDate,
       reminderDate: reminderDate,
+      lastMinuteReminderMinutes: lastMinuteReminderMinutes,
       folder: folder,
       tags: tags,
       subtasks: const [],
@@ -106,12 +108,9 @@ class TaskRepository {
     if (description != null && description.isNotEmpty) {
       payload['description'] = description;
     }
-    if (dueDate != null) {
-      payload['dueDate'] = dueDate.toUtc().toIso8601String();
-    }
-    if (reminderDate != null) {
-      payload['reminderDate'] = reminderDate.toUtc().toIso8601String();
-    }
+    payload['dueDate'] = dueDate?.toUtc().toIso8601String();
+    payload['reminderDate'] = reminderDate?.toUtc().toIso8601String();
+    payload['lastMinuteReminderMinutes'] = lastMinuteReminderMinutes;
     if (folder != null && folder.isNotEmpty) {
       payload['folder'] = folder;
     }
@@ -139,6 +138,7 @@ class TaskRepository {
     TaskPriority? priority,
     DateTime? dueDate,
     DateTime? reminderDate,
+    int? lastMinuteReminderMinutes,
     String? folder,
     List<String>? tags,
   }) async {
@@ -149,7 +149,11 @@ class TaskRepository {
       status: status,
       priority: priority,
       dueDate: dueDate,
+      clearDueDate: dueDate == null,
       reminderDate: reminderDate,
+      lastMinuteReminderMinutes: lastMinuteReminderMinutes,
+      clearReminderDate: reminderDate == null,
+      clearLastMinuteReminder: lastMinuteReminderMinutes == null,
       folder: folder,
       tags: tags,
       updatedAt: DateTime.now(),
@@ -164,12 +168,9 @@ class TaskRepository {
     if (description != null) payload['description'] = description;
     if (status != null) payload['status'] = status.value;
     if (priority != null) payload['priority'] = priority.value;
-    if (dueDate != null) {
-      payload['dueDate'] = dueDate.toUtc().toIso8601String();
-    }
-    if (reminderDate != null) {
-      payload['reminderDate'] = reminderDate.toUtc().toIso8601String();
-    }
+    payload['dueDate'] = dueDate?.toUtc().toIso8601String();
+    payload['reminderDate'] = reminderDate?.toUtc().toIso8601String();
+    payload['lastMinuteReminderMinutes'] = lastMinuteReminderMinutes;
     if (folder != null) payload['folder'] = folder;
     if (tags != null) payload['tags'] = tags;
 
@@ -347,6 +348,14 @@ class TaskRepository {
     });
 
     _syncService.syncPending().ignore();
+  }
+
+  Future<Task> reorderSubtasks(String taskId, List<Subtask> subtasks) async {
+    final current = _localStorage.getTask(taskId);
+    if (current != null) await _localStorage.saveTask(current.copyWith(subtasks: subtasks));
+    final updated = await _apiService.reorderSubtasks(taskId, subtasks.map((s) => s.id).toList());
+    await _localStorage.saveTask(updated);
+    return updated;
   }
 
   Future<Task> generateSubtasksWithAI(String taskId) async {

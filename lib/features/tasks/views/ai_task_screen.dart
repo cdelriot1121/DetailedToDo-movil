@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/notifications/notification_service.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/voice_input_widget.dart';
@@ -38,8 +39,16 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
     });
 
     try {
+      await ref.read(notificationServiceProvider).requestWebPermission();
       final repository = ref.read(taskRepositoryProvider);
       final createdTask = await repository.createTaskWithAI(text);
+      ref.read(notificationServiceProvider).scheduleTaskReminders(
+        taskId: createdTask.id,
+        title: createdTask.title,
+        reminderDate: createdTask.reminderDate,
+        dueDate: createdTask.dueDate,
+        lastMinuteReminderMinutes: createdTask.lastMinuteReminderMinutes,
+      );
 
       ref.read(tasksViewModelProvider.notifier).loadTasks();
 
