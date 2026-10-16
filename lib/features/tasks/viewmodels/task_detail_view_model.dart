@@ -73,6 +73,13 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
     try {
       final task = await _repository.getTask(taskId);
       state = state.copyWith(isLoading: false, task: task);
+      _notificationService.scheduleTaskReminders(
+        taskId: task.id,
+        title: task.title,
+        reminderDate: task.isCompleted ? null : task.reminderDate,
+        dueDate: task.isCompleted ? null : task.dueDate,
+        lastMinuteReminderMinutes: task.isCompleted ? null : task.lastMinuteReminderMinutes,
+      );
 
       if (task.subtasksGenerationStatus == 'PENDING') {
         _startPolling();
@@ -131,12 +138,26 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
         : TaskStatus.completed;
 
     state = state.copyWith(task: current.copyWith(status: nextStatus));
+    _notificationService.scheduleTaskReminders(
+      taskId: current.id,
+      title: current.title,
+      reminderDate: nextStatus == TaskStatus.completed ? null : current.reminderDate,
+      dueDate: nextStatus == TaskStatus.completed ? null : current.dueDate,
+      lastMinuteReminderMinutes: nextStatus == TaskStatus.completed ? null : current.lastMinuteReminderMinutes,
+    );
 
     try {
       final updated = await _repository.updateStatus(taskId, nextStatus);
       state = state.copyWith(task: updated);
     } catch (_) {
       state = state.copyWith(task: current);
+      _notificationService.scheduleTaskReminders(
+        taskId: current.id,
+        title: current.title,
+        reminderDate: current.reminderDate,
+        dueDate: current.dueDate,
+        lastMinuteReminderMinutes: current.lastMinuteReminderMinutes,
+      );
     }
   }
 
@@ -194,6 +215,21 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
       return true;
     } catch (_) {
       return false;
+    }
+  }
+
+  Future<void> reorderSubtasks(int oldIndex, int newIndex) async {
+    final current = state.task;
+    if (current == null) return;
+    final reordered = List.of(current.subtasks);
+    final item = reordered.removeAt(oldIndex);
+    reordered.insert(newIndex, item);
+    state = state.copyWith(task: current.copyWith(subtasks: reordered));
+    try {
+      final updated = await _repository.reorderSubtasks(taskId, reordered);
+      state = state.copyWith(task: updated);
+    } catch (_) {
+      state = state.copyWith(task: current, errorMessage: 'No se pudo guardar el orden de las subtareas.');
     }
   }
 

@@ -8,6 +8,7 @@ import '../data/home_api_service.dart';
 
 class HomeState {
   final bool isLoading;
+  final bool hasLoadedOnce;
   final List<Task> pendingTasks;
   final List<Event> upcomingEvents;
   final int pendingTasksCount;
@@ -19,6 +20,7 @@ class HomeState {
 
   const HomeState({
     this.isLoading = true,
+    this.hasLoadedOnce = false,
     this.pendingTasks = const [],
     this.upcomingEvents = const [],
     this.pendingTasksCount = 0,
@@ -31,6 +33,7 @@ class HomeState {
 
   HomeState copyWith({
     bool? isLoading,
+    bool? hasLoadedOnce,
     List<Task>? pendingTasks,
     List<Event>? upcomingEvents,
     int? pendingTasksCount,
@@ -43,6 +46,7 @@ class HomeState {
   }) {
     return HomeState(
       isLoading: isLoading ?? this.isLoading,
+      hasLoadedOnce: hasLoadedOnce ?? this.hasLoadedOnce,
       pendingTasks: pendingTasks ?? this.pendingTasks,
       upcomingEvents: upcomingEvents ?? this.upcomingEvents,
       pendingTasksCount: pendingTasksCount ?? this.pendingTasksCount,
@@ -72,7 +76,10 @@ class HomeViewModel extends Notifier<HomeState> {
   }
 
   Future<void> loadHomeData() async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+      isLoading: !state.hasLoadedOnce,
+      clearError: true,
+    );
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
@@ -111,11 +118,6 @@ class HomeViewModel extends Notifier<HomeState> {
         state.upcomingEvents;
     upcomingEvents.sort((a, b) => a.startDate.compareTo(b.startDate));
 
-    final todayTasks = pending.where((task) {
-      if (task.dueDate == null) return false;
-      return !task.dueDate!.isBefore(startOfDay) &&
-          task.dueDate!.isBefore(endOfDay);
-    }).length;
     final reminders = tasks == null
         ? state.remindersCount
         : tasks
@@ -137,12 +139,41 @@ class HomeViewModel extends Notifier<HomeState> {
       isLoading: false,
       pendingTasks: pending.take(5).toList(),
       upcomingEvents: upcomingEvents.take(3).toList(),
-      pendingTasksCount: todayTasks > 0 ? todayTasks : pending.length,
+      pendingTasksCount: pending.length,
       upcomingEventsCount: todayEvents,
       remindersCount: reminders,
+      hasLoadedOnce: true,
       errorMessage: errorMessage,
     );
     unawaited(_loadAISummary(pending));
+  }
+
+  Future<bool> toggleTaskStatus(Task task) async {
+    final nextStatus = task.status == TaskStatus.completed
+        ? TaskStatus.pending
+        : TaskStatus.completed;
+    final previousState = state;
+    final updatedTasks = state.pendingTasks
+        .map((item) => item.id == task.id ? item.copyWith(status: nextStatus) : item)
+        .toList();
+    state = state.copyWith(
+      pendingTasks: updatedTasks,
+      pendingTasksCount: (state.pendingTasksCount +
+              (nextStatus == TaskStatus.completed ? -1 : 1))
+          .clamp(0, 1 << 30)
+          .toInt(),
+    );
+
+    try {
+      await _taskRepository.updateStatus(task.id, nextStatus);
+      await loadHomeData();
+      return true;
+    } catch (_) {
+      state = previousState.copyWith(
+        errorMessage: 'No se pudo actualizar el estado de la tarea.',
+      );
+      return false;
+    }
   }
 
   Future<void> _loadAISummary(List<Task> pendingTasks) async {

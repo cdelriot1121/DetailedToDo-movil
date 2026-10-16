@@ -21,6 +21,7 @@ class TaskDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
+  bool _isReorderingSubtasks = false;
   final _subtaskTextController = TextEditingController();
   final _subtaskDescriptionController = TextEditingController();
 
@@ -531,21 +532,19 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  TextButton.icon(
-                    onPressed: _showAddSubtaskDialog,
-                    icon: Icon(
-                      PhosphorIconsRegular.plus,
-                      size: 16,
-                      color: context.palette.accent,
-                    ),
-                    label: Text(
-                      'Agregar',
-                      style: TextStyle(
-                        color: context.palette.accent,
-                        fontSize: 13,
+                  Row(children: [
+                    if (task.subtasks.length > 1)
+                      TextButton.icon(
+                        onPressed: () => setState(() => _isReorderingSubtasks = !_isReorderingSubtasks),
+                        icon: Icon(_isReorderingSubtasks ? PhosphorIconsRegular.check : PhosphorIconsRegular.list, size: 16, color: context.palette.accent),
+                        label: Text(_isReorderingSubtasks ? 'Listo' : 'Ordenar', style: TextStyle(color: context.palette.accent, fontSize: 13)),
                       ),
+                    TextButton.icon(
+                      onPressed: _showAddSubtaskDialog,
+                      icon: Icon(PhosphorIconsRegular.plus, size: 16, color: context.palette.accent),
+                      label: Text('Agregar', style: TextStyle(color: context.palette.accent, fontSize: 13)),
                     ),
-                  ),
+                  ]),
                 ],
               ),
               const SizedBox(height: 8),
@@ -574,8 +573,16 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   ),
                 ),
               ] else ...[
-                ...task.subtasks.map(
-                  (subtask) => Padding(
+                ReorderableListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  buildDefaultDragHandles: false,
+                  itemCount: task.subtasks.length,
+                  onReorderItem: (oldIndex, newIndex) => ref.read(taskDetailViewModelProvider(widget.taskId).notifier).reorderSubtasks(oldIndex, newIndex),
+                  itemBuilder: (context, index) {
+                    final subtask = task.subtasks[index];
+                    return Padding(
+                    key: ValueKey(subtask.id),
                     padding: const EdgeInsets.only(bottom: 8),
                     child: AppCard(
                       padding: const EdgeInsets.symmetric(
@@ -655,7 +662,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                               ],
                             ),
                           ),
-                          IconButton(
+                          if (_isReorderingSubtasks)
+                            ReorderableDragStartListener(index: index, child: Padding(padding: const EdgeInsets.all(8), child: Icon(PhosphorIconsRegular.dotsSixVertical, size: 20, color: context.palette.secondaryText)))
+                          else IconButton(
                             icon: Icon(
                               PhosphorIconsRegular.trash,
                               size: 16,
@@ -674,7 +683,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                         ],
                       ),
                     ),
-                  ),
+                    );
+                  },
                 ),
               ],
             ],

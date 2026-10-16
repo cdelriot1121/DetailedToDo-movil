@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/notifications/notification_service.dart';
 import '../../../core/network/api_exception.dart';
 import '../data/task_repository.dart';
 import '../models/task.dart';
@@ -94,6 +95,15 @@ class TasksViewModel extends Notifier<TasksState> {
         folder: state.selectedFolder,
         tag: state.selectedTag,
       );
+      for (final task in tasks) {
+        ref.read(notificationServiceProvider).scheduleTaskReminders(
+          taskId: task.id,
+          title: task.title,
+          reminderDate: task.isCompleted ? null : task.reminderDate,
+          dueDate: task.isCompleted ? null : task.dueDate,
+          lastMinuteReminderMinutes: task.isCompleted ? null : task.lastMinuteReminderMinutes,
+        );
+      }
 
       if (tasks.isEmpty) {
         state = state.copyWith(
@@ -182,6 +192,7 @@ class TasksViewModel extends Notifier<TasksState> {
 
   Future<bool> deleteTask(String id) async {
     try {
+      ref.read(notificationServiceProvider).scheduleTaskReminders(taskId: id, title: '');
       await _repository.deleteTask(id);
       state = state.copyWith(
         tasks: state.tasks.where((t) => t.id != id).toList(),

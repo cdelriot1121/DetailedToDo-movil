@@ -7,7 +7,6 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../auth/viewmodels/auth_view_model.dart';
 import '../../tasks/models/task.dart';
-import '../../tasks/viewmodels/tasks_view_model.dart';
 import '../viewmodels/home_view_model.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -266,12 +265,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 const SizedBox(height: 28),
 
-                // Tareas de hoy Section Header
+                // Pending tasks shown on the home dashboard.
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Tareas de hoy',
+                      'Tareas pendientes',
                       style: TextStyle(
                         color: context.palette.primaryText,
                         fontSize: 18,
@@ -336,7 +335,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                     child: Center(
                       child: Text(
-                        'No hay tareas pendientes para hoy',
+                            'No tienes tareas pendientes.',
                         style: TextStyle(
                           color: context.palette.secondaryText,
                           fontSize: 14,
@@ -611,10 +610,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () {
-                    ref
-                        .read(tasksViewModelProvider.notifier)
+                  onTap: () async {
+                    final updated = await ref
+                        .read(homeViewModelProvider.notifier)
                         .toggleTaskStatus(task);
+                    if (!updated && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No se pudo actualizar la tarea. Inténtalo de nuevo.'),
+                        ),
+                      );
+                    }
                   },
                   child: Container(
                     width: 24,

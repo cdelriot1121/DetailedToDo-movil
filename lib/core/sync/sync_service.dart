@@ -23,6 +23,7 @@ class SyncService {
   final EventApiService _eventApi;
 
   bool _isSyncing = false;
+  Future<void>? _syncInFlight;
 
   SyncService(
     this._storage,
@@ -33,8 +34,18 @@ class SyncService {
 
   bool get isSyncing => _isSyncing;
 
-  Future<void> syncPending() async {
-    if (_isSyncing) return;
+  Future<void> syncPending() {
+    final inFlight = _syncInFlight;
+    if (inFlight != null) return inFlight;
+    late final Future<void> run;
+    run = _performSync().whenComplete(() {
+      if (identical(_syncInFlight, run)) _syncInFlight = null;
+    });
+    _syncInFlight = run;
+    return run;
+  }
+
+  Future<void> _performSync() async {
     _isSyncing = true;
 
     try {

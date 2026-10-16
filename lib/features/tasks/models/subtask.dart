@@ -4,6 +4,7 @@ class Subtask {
   final String? description;
   final bool completed;
   final DateTime? createdAt;
+  final int? order;
 
   const Subtask({
     required this.id,
@@ -11,6 +12,7 @@ class Subtask {
     this.description,
     this.completed = false,
     this.createdAt,
+    this.order,
   });
 
   factory Subtask.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Subtask {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
+      order: (json['order'] as num?)?.toInt(),
     );
   }
 
@@ -33,6 +36,7 @@ class Subtask {
       'description': description,
       'status': completed ? 'COMPLETED' : 'PENDING',
       'createdAt': createdAt?.toIso8601String(),
+      'order': order,
     };
   }
 
@@ -42,6 +46,7 @@ class Subtask {
     String? description,
     bool? completed,
     DateTime? createdAt,
+    int? order,
   }) {
     return Subtask(
       id: id ?? this.id,
@@ -49,6 +54,7 @@ class Subtask {
       description: description ?? this.description,
       completed: completed ?? this.completed,
       createdAt: createdAt ?? this.createdAt,
+      order: order ?? this.order,
     );
   }
 }

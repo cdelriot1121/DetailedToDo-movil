@@ -5,6 +5,7 @@ import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/notifications/notification_service.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../data/task_repository.dart';
@@ -31,6 +32,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   late bool _isCompleted;
   DateTime? _dueDate;
   DateTime? _reminderDate;
+  int? _lastMinuteReminderMinutes;
   bool _isLoading = false;
 
   @override
@@ -47,6 +49,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     _isCompleted = task?.status == TaskStatus.completed;
     _dueDate = task?.dueDate;
     _reminderDate = task?.reminderDate;
+    _lastMinuteReminderMinutes = task?.lastMinuteReminderMinutes;
   }
 
   @override
@@ -111,6 +114,16 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_lastMinuteReminderMinutes != null && _dueDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Agrega una fecha límite para usar el aviso de última hora.')),
+      );
+      return;
+    }
+
+    if (_reminderDate != null || (_dueDate != null && _lastMinuteReminderMinutes != null)) {
+      await ref.read(notificationServiceProvider).requestWebPermission();
+    }
 
     setState(() => _isLoading = true);
 
@@ -122,8 +135,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         .toList();
 
     try {
+      late final String savedTaskId;
       if (widget.taskToEdit != null) {
-        await repository.updateTask(
+        final saved = await repository.updateTask(
           widget.taskToEdit!.id,
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim().isEmpty
@@ -133,13 +147,15 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
           priority: _priority,
           dueDate: _dueDate,
           reminderDate: _reminderDate,
+          lastMinuteReminderMinutes: _lastMinuteReminderMinutes,
           folder: _folderController.text.trim().isEmpty
               ? null
               : _folderController.text.trim(),
           tags: tags,
         );
+        savedTaskId = saved.id;
       } else {
-        await repository.createTask(
+        final saved = await repository.createTask(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim().isEmpty
               ? null
@@ -147,12 +163,22 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
           priority: _priority,
           dueDate: _dueDate,
           reminderDate: _reminderDate,
+          lastMinuteReminderMinutes: _lastMinuteReminderMinutes,
           folder: _folderController.text.trim().isEmpty
               ? null
               : _folderController.text.trim(),
           tags: tags,
         );
+        savedTaskId = saved.id;
       }
+
+      ref.read(notificationServiceProvider).scheduleTaskReminders(
+        taskId: savedTaskId,
+        title: _titleController.text.trim(),
+        reminderDate: _isCompleted ? null : _reminderDate,
+        dueDate: _isCompleted ? null : _dueDate,
+        lastMinuteReminderMinutes: _isCompleted ? null : _lastMinuteReminderMinutes,
+      );
 
       ref.read(tasksViewModelProvider.notifier).loadTasks();
 
@@ -303,6 +329,30 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                   onClear: _reminderDate != null
                       ? () => setState(() => _reminderDate = null)
                       : null,
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: context.palette.inputBackground,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: context.palette.border),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int?>(
+                      value: _lastMinuteReminderMinutes,
+                      isExpanded: true,
+                      hint: const Text('Sin aviso de última hora'),
+                      items: const [
+                        DropdownMenuItem(value: null, child: Text('Sin aviso de última hora')),
+                        DropdownMenuItem(value: 180, child: Text('3 horas antes de la fecha límite')),
+                        DropdownMenuItem(value: 60, child: Text('1 hora antes de la fecha límite')),
+                        DropdownMenuItem(value: 30, child: Text('30 minutos antes de la fecha límite')),
+                        DropdownMenuItem(value: 15, child: Text('15 minutos antes de la fecha límite')),
+                      ],
+                      onChanged: (value) => setState(() => _lastMinuteReminderMinutes = value),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
 
