@@ -31,8 +31,10 @@ class TaskRepository {
     String? folder,
     String? tag,
   }) async {
-    // Try online fetch first and update cache
+    // Flush local mutations before fetching so a stale server response cannot
+    // overwrite a status change made moments ago.
     try {
+      await _syncService.syncPending();
       final remoteTasks = await _apiService.getTasks(
         status: status,
         priority: priority,
@@ -40,8 +42,6 @@ class TaskRepository {
         tag: tag,
       );
       await _localStorage.saveTasks(remoteTasks);
-      // Trigger background sync for any offline changes
-      _syncService.syncPending().ignore();
       return remoteTasks;
     } catch (_) {
       // Fallback to local cache if offline or server unreachable
@@ -183,7 +183,7 @@ class TaskRepository {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
 
-    _syncService.syncPending().ignore();
+    await _syncService.syncPending();
 
     return updatedTask;
   }
@@ -206,7 +206,7 @@ class TaskRepository {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
 
-    _syncService.syncPending().ignore();
+    await _syncService.syncPending();
 
     final result = _localStorage.getTask(id);
     if (result != null) return result;
