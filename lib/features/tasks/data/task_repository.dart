@@ -108,8 +108,10 @@ class TaskRepository {
     if (description != null && description.isNotEmpty) {
       payload['description'] = description;
     }
-    payload['dueDate'] = dueDate?.toUtc().toIso8601String();
-    payload['reminderDate'] = reminderDate?.toUtc().toIso8601String();
+    // The API stores these as LocalDateTime, so send the selected wall-clock
+    // time without converting it to UTC or attaching a timezone.
+    payload['dueDate'] = dueDate?.toIso8601String();
+    payload['reminderDate'] = reminderDate?.toIso8601String();
     payload['lastMinuteReminderMinutes'] = lastMinuteReminderMinutes;
     if (folder != null && folder.isNotEmpty) {
       payload['folder'] = folder;
@@ -168,8 +170,9 @@ class TaskRepository {
     if (description != null) payload['description'] = description;
     if (status != null) payload['status'] = status.value;
     if (priority != null) payload['priority'] = priority.value;
-    payload['dueDate'] = dueDate?.toUtc().toIso8601String();
-    payload['reminderDate'] = reminderDate?.toUtc().toIso8601String();
+    // Keep task dates consistent with the backend's LocalDateTime fields.
+    payload['dueDate'] = dueDate?.toIso8601String();
+    payload['reminderDate'] = reminderDate?.toIso8601String();
     payload['lastMinuteReminderMinutes'] = lastMinuteReminderMinutes;
     if (folder != null) payload['folder'] = folder;
     if (tags != null) payload['tags'] = tags;

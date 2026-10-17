@@ -79,7 +79,7 @@ class SubscriptionViewModel extends Notifier<SubscriptionState> {
           return true;
         } else {
           state = state.copyWith(
-            errorMessage: 'No se pudo abrir el navegador para Mercado Pago.',
+            errorMessage: 'No se pudo abrir el navegador para continuar con la suscripción.',
           );
           return false;
         }
