@@ -96,7 +96,7 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
                     Text(
                       isPlus
                           ? 'Membresía activa'
-                          : 'Potencia tu productividad diaria con IA',
+                          : 'Más solicitudes diarias para tus tareas',
                       style: TextStyle(
                         color: palette.secondaryText,
                         fontSize: 13,
@@ -118,7 +118,7 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
                 _featureItem(
                   palette,
                   PhosphorIconsRegular.lightning,
-                  '15 solicitudes diarias de IA (en vez de 5)',
+                  '10 solicitudes diarias de IA (en vez de 3)',
                 ),
                 const SizedBox(height: 12),
                 _featureItem(
@@ -130,7 +130,7 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
                 _featureItem(
                   palette,
                   PhosphorIconsRegular.shieldCheck,
-                  'Suscripción mensual recurrente vía Mercado Pago',
+                  'Suscripción mensual recurrente',
                 ),
                 const SizedBox(height: 12),
                 _featureItem(
@@ -258,9 +258,9 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
               const SizedBox(height: 10),
             ],
             AppButton(
-              label: subState.isProcessing
-                  ? 'Conectando con Mercado Pago...'
-                  : 'Suscribirme con Mercado Pago',
+                label: subState.isProcessing
+                  ? 'Procesando suscripción...'
+                  : 'Suscribirme al plan Plus',
               icon: PhosphorIconsRegular.creditCard,
               isLoading: subState.isProcessing,
               onPressed: () async {
@@ -274,7 +274,7 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
                   messenger.showSnackBar(
                     const SnackBar(
                       content: Text(
-                        'Redirigiendo a Mercado Pago para confirmar tu suscripción...',
+                        'Redirigiendo para confirmar tu suscripción...',
                       ),
                     ),
                   );

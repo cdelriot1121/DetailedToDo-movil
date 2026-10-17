@@ -333,7 +333,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ),
                         Text(
-                          '${quota?.used ?? 0} de ${quota?.limit ?? (isPlus ? 15 : 5)} usadas',
+                          '${quota?.used ?? 0} de ${quota?.limit ?? (isPlus ? 10 : 3)} usadas',
                           style: TextStyle(
                             color: palette.primaryText,
                             fontSize: 12.5,
@@ -356,7 +356,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Te quedan ${quota?.remaining ?? (isPlus ? 15 : 5)} solicitudes hoy.',
+                      'Te quedan ${quota?.remaining ?? (isPlus ? 10 : 3)} solicitudes hoy.',
                       style: TextStyle(
                         color: palette.secondaryText,
                         fontSize: 12,
@@ -427,7 +427,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              'Triplica tus consultas de IA a 15 por día.',
+                              'Aumenta tus consultas de IA a 10 por día.',
                               style: TextStyle(
                                 color: palette.secondaryText,
                                 fontSize: 12,
