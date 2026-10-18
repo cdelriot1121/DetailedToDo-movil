@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:async';
 import '../../../app/theme.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_text_field.dart';
+import 'google_g_mark.dart';
 import '../viewmodels/auth_view_model.dart';
+import 'google_sign_in_button_stub.dart'
+    if (dart.library.html) 'google_sign_in_button_web.dart' as google_button;
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -14,12 +20,47 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _googleEvents;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      _googleEvents = GoogleSignIn.instance.authenticationEvents.listen((event) {
+        if (event is GoogleSignInAuthenticationEventSignIn) {
+          final idToken = event.user.authentication.idToken;
+          if (idToken != null) _completeGoogleSignIn(idToken);
+        }
+      });
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (kIsWeb) return; // En web el botón oficial de GIS inicia el flujo.
+    try {
+      final account = await GoogleSignIn.instance.authenticate();
+      final idToken = account.authentication.idToken;
+      if (idToken == null) throw StateError('Google no devolvió un ID token.');
+      await _completeGoogleSignIn(idToken);
+    } catch (_) {
+      if (mounted) {
+        ref.read(authViewModelProvider.notifier).clearError();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo iniciar sesión con Google.')));
+      }
+    }
+  }
+
+  Future<void> _completeGoogleSignIn(String idToken) async {
+    final success = await ref.read(authViewModelProvider.notifier).loginWithGoogle(idToken);
+    if (success && mounted) context.go('/home');
+  }
+
+  @override
   void dispose() {
+    _googleEvents?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -281,30 +322,90 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 20),
 
                     // Boton: Continuar con Google
-                    SizedBox(
-                      height: 52,
-                      child: OutlinedButton.icon(
+                    if (kIsWeb)
+                      Center(
+                        child: google_button.buildGoogleSignInButton(
+                          isDark: context.palette.isDark,
+                          onPressed: _signInWithGoogle,
+                        ),
+                      )
+                    else
+                      Container(
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: context.palette.surface,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: context.palette.border),
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.palette.accent.withValues(alpha: 0.08),
+                            blurRadius: 18,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: context.palette.surface,
                           foregroundColor: context.palette.primaryText,
-                          side: BorderSide(
-                              color: context.palette.border, width: 1),
+                          side: BorderSide.none,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.g_mobiledata_rounded,
-                          size: 24,
-                          color: context.palette.primaryText,
-                        ),
-                        label: const Text(
-                          'Continuar con Google',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        onPressed: authState.isLoading ? null : _signInWithGoogle,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: context.palette.accentContainer,
+                                borderRadius: BorderRadius.circular(13),
+                              ),
+                              child: const Center(child: GoogleGMark(size: 23)),
+                            ),
+                            const SizedBox(width: 13),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Continuar con Google',
+                                    style: TextStyle(
+                                      color: context.palette.primaryText,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Acceso rápido y seguro',
+                                    style: TextStyle(
+                                      color: context.palette.secondaryText,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (authState.isLoading)
+                              SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: context.palette.accent,
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 19,
+                                color: context.palette.secondaryText,
+                              ),
+                          ],
                         ),
                       ),
                     ),

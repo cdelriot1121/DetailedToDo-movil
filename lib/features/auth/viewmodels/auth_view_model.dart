@@ -111,6 +111,26 @@ class AuthViewModel extends Notifier<AuthState> {
     }
   }
 
+  Future<bool> loginWithGoogle(String idToken) async {
+    state = state.copyWith(status: AuthStatus.loading, clearError: true);
+    try {
+      final user = await _repository.loginWithGoogle(idToken);
+      state = state.copyWith(status: AuthStatus.authenticated, user: user, clearError: true);
+      ref.invalidate(tasksViewModelProvider);
+      ref.invalidate(notesViewModelProvider);
+      ref.invalidate(eventsViewModelProvider);
+      ref.invalidate(homeViewModelProvider);
+      ref.invalidate(profileViewModelProvider);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(status: AuthStatus.error, errorMessage: 'No se pudo iniciar sesión con Google.');
+      return false;
+    }
+  }
+
   Future<bool> register(String name, String email, String password) async {
     state = state.copyWith(status: AuthStatus.loading, clearError: true);
     try {

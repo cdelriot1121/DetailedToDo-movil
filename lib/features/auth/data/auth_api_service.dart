@@ -14,6 +14,15 @@ class AuthApiService {
 
   AuthApiService(this._dio);
 
+  Future<Map<String, dynamic>> loginWithGoogle(String idToken) async {
+    try {
+      final response = await _dio.post('/auth/google', data: {'idToken': idToken});
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,

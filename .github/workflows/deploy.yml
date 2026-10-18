@@ -42,9 +42,32 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Web Application
+      - name: Configure Google Sign-In client ID
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
         run: |
-          flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define=API_BASE_URL="${{ secrets.API_BASE_URL }}"
+          if [ -z "$GOOGLE_WEB_CLIENT_ID" ]; then
+            echo "::error::Define GOOGLE_WEB_CLIENT_ID in repository Actions variables."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          index_file = Path("web/index.html")
+          html = index_file.read_text()
+          marker = "REPLACE_WITH_GOOGLE_WEB_CLIENT_ID"
+          if marker not in html:
+              raise SystemExit(f"Missing {marker} in {index_file}")
+          index_file.write_text(html.replace(marker, os.environ["GOOGLE_WEB_CLIENT_ID"]))
+          PY
+
+      - name: Build Web Application
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+        run: |
+          flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define="API_BASE_URL=$API_BASE_URL" --dart-define="GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
