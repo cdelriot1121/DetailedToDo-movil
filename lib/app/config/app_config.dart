@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class AppConfig {
   static const String _envUrl = String.fromEnvironment('API_BASE_URL');
+  static const String googleWebClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
 
   static String get apiBaseUrl {
     String base;

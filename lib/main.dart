@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'app/app.dart';
+import 'app/config/app_config.dart';
 import 'app/theme.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/storage/local_storage_service.dart';
@@ -10,6 +13,12 @@ import 'core/storage/secure_storage_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final googleClientId = AppConfig.googleWebClientId.trim();
+  await GoogleSignIn.instance.initialize(
+    clientId: kIsWeb && googleClientId.isNotEmpty ? googleClientId : null,
+    serverClientId: !kIsWeb && googleClientId.isNotEmpty ? googleClientId : null,
+  );
 
   // Initialize Spanish date formatting for intl
   await initializeDateFormatting('es', null);
