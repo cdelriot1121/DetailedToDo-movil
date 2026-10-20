@@ -10,6 +10,13 @@ import '../../../core/widgets/loading_view.dart';
 import '../models/note.dart';
 import '../viewmodels/notes_view_model.dart';
 
+String _notePreview(String markdown) => markdown
+    .replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '')
+    .replaceAll(RegExp(r'[*_`>#]'), '')
+    .replaceAll(RegExp(r'^\s*[-+]\s+', multiLine: true), '• ')
+    .replaceAll(RegExp(r'\n+'), ' ')
+    .trim();
+
 class NotesScreen extends ConsumerStatefulWidget {
   const NotesScreen({super.key});
 
@@ -469,7 +476,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 // Content preview
                 if (note.content.isNotEmpty)
                   Text(
-                    note.content,
+                    _notePreview(note.content),
                     style: TextStyle(
                       color: context.palette.secondaryText,
                       fontSize: 13,
@@ -616,7 +623,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           if (note.content.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
-              note.content,
+              _notePreview(note.content),
               style: TextStyle(
                 color: context.palette.secondaryText,
                 fontSize: 13,

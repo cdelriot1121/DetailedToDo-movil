@@ -8,6 +8,7 @@ import '../../../core/widgets/loading_view.dart';
 import '../data/note_repository.dart';
 import '../models/note.dart';
 import '../viewmodels/notes_view_model.dart';
+import 'markdown_note_content.dart';
 
 class NoteDetailScreen extends ConsumerStatefulWidget {
   final String noteId;
@@ -202,15 +203,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
               const Divider(),
               const SizedBox(height: 12),
 
-              // Content Document Style
-              Text(
-                note.content,
-                style: TextStyle(
-                  color: context.palette.primaryText,
-                  fontSize: 15,
-                  height: 1.6,
-                ),
-              ),
+              MarkdownNoteContent(data: note.content),
 
               if (note.tags.isNotEmpty) ...[
                 const SizedBox(height: 28),

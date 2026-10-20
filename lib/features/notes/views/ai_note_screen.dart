@@ -89,7 +89,7 @@ class _AINoteScreenState extends ConsumerState<AINoteScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'La IA organizará un título descriptivo, cuerpo estructurado, carpeta y etiquetas relevantes.',
+                'La IA preparará una nota desarrollada en Markdown, con secciones claras, carpeta y etiquetas relevantes.',
                 style: TextStyle(
                   color: context.palette.secondaryText,
                   fontSize: 14,

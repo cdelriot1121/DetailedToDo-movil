@@ -64,6 +64,9 @@ class NotesViewModel extends Notifier<NotesState> {
   }
 
   Future<void> loadNotes({bool isRefresh = false}) async {
+    // Keep optimistic notes created while this request is in flight. The server
+    // can answer before their queued create_note sync operation reaches it.
+    final noteIdsAtRequestStart = state.notes.map((note) => note.id).toSet();
     if (isRefresh) {
       state = state.copyWith(viewState: NotesViewState.refreshing, clearError: true);
     } else {
@@ -71,10 +74,18 @@ class NotesViewModel extends Notifier<NotesState> {
     }
 
     try {
-      final notes = await _repository.getNotes(
+      final fetchedNotes = await _repository.getNotes(
         folder: state.selectedFolder,
         tag: state.selectedTag,
       );
+      final fetchedIds = fetchedNotes.map((note) => note.id).toSet();
+      final createdDuringRequest = state.notes.where((note) {
+        return !noteIdsAtRequestStart.contains(note.id) &&
+            !fetchedIds.contains(note.id) &&
+            (state.selectedFolder == null || note.folder == state.selectedFolder) &&
+            (state.selectedTag == null || note.tags.contains(state.selectedTag));
+      });
+      final notes = [...createdDuringRequest, ...fetchedNotes];
 
       if (notes.isEmpty) {
         state = state.copyWith(
@@ -115,6 +126,7 @@ class NotesViewModel extends Notifier<NotesState> {
   Future<bool> createQuickNote({
     required String title,
     required String content,
+    String? folder,
     String? color,
     List<String> tags = const [],
   }) async {
@@ -122,17 +134,21 @@ class NotesViewModel extends Notifier<NotesState> {
       final newNote = await _repository.createNote(
         title: title,
         content: content,
+        folder: folder,
         color: color,
         tags: tags,
       );
-      state = state.copyWith(
-        notes: [newNote, ...state.notes],
-        viewState: NotesViewState.success,
-      );
+      final matchesCurrentFilters =
+          (state.selectedFolder == null || state.selectedFolder == newNote.folder) &&
+          (state.selectedTag == null || newNote.tags.contains(state.selectedTag));
+      if (matchesCurrentFilters) {
+        state = state.copyWith(
+          notes: [newNote, ...state.notes.where((note) => note.id != newNote.id)],
+          viewState: NotesViewState.success,
+        );
+      }
       return true;
     } catch (_) {
-      // Fallback reload
-      await loadNotes();
       return false;
     }
   }
