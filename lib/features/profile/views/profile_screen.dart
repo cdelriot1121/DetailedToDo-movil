@@ -245,7 +245,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ? PhosphorIconsFill.sparkle
                                     : PhosphorIconsRegular.sparkle,
                                 size: 18,
-                                color: palette.accent,
+                                color: palette.onAccentContainer,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -271,12 +271,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         ),
                                         decoration: BoxDecoration(
                                           color: palette.accentContainer,
-                                          borderRadius: BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                         ),
                                         child: Text(
                                           user?.subscriptionStatus ?? 'ACTIVO',
                                           style: TextStyle(
-                                            color: palette.accent,
+                                            color: palette.onAccentContainer,
                                             fontSize: 10,
                                             fontWeight: FontWeight.w700,
                                             letterSpacing: 0.3,
@@ -386,7 +388,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         child: Icon(
                           PhosphorIconsFill.sparkle,
                           size: 20,
-                          color: palette.accent,
+                          color: palette.onAccentContainer,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -417,7 +419,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   child: Text(
                                     '\$3.500/mes',
                                     style: TextStyle(
-                                      color: palette.accent,
+                                      color: palette.onAccentContainer,
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -460,10 +462,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   title: Text(
                     'Tema de la aplicación',
-                    style: TextStyle(
-                      color: palette.primaryText,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: palette.primaryText, fontSize: 14),
                   ),
                   subtitle: Text(
                     selectedTheme.label,

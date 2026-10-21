@@ -69,11 +69,17 @@ class AuthRepository {
     return user;
   }
 
-  Future<void> requestPasswordReset(String email) => _apiService.requestPasswordReset(email);
-  Future<void> resendRegistrationOtp(String email) => _apiService.resendRegistrationOtp(email);
+  Future<void> requestPasswordReset(String email) =>
+      _apiService.requestPasswordReset(email);
+  Future<void> resendRegistrationOtp(String email) =>
+      _apiService.resendRegistrationOtp(email);
 
   Future<void> resetPassword(String email, String code, String newPassword) =>
-      _apiService.resetPassword(email: email, code: code, newPassword: newPassword);
+      _apiService.resetPassword(
+        email: email,
+        code: code,
+        newPassword: newPassword,
+      );
 
   Future<User?> checkAuth() async {
     final token = await _storageService.getToken();
@@ -99,13 +105,21 @@ class AuthRepository {
         return cachedUser;
       }
       final email = await _storageService.getUserEmail() ?? '';
-      return User(id: 'offline_user', name: email.split('@').first, email: email);
+      return User(
+        id: 'offline_user',
+        name: email.split('@').first,
+        email: email,
+      );
     } catch (_) {
       if (cachedUser != null) {
         return cachedUser;
       }
       final email = await _storageService.getUserEmail() ?? '';
-      return User(id: 'offline_user', name: email.split('@').first, email: email);
+      return User(
+        id: 'offline_user',
+        name: email.split('@').first,
+        email: email,
+      );
     }
   }
 
@@ -118,7 +132,11 @@ class AuthRepository {
       final cached = _localStorage.getUser();
       if (cached != null) return cached;
       final email = await _storageService.getUserEmail() ?? '';
-      return User(id: 'offline_user', name: email.split('@').first, email: email);
+      return User(
+        id: 'offline_user',
+        name: email.split('@').first,
+        email: email,
+      );
     }
   }
 

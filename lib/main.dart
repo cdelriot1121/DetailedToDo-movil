@@ -15,10 +15,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final googleClientId = AppConfig.googleWebClientId.trim();
-  await GoogleSignIn.instance.initialize(
-    clientId: kIsWeb && googleClientId.isNotEmpty ? googleClientId : null,
-    serverClientId: !kIsWeb && googleClientId.isNotEmpty ? googleClientId : null,
-  );
+  if (!kIsWeb || googleClientId.isNotEmpty) {
+    await GoogleSignIn.instance.initialize(
+      clientId: kIsWeb ? googleClientId : null,
+      serverClientId: !kIsWeb ? googleClientId : null,
+    );
+  }
 
   // Initialize Spanish date formatting for intl
   await initializeDateFormatting('es', null);
