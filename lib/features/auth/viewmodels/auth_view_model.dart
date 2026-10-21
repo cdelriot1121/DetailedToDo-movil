@@ -8,13 +8,7 @@ import '../../tasks/viewmodels/tasks_view_model.dart';
 import '../data/auth_repository.dart';
 import '../models/user.dart';
 
-enum AuthStatus {
-  initial,
-  loading,
-  authenticated,
-  unauthenticated,
-  error,
-}
+enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
 class AuthState {
   final AuthStatus status;
@@ -27,7 +21,8 @@ class AuthState {
     this.errorMessage,
   });
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && user != null;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && user != null;
   bool get isLoading => status == AuthStatus.loading;
 
   AuthState copyWith({
@@ -44,10 +39,13 @@ class AuthState {
   }
 }
 
-final authViewModelProvider =
-    NotifierProvider<AuthViewModel, AuthState>(AuthViewModel.new);
+final authViewModelProvider = NotifierProvider<AuthViewModel, AuthState>(
+  AuthViewModel.new,
+);
 
 class AuthViewModel extends Notifier<AuthState> {
+  static const _authOperationTimeout = Duration(seconds: 20);
+
   AuthRepository get _repository => ref.read(authRepositoryProvider);
 
   @override
@@ -84,7 +82,9 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<bool> login(String email, String password) async {
     state = state.copyWith(status: AuthStatus.loading, clearError: true);
     try {
-      final user = await _repository.login(email.trim(), password);
+      final user = await _repository
+          .login(email.trim(), password)
+          .timeout(_authOperationTimeout);
       state = state.copyWith(
         status: AuthStatus.authenticated,
         user: user,
@@ -97,10 +97,7 @@ class AuthViewModel extends Notifier<AuthState> {
       ref.invalidate(profileViewModelProvider);
       return true;
     } on ApiException catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.error,
-        errorMessage: e.message,
-      );
+      state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
       return false;
     } catch (e) {
       state = state.copyWith(
@@ -114,8 +111,14 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<bool> loginWithGoogle(String idToken) async {
     state = state.copyWith(status: AuthStatus.loading, clearError: true);
     try {
-      final user = await _repository.loginWithGoogle(idToken);
-      state = state.copyWith(status: AuthStatus.authenticated, user: user, clearError: true);
+      final user = await _repository
+          .loginWithGoogle(idToken)
+          .timeout(_authOperationTimeout);
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        user: user,
+        clearError: true,
+      );
       ref.invalidate(tasksViewModelProvider);
       ref.invalidate(notesViewModelProvider);
       ref.invalidate(eventsViewModelProvider);
@@ -126,7 +129,10 @@ class AuthViewModel extends Notifier<AuthState> {
       state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
       return false;
     } catch (_) {
-      state = state.copyWith(status: AuthStatus.error, errorMessage: 'No se pudo iniciar sesión con Google.');
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'No se pudo iniciar sesión con Google.',
+      );
       return false;
     }
   }
@@ -134,17 +140,16 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<bool> register(String name, String email, String password) async {
     state = state.copyWith(status: AuthStatus.loading, clearError: true);
     try {
-      await _repository.register(name.trim(), email.trim(), password);
+      await _repository
+          .register(name.trim(), email.trim(), password)
+          .timeout(_authOperationTimeout);
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
         clearError: true,
       );
       return true;
     } on ApiException catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.error,
-        errorMessage: e.message,
-      );
+      state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
       return false;
     } catch (e) {
       state = state.copyWith(
@@ -158,7 +163,9 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<bool> verifyOtp(String email, String code) async {
     state = state.copyWith(status: AuthStatus.loading, clearError: true);
     try {
-      final user = await _repository.verifyOtp(email.trim(), code.trim());
+      final user = await _repository
+          .verifyOtp(email.trim(), code.trim())
+          .timeout(_authOperationTimeout);
       state = state.copyWith(
         status: AuthStatus.authenticated,
         user: user,
@@ -171,10 +178,7 @@ class AuthViewModel extends Notifier<AuthState> {
       ref.invalidate(profileViewModelProvider);
       return true;
     } on ApiException catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.error,
-        errorMessage: e.message,
-      );
+      state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
       return false;
     } catch (e) {
       state = state.copyWith(
@@ -188,14 +192,22 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<bool> requestPasswordReset(String email) async {
     state = state.copyWith(status: AuthStatus.loading, clearError: true);
     try {
-      await _repository.requestPasswordReset(email.trim());
-      state = state.copyWith(status: AuthStatus.unauthenticated, clearError: true);
+      await _repository
+          .requestPasswordReset(email.trim())
+          .timeout(_authOperationTimeout);
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        clearError: true,
+      );
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
       return false;
     } catch (_) {
-      state = state.copyWith(status: AuthStatus.error, errorMessage: 'No se pudo solicitar el código.');
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'No se pudo solicitar el código.',
+      );
       return false;
     }
   }
@@ -203,14 +215,22 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<bool> resendRegistrationOtp(String email) async {
     state = state.copyWith(status: AuthStatus.loading, clearError: true);
     try {
-      await _repository.resendRegistrationOtp(email.trim());
-      state = state.copyWith(status: AuthStatus.unauthenticated, clearError: true);
+      await _repository
+          .resendRegistrationOtp(email.trim())
+          .timeout(_authOperationTimeout);
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        clearError: true,
+      );
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
       return false;
     } catch (_) {
-      state = state.copyWith(status: AuthStatus.error, errorMessage: 'No se pudo reenviar el código.');
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'No se pudo reenviar el código.',
+      );
       return false;
     }
   }
@@ -218,14 +238,22 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<bool> resetPassword(String email, String code, String password) async {
     state = state.copyWith(status: AuthStatus.loading, clearError: true);
     try {
-      await _repository.resetPassword(email, code.trim(), password);
-      state = state.copyWith(status: AuthStatus.unauthenticated, clearError: true);
+      await _repository
+          .resetPassword(email, code.trim(), password)
+          .timeout(_authOperationTimeout);
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        clearError: true,
+      );
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(status: AuthStatus.error, errorMessage: e.message);
       return false;
     } catch (_) {
-      state = state.copyWith(status: AuthStatus.error, errorMessage: 'No se pudo cambiar la contraseña.');
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'No se pudo cambiar la contraseña.',
+      );
       return false;
     }
   }

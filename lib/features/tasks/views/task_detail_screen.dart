@@ -3,13 +3,45 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_view.dart';
+import '../../notes/data/note_repository.dart';
+import '../../notes/viewmodels/notes_view_model.dart';
 import '../models/task.dart';
 import '../viewmodels/task_detail_view_model.dart';
 import '../viewmodels/tasks_view_model.dart';
+
+enum _AiTaskNoteType {
+  guide(
+    'GUIDE',
+    'Guía',
+    'Convierte la tarea y sus subtareas en una guía práctica.',
+  ),
+  details(
+    'DETAILS',
+    'Más detalles',
+    'Amplía el contexto, objetivos y puntos importantes.',
+  ),
+  process(
+    'PROCESS',
+    'Proceso',
+    'Organiza la tarea como un proceso paso a paso.',
+  ),
+  concepts(
+    'CONCEPTS',
+    'Conceptos',
+    'Resume las ideas clave que debes entender mejor.',
+  );
+
+  final String apiValue;
+  final String label;
+  final String description;
+
+  const _AiTaskNoteType(this.apiValue, this.label, this.description);
+}
 
 class TaskDetailScreen extends ConsumerStatefulWidget {
   final String taskId;
@@ -22,6 +54,7 @@ class TaskDetailScreen extends ConsumerStatefulWidget {
 
 class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
   bool _isReorderingSubtasks = false;
+  bool _isCreatingAINote = false;
   final _subtaskTextController = TextEditingController();
   final _subtaskDescriptionController = TextEditingController();
 
@@ -147,6 +180,119 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
         );
       },
     );
+  }
+
+  Future<void> _showCreateTaskNoteOptions(Task task) async {
+    if (_isCreatingAINote) return;
+
+    final selectedType = await showModalBottomSheet<_AiTaskNoteType>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: context.palette.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.85,
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Crear nota desde esta tarea',
+                  style: TextStyle(
+                    color: context.palette.primaryText,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'La IA usará la tarea y sus subtareas actuales para generar la nota en Markdown.',
+                  style: TextStyle(
+                    color: context.palette.secondaryText,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Esto consume 1 request de IA del día según el plan del usuario.',
+                  style: TextStyle(
+                    color: context.palette.secondaryText,
+                    fontSize: 12,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ..._AiTaskNoteType.values.map(
+                  (type) => ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    minVerticalPadding: 8,
+                    title: Text(
+                      type.label,
+                      style: TextStyle(color: context.palette.primaryText),
+                    ),
+                    subtitle: Text(
+                      type.description,
+                      style: TextStyle(
+                        color: context.palette.secondaryText,
+                        height: 1.3,
+                      ),
+                    ),
+                    trailing: Icon(
+                      PhosphorIconsRegular.caretRight,
+                      color: context.palette.secondaryText,
+                    ),
+                    onTap: () => Navigator.pop(sheetContext, type),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || selectedType == null) return;
+    await _createTaskNote(task, selectedType);
+  }
+
+  Future<void> _createTaskNote(Task task, _AiTaskNoteType type) async {
+    setState(() => _isCreatingAINote = true);
+
+    try {
+      final createdNote = await ref
+          .read(noteRepositoryProvider)
+          .createTaskNoteWithAI(task.id, type.apiValue);
+
+      ref.read(notesViewModelProvider.notifier).loadNotes();
+
+      if (!mounted) return;
+      context.push('/notes/${createdNote.id}', extra: createdNote);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No pudimos crear la nota desde esta tarea.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCreatingAINote = false);
+      }
+    }
   }
 
   @override
@@ -281,7 +427,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                         ),
                       ),
                     ],
-                    if (task.folder != null && task.folder!.isNotEmpty || task.tags.isNotEmpty) ...[
+                    if (task.folder != null && task.folder!.isNotEmpty ||
+                        task.tags.isNotEmpty) ...[
                       const SizedBox(height: 14),
                       Wrap(
                         spacing: 8,
@@ -297,7 +444,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                               decoration: BoxDecoration(
                                 color: context.palette.surfaceSecondary,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: context.palette.border),
+                                border: Border.all(
+                                  color: context.palette.border,
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -328,7 +477,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                               decoration: BoxDecoration(
                                 color: context.palette.surfaceSecondary,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: context.palette.border),
+                                border: Border.all(
+                                  color: context.palette.border,
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -422,33 +573,41 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                PhosphorIconsRegular.chartBar,
-                                size: 18,
-                                color: context.palette.accent,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Progreso de subtareas',
-                                style: TextStyle(
-                                  color: context.palette.primaryText,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  PhosphorIconsRegular.chartBar,
+                                  size: 18,
+                                  color: context.palette.accent,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    'Progreso de subtareas',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: context.palette.primaryText,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: task.completedSubtasksCount == task.totalSubtasksCount
+                              color:
+                                  task.completedSubtasksCount ==
+                                      task.totalSubtasksCount
                                   ? AppColors.success.withValues(alpha: 0.15)
                                   : context.palette.surfaceSecondary,
                               borderRadius: BorderRadius.circular(6),
@@ -456,7 +615,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                             child: Text(
                               '${(task.subtasksProgress * 100).toInt()}%',
                               style: TextStyle(
-                                color: task.completedSubtasksCount == task.totalSubtasksCount
+                                color:
+                                    task.completedSubtasksCount ==
+                                        task.totalSubtasksCount
                                     ? AppColors.success
                                     : context.palette.accent,
                                 fontSize: 12,
@@ -474,7 +635,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                           minHeight: 8,
                           backgroundColor: context.palette.surfaceSecondary,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            task.completedSubtasksCount == task.totalSubtasksCount
+                            task.completedSubtasksCount ==
+                                    task.totalSubtasksCount
                                 ? AppColors.success
                                 : context.palette.accent,
                           ),
@@ -482,19 +644,25 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                       ),
                       const SizedBox(height: 8),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Llevas ${task.completedSubtasksCount}/${task.totalSubtasksCount} subtareas completadas',
-                            style: TextStyle(
-                              color: context.palette.secondaryText,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: Text(
+                              'Llevas ${task.completedSubtasksCount}/${task.totalSubtasksCount} subtareas completadas',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: context.palette.secondaryText,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                          if (task.completedSubtasksCount == task.totalSubtasksCount &&
-                              task.totalSubtasksCount > 0)
+                          if (task.completedSubtasksCount ==
+                                  task.totalSubtasksCount &&
+                              task.totalSubtasksCount > 0) ...[
+                            const SizedBox(width: 8),
                             const Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   PhosphorIconsBold.checkCircle,
@@ -512,6 +680,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                                 ),
                               ],
                             ),
+                          ],
                         ],
                       ),
                     ],
@@ -521,8 +690,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               ],
 
               // Subtasks Section header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Subtareas',
@@ -532,19 +701,45 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Row(children: [
-                    if (task.subtasks.length > 1)
-                      TextButton.icon(
-                        onPressed: () => setState(() => _isReorderingSubtasks = !_isReorderingSubtasks),
-                        icon: Icon(_isReorderingSubtasks ? PhosphorIconsRegular.check : PhosphorIconsRegular.list, size: 16, color: context.palette.accent),
-                        label: Text(_isReorderingSubtasks ? 'Listo' : 'Ordenar', style: TextStyle(color: context.palette.accent, fontSize: 13)),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      if (task.subtasks.length > 1) ...[
+                        Expanded(
+                          child: _SubtaskActionButton(
+                            icon: _isReorderingSubtasks
+                                ? PhosphorIconsRegular.check
+                                : PhosphorIconsRegular.list,
+                            label: _isReorderingSubtasks ? 'Listo' : 'Ordenar',
+                            active: _isReorderingSubtasks,
+                            onPressed: () => setState(
+                              () => _isReorderingSubtasks =
+                                  !_isReorderingSubtasks,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: _SubtaskActionButton(
+                          icon: PhosphorIconsRegular.sparkle,
+                          label: _isCreatingAINote ? 'Creando' : 'Nota IA',
+                          isLoading: _isCreatingAINote,
+                          onPressed: _isCreatingAINote
+                              ? null
+                              : () => _showCreateTaskNoteOptions(task),
+                        ),
                       ),
-                    TextButton.icon(
-                      onPressed: _showAddSubtaskDialog,
-                      icon: Icon(PhosphorIconsRegular.plus, size: 16, color: context.palette.accent),
-                      label: Text('Agregar', style: TextStyle(color: context.palette.accent, fontSize: 13)),
-                    ),
-                  ]),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _SubtaskActionButton(
+                          icon: PhosphorIconsRegular.plus,
+                          label: 'Agregar',
+                          onPressed: _showAddSubtaskDialog,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -578,115 +773,205 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   buildDefaultDragHandles: false,
                   itemCount: task.subtasks.length,
-                  onReorderItem: (oldIndex, newIndex) => ref.read(taskDetailViewModelProvider(widget.taskId).notifier).reorderSubtasks(oldIndex, newIndex),
+                  onReorderItem: (oldIndex, newIndex) => ref
+                      .read(taskDetailViewModelProvider(widget.taskId).notifier)
+                      .reorderSubtasks(oldIndex, newIndex),
                   itemBuilder: (context, index) {
                     final subtask = task.subtasks[index];
                     return Padding(
-                    key: ValueKey(subtask.id),
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: AppCard(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              ref
-                                  .read(
-                                    taskDetailViewModelProvider(
-                                      widget.taskId,
-                                    ).notifier,
-                                  )
-                                  .toggleSubtask(
-                                    subtask.id,
-                                    !subtask.completed,
-                                  );
-                            },
-                            child: Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: subtask.completed
-                                      ? context.palette.onAccent
-                                      : context.palette.secondaryText,
-                                  width: 2,
-                                ),
-                                color: subtask.completed
-                                    ? context.palette.accent
-                                    : Colors.transparent,
-                              ),
-                              child: subtask.completed
-                                  ? Center(
-                                      child: Icon(
-                                        PhosphorIconsBold.check,
-                                        size: 10,
-                                        color: context.palette.onAccent,
-                                      ),
+                      key: ValueKey(subtask.id),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: AppCard(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                ref
+                                    .read(
+                                      taskDetailViewModelProvider(
+                                        widget.taskId,
+                                      ).notifier,
                                     )
-                                  : null,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  subtask.title,
-                                  style: TextStyle(
+                                    .toggleSubtask(
+                                      subtask.id,
+                                      !subtask.completed,
+                                    );
+                              },
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
                                     color: subtask.completed
-                                        ? context.palette.secondaryText
-                                        : context.palette.primaryText,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: subtask.completed
-                                        ? TextDecoration.lineThrough
-                                        : null,
+                                        ? context.palette.onAccent
+                                        : context.palette.secondaryText,
+                                    width: 2,
                                   ),
+                                  color: subtask.completed
+                                      ? context.palette.accent
+                                      : Colors.transparent,
                                 ),
-                                if (subtask.description?.isNotEmpty == true) ...[
-                                  const SizedBox(height: 3),
+                                child: subtask.completed
+                                    ? Center(
+                                        child: Icon(
+                                          PhosphorIconsBold.check,
+                                          size: 10,
+                                          color: context.palette.onAccent,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    subtask.description!,
+                                    subtask.title,
                                     style: TextStyle(
-                                      color: context.palette.secondaryText,
-                                      fontSize: 12,
-                                      height: 1.3,
+                                      color: subtask.completed
+                                          ? context.palette.secondaryText
+                                          : context.palette.primaryText,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: subtask.completed
+                                          ? TextDecoration.lineThrough
+                                          : null,
                                     ),
                                   ),
+                                  if (subtask.description?.isNotEmpty ==
+                                      true) ...[
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      subtask.description!,
+                                      style: TextStyle(
+                                        color: context.palette.secondaryText,
+                                        fontSize: 12,
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
-                          ),
-                          if (_isReorderingSubtasks)
-                            ReorderableDragStartListener(index: index, child: Padding(padding: const EdgeInsets.all(8), child: Icon(PhosphorIconsRegular.dotsSixVertical, size: 20, color: context.palette.secondaryText)))
-                          else IconButton(
-                            icon: Icon(
-                              PhosphorIconsRegular.trash,
-                              size: 16,
-                              color: context.palette.secondaryText,
-                            ),
-                            onPressed: () {
-                              ref
-                                  .read(
-                                    taskDetailViewModelProvider(
-                                      widget.taskId,
-                                    ).notifier,
-                                  )
-                                  .deleteSubtask(subtask.id);
-                            },
-                          ),
-                        ],
+                            if (_isReorderingSubtasks)
+                              ReorderableDragStartListener(
+                                index: index,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Icon(
+                                    PhosphorIconsRegular.dotsSixVertical,
+                                    size: 20,
+                                    color: context.palette.secondaryText,
+                                  ),
+                                ),
+                              )
+                            else
+                              IconButton(
+                                icon: Icon(
+                                  PhosphorIconsRegular.trash,
+                                  size: 16,
+                                  color: context.palette.secondaryText,
+                                ),
+                                onPressed: () {
+                                  ref
+                                      .read(
+                                        taskDetailViewModelProvider(
+                                          widget.taskId,
+                                        ).notifier,
+                                      )
+                                      .deleteSubtask(subtask.id);
+                                },
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
                     );
                   },
                 ),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SubtaskActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool active;
+
+  const _SubtaskActionButton({
+    required this.icon,
+    required this.label,
+    this.onPressed,
+    this.isLoading = false,
+    this.active = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onPressed != null || isLoading;
+    final foreground = enabled
+        ? context.palette.accent
+        : context.palette.placeholder;
+
+    return Material(
+      color: active
+          ? context.palette.accent.withValues(alpha: 0.12)
+          : context.palette.surfaceSecondary,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: isLoading ? null : onPressed,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: active
+                  ? context.palette.accent.withValues(alpha: 0.35)
+                  : context.palette.border,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isLoading)
+                SizedBox(
+                  width: 15,
+                  height: 15,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: foreground,
+                  ),
+                )
+              else
+                Icon(icon, size: 15, color: foreground),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

@@ -14,10 +14,7 @@ class NoteApiService {
 
   NoteApiService(this._dio);
 
-  Future<List<Note>> getNotes({
-    String? folder,
-    String? tag,
-  }) async {
+  Future<List<Note>> getNotes({String? folder, String? tag}) async {
     try {
       final queryParams = <String, dynamic>{};
       if (folder != null && folder.isNotEmpty) queryParams['folder'] = folder;
@@ -77,9 +74,18 @@ class NoteApiService {
 
   Future<Note> createNoteWithAI(String content) async {
     try {
+      final response = await _dio.post('/notes/ai', data: {'content': content});
+      return Note.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  Future<Note> createTaskNoteWithAI(String taskId, String type) async {
+    try {
       final response = await _dio.post(
-        '/notes/ai',
-        data: {'content': content},
+        '/tasks/$taskId/notes/ai',
+        data: {'type': type},
       );
       return Note.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {

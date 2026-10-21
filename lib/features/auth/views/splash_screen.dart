@@ -37,57 +37,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     return Scaffold(
       backgroundColor: context.palette.scaffoldBackground,
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: context.palette.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: context.palette.border, width: 1.5),
-              ),
-              child: Center(
-                child: Text(
-                  'D',
-                  style: TextStyle(
-                    color: context.palette.onAccent,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -1,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'DetailedToDo',
-              style: TextStyle(
-                color: context.palette.onAccent,
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Organización personal asistida',
-              style: TextStyle(
-                color: context.palette.secondaryText,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 36),
-            SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(context.palette.secondaryText),
-              ),
-            ),
-          ],
+        child: Image.asset(
+          'assets/DetailedToDoLogo_v1.png',
+          width: 170,
+          height: 170,
+          fit: BoxFit.contain,
         ),
       ),
     );

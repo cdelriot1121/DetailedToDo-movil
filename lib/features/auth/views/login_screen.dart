@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:async';
 import '../../../app/theme.dart';
+import '../../../app/config/app_config.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_text_field.dart';
 import 'google_g_mark.dart';
@@ -322,11 +323,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 20),
 
                     // Boton: Continuar con Google
-                    if (kIsWeb)
+                    if (kIsWeb && AppConfig.googleWebClientId.trim().isNotEmpty)
                       Center(
                         child: google_button.buildGoogleSignInButton(
                           isDark: context.palette.isDark,
                           onPressed: _signInWithGoogle,
+                        ),
+                      )
+                    else if (kIsWeb)
+                      Text(
+                        'El acceso con Google aún no está configurado.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: context.palette.secondaryText,
+                          fontSize: 13,
                         ),
                       )
                     else

@@ -18,16 +18,9 @@ class NoteRepository {
   final SyncService _syncService;
   final _uuid = const Uuid();
 
-  NoteRepository(
-    this._apiService,
-    this._localStorage,
-    this._syncService,
-  );
+  NoteRepository(this._apiService, this._localStorage, this._syncService);
 
-  Future<List<Note>> getNotes({
-    String? folder,
-    String? tag,
-  }) async {
+  Future<List<Note>> getNotes({String? folder, String? tag}) async {
     try {
       final remoteNotes = await _apiService.getNotes(folder: folder, tag: tag);
       await _localStorage.saveNotes(remoteNotes);
@@ -110,22 +103,20 @@ class NoteRepository {
     List<String>? tags,
   }) async {
     final existing = _localStorage.getNote(id);
-    final updatedNote = (existing ?? Note(id: id, title: title, content: content)).copyWith(
-      title: title,
-      content: content,
-      folder: folder,
-      color: color,
-      tags: tags,
-      updatedAt: DateTime.now(),
-    );
+    final updatedNote =
+        (existing ?? Note(id: id, title: title, content: content)).copyWith(
+          title: title,
+          content: content,
+          folder: folder,
+          color: color,
+          tags: tags,
+          updatedAt: DateTime.now(),
+        );
 
     // Save locally immediately
     await _localStorage.saveNote(updatedNote);
 
-    final payload = <String, dynamic>{
-      'title': title,
-      'content': content,
-    };
+    final payload = <String, dynamic>{'title': title, 'content': content};
     if (folder != null) payload['folder'] = folder;
     if (color != null) payload['color'] = color;
     if (tags != null) payload['tags'] = tags;
@@ -160,6 +151,12 @@ class NoteRepository {
 
   Future<Note> createNoteWithAI(String content) async {
     final note = await _apiService.createNoteWithAI(content);
+    await _localStorage.saveNote(note);
+    return note;
+  }
+
+  Future<Note> createTaskNoteWithAI(String taskId, String type) async {
+    final note = await _apiService.createTaskNoteWithAI(taskId, type);
     await _localStorage.saveNote(note);
     return note;
   }

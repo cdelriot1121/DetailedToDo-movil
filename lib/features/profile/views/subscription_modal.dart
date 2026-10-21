@@ -76,7 +76,7 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
                 ),
                 child: Icon(
                   PhosphorIconsFill.sparkle,
-                  color: palette.accent,
+                  color: palette.onAccentContainer,
                   size: 24,
                 ),
               ),
@@ -241,10 +241,7 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
                 ),
                 Text(
                   ' / mes',
-                  style: TextStyle(
-                    color: palette.secondaryText,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: palette.secondaryText, fontSize: 14),
                 ),
               ],
             ),
@@ -258,7 +255,7 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
               const SizedBox(height: 10),
             ],
             AppButton(
-                label: subState.isProcessing
+              label: subState.isProcessing
                   ? 'Procesando suscripción...'
                   : 'Suscribirme al plan Plus',
               icon: PhosphorIconsRegular.creditCard,
@@ -295,10 +292,7 @@ class _SubscriptionModalState extends ConsumerState<SubscriptionModal> {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              color: palette.primaryText,
-              fontSize: 13.5,
-            ),
+            style: TextStyle(color: palette.primaryText, fontSize: 13.5),
           ),
         ),
       ],
