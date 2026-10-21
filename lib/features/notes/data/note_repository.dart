@@ -163,4 +163,10 @@ class NoteRepository {
     await _localStorage.saveNote(note);
     return note;
   }
+
+  Future<Note> createTaskNoteWithAI(String taskId, String type) async {
+    final note = await _apiService.createTaskNoteWithAI(taskId, type);
+    await _localStorage.saveNote(note);
+    return note;
+  }
 }

@@ -3,13 +3,45 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_view.dart';
+import '../../notes/data/note_repository.dart';
+import '../../notes/viewmodels/notes_view_model.dart';
 import '../models/task.dart';
 import '../viewmodels/task_detail_view_model.dart';
 import '../viewmodels/tasks_view_model.dart';
+
+enum _AiTaskNoteType {
+  guide(
+    'GUIDE',
+    'Guía',
+    'Convierte la tarea y sus subtareas en una guía práctica.',
+  ),
+  details(
+    'DETAILS',
+    'Más detalles',
+    'Amplía el contexto, objetivos y puntos importantes.',
+  ),
+  process(
+    'PROCESS',
+    'Proceso',
+    'Organiza la tarea como un proceso paso a paso.',
+  ),
+  concepts(
+    'CONCEPTS',
+    'Conceptos',
+    'Resume las ideas clave que debes entender mejor.',
+  );
+
+  final String apiValue;
+  final String label;
+  final String description;
+
+  const _AiTaskNoteType(this.apiValue, this.label, this.description);
+}
 
 class TaskDetailScreen extends ConsumerStatefulWidget {
   final String taskId;
@@ -22,6 +54,7 @@ class TaskDetailScreen extends ConsumerStatefulWidget {
 
 class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
   bool _isReorderingSubtasks = false;
+  bool _isCreatingAINote = false;
   final _subtaskTextController = TextEditingController();
   final _subtaskDescriptionController = TextEditingController();
 
@@ -147,6 +180,109 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
         );
       },
     );
+  }
+
+  Future<void> _showCreateTaskNoteOptions(Task task) async {
+    if (_isCreatingAINote) return;
+
+    final selectedType = await showModalBottomSheet<_AiTaskNoteType>(
+      context: context,
+      backgroundColor: context.palette.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Crear nota desde esta tarea',
+                  style: TextStyle(
+                    color: context.palette.primaryText,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'La IA usará la tarea y sus subtareas actuales para generar la nota en Markdown.',
+                  style: TextStyle(
+                    color: context.palette.secondaryText,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Esto consume 1 request de IA del día según el plan del usuario.',
+                  style: TextStyle(
+                    color: context.palette.secondaryText,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ..._AiTaskNoteType.values.map(
+                  (type) => ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      type.label,
+                      style: TextStyle(color: context.palette.primaryText),
+                    ),
+                    subtitle: Text(
+                      type.description,
+                      style: TextStyle(color: context.palette.secondaryText),
+                    ),
+                    trailing: Icon(
+                      PhosphorIconsRegular.caretRight,
+                      color: context.palette.secondaryText,
+                    ),
+                    onTap: () => Navigator.pop(sheetContext, type),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || selectedType == null) return;
+    await _createTaskNote(task, selectedType);
+  }
+
+  Future<void> _createTaskNote(Task task, _AiTaskNoteType type) async {
+    setState(() => _isCreatingAINote = true);
+
+    try {
+      final createdNote = await ref
+          .read(noteRepositoryProvider)
+          .createTaskNoteWithAI(task.id, type.apiValue);
+
+      ref.read(notesViewModelProvider.notifier).loadNotes();
+
+      if (!mounted) return;
+      context.push('/notes/${createdNote.id}', extra: createdNote);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No pudimos crear la nota desde esta tarea.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCreatingAINote = false);
+      }
+    }
   }
 
   @override
@@ -522,29 +658,89 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
 
               // Subtasks Section header
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Subtareas',
-                    style: TextStyle(
-                      color: context.palette.primaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      'Subtareas',
+                      style: TextStyle(
+                        color: context.palette.primaryText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  Row(children: [
-                    if (task.subtasks.length > 1)
-                      TextButton.icon(
-                        onPressed: () => setState(() => _isReorderingSubtasks = !_isReorderingSubtasks),
-                        icon: Icon(_isReorderingSubtasks ? PhosphorIconsRegular.check : PhosphorIconsRegular.list, size: 16, color: context.palette.accent),
-                        label: Text(_isReorderingSubtasks ? 'Listo' : 'Ordenar', style: TextStyle(color: context.palette.accent, fontSize: 13)),
-                      ),
-                    TextButton.icon(
-                      onPressed: _showAddSubtaskDialog,
-                      icon: Icon(PhosphorIconsRegular.plus, size: 16, color: context.palette.accent),
-                      label: Text('Agregar', style: TextStyle(color: context.palette.accent, fontSize: 13)),
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: [
+                        if (task.subtasks.length > 1)
+                          TextButton.icon(
+                            onPressed: () => setState(
+                              () => _isReorderingSubtasks = !_isReorderingSubtasks,
+                            ),
+                            icon: Icon(
+                              _isReorderingSubtasks
+                                  ? PhosphorIconsRegular.check
+                                  : PhosphorIconsRegular.list,
+                              size: 16,
+                              color: context.palette.accent,
+                            ),
+                            label: Text(
+                              _isReorderingSubtasks ? 'Listo' : 'Ordenar',
+                              style: TextStyle(
+                                color: context.palette.accent,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        TextButton.icon(
+                          onPressed: _isCreatingAINote
+                              ? null
+                              : () => _showCreateTaskNoteOptions(task),
+                          icon: _isCreatingAINote
+                              ? SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: context.palette.accent,
+                                  ),
+                                )
+                              : Icon(
+                                  PhosphorIconsRegular.sparkle,
+                                  size: 16,
+                                  color: context.palette.accent,
+                                ),
+                          label: Text(
+                            _isCreatingAINote ? 'Creando...' : 'Nota IA',
+                            style: TextStyle(
+                              color: context.palette.accent,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: _showAddSubtaskDialog,
+                          icon: Icon(
+                            PhosphorIconsRegular.plus,
+                            size: 16,
+                            color: context.palette.accent,
+                          ),
+                          label: Text(
+                            'Agregar',
+                            style: TextStyle(
+                              color: context.palette.accent,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ]),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),

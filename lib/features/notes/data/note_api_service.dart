@@ -86,4 +86,16 @@ class NoteApiService {
       throw ApiException.fromDioError(e);
     }
   }
+
+  Future<Note> createTaskNoteWithAI(String taskId, String type) async {
+    try {
+      final response = await _dio.post(
+        '/tasks/$taskId/notes/ai',
+        data: {'type': type},
+      );
+      return Note.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
 }
