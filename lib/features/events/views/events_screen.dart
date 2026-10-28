@@ -37,7 +37,23 @@ class EventsScreen extends ConsumerWidget {
             ),
           ],
         ),
-        actions: const [],
+        actions: [
+          TextButton(
+            onPressed: () {
+              final now = DateTime.now();
+              final today = DateTime(now.year, now.month, now.day);
+              ref.read(eventsViewModelProvider.notifier).setDateRange(
+                today,
+                today.add(const Duration(days: 1)),
+              );
+            },
+            child: const Text('Hoy'),
+          ),
+          TextButton(
+            onPressed: () => ref.read(eventsViewModelProvider.notifier).showAllEvents(),
+            child: const Text('Todos'),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: context.palette.accent,
@@ -123,15 +139,16 @@ class EventsScreen extends ConsumerWidget {
                   height: 70,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemCount: 7,
+                    itemCount: 46,
                     separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
-                      final date = DateTime.now().add(
-                        Duration(days: index - 2),
+                      final today = DateTime.now();
+                      final date = DateTime(today.year, today.month, today.day).add(
+                        Duration(days: index - 15),
                       );
                       final selectedDate = state.fromDate;
                       final isSelected = selectedDate == null
-                          ? index == 2
+                          ? false
                           : selectedDate.year == date.year &&
                                 selectedDate.month == date.month &&
                                 selectedDate.day == date.day;

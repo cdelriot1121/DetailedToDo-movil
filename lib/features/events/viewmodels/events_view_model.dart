@@ -118,6 +118,11 @@ class EventsViewModel extends Notifier<EventsState> {
     loadEvents();
   }
 
+  void showAllEvents() {
+    state = state.copyWith(clearDates: true);
+    loadEvents();
+  }
+
   Future<bool> deleteEvent(String id) async {
     try {
       await _repository.deleteEvent(id);

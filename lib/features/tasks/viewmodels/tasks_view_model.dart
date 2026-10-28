@@ -190,6 +190,12 @@ class TasksViewModel extends Notifier<TasksState> {
     }
   }
 
+  void updateTaskSnapshot(Task task) {
+    state = state.copyWith(
+      tasks: state.tasks.map((item) => item.id == task.id ? task : item).toList(),
+    );
+  }
+
   Future<bool> deleteTask(String id) async {
     try {
       ref.read(notificationServiceProvider).scheduleTaskReminders(taskId: id, title: '');
