@@ -267,9 +267,12 @@ class TaskRepository {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
 
-    _syncService.syncPending().ignore();
-
-    return newSubtask;
+    await _syncService.syncPending();
+    final syncedTask = _localStorage.getTask(taskId);
+    return syncedTask?.subtasks.firstWhere(
+          (item) => item.title == title && !existingTask!.subtasks.any((old) => old.id == item.id),
+          orElse: () => newSubtask,
+        ) ?? newSubtask;
   }
 
   Future<Subtask> toggleSubtask(
@@ -354,11 +357,22 @@ class TaskRepository {
   }
 
   Future<Task> reorderSubtasks(String taskId, List<Subtask> subtasks) async {
+    // Resolve locally-created subtasks to their server IDs before ordering.
+    await _syncService.syncPending();
     final current = _localStorage.getTask(taskId);
-    if (current != null) await _localStorage.saveTask(current.copyWith(subtasks: subtasks));
-    final updated = await _apiService.reorderSubtasks(taskId, subtasks.map((s) => s.id).toList());
-    await _localStorage.saveTask(updated);
-    return updated;
+    if (current != null) {
+      final ids = <String>[];
+      final unmatched = List<Subtask>.from(current.subtasks);
+      for (final item in subtasks) {
+        final index = unmatched.indexWhere((remote) => remote.id == item.id || remote.title == item.title);
+        if (index < 0) throw StateError('No se pudo resolver una subtarea para ordenar.');
+        ids.add(unmatched.removeAt(index).id);
+      }
+      final updated = await _apiService.reorderSubtasks(taskId, ids);
+      await _localStorage.saveTask(updated);
+      return updated;
+    }
+    throw StateError('No se encontró la tarea para guardar el orden.');
   }
 
   Future<Task> generateSubtasksWithAI(String taskId) async {

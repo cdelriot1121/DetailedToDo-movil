@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/notifications/notification_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
@@ -114,13 +115,18 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_reminderDate != null) {
+      await ref.read(notificationServiceProvider).requestReminderPermission();
+    }
+
     setState(() => _isLoading = true);
 
     final repository = ref.read(eventRepositoryProvider);
 
     try {
+      late final Event savedEvent;
       if (widget.eventToEdit != null) {
-        await repository.updateEvent(
+        savedEvent = await repository.updateEvent(
           widget.eventToEdit!.id,
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim().isEmpty
@@ -135,7 +141,7 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
           tags: widget.eventToEdit?.tags ?? [],
         );
       } else {
-        await repository.createEvent(
+        savedEvent = await repository.createEvent(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim().isEmpty
               ? null
@@ -148,6 +154,14 @@ class _EventFormScreenState extends ConsumerState<EventFormScreen> {
           reminderDate: _reminderDate,
         );
       }
+
+      ref
+          .read(notificationServiceProvider)
+          .scheduleEventReminder(
+            eventId: savedEvent.id,
+            title: savedEvent.title,
+            reminderDate: savedEvent.reminderDate,
+          );
 
       ref.read(eventsViewModelProvider.notifier).loadEvents();
 

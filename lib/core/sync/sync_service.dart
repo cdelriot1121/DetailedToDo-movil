@@ -127,7 +127,8 @@ class SyncService {
         if (resourceId != null) {
           final title = payload['title'] as String? ?? '';
           final description = payload['description'] as String? ?? '';
-          await _taskApi.createSubtask(resourceId, title, description);
+          final updated = await _taskApi.createSubtask(resourceId, title, description);
+          await _storage.saveTask(updated);
         }
         break;
 
@@ -143,6 +144,16 @@ class SyncService {
         if (resourceId != null) {
           final subtaskId = payload['subtaskId'] as String;
           await _taskApi.deleteSubtask(resourceId, subtaskId);
+        }
+        break;
+
+      case 'reorder_subtasks':
+        if (resourceId != null) {
+          final updated = await _taskApi.reorderSubtasks(
+            resourceId,
+            List<String>.from(payload['subtaskIds'] as List? ?? const []),
+          );
+          await _storage.saveTask(updated);
         }
         break;
 

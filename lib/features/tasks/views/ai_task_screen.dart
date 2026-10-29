@@ -42,13 +42,22 @@ class _AITaskScreenState extends ConsumerState<AITaskScreen> {
       await ref.read(notificationServiceProvider).requestWebPermission();
       final repository = ref.read(taskRepositoryProvider);
       final createdTask = await repository.createTaskWithAI(text);
-      ref.read(notificationServiceProvider).scheduleTaskReminders(
-        taskId: createdTask.id,
-        title: createdTask.title,
-        reminderDate: createdTask.reminderDate,
-        dueDate: createdTask.dueDate,
-        lastMinuteReminderMinutes: createdTask.lastMinuteReminderMinutes,
-      );
+      if (createdTask.reminderDate != null ||
+          (createdTask.dueDate != null &&
+              createdTask.lastMinuteReminderMinutes != null)) {
+        await ref
+            .read(notificationServiceProvider)
+            .requestMobileReminderPermission();
+      }
+      ref
+          .read(notificationServiceProvider)
+          .scheduleTaskReminders(
+            taskId: createdTask.id,
+            title: createdTask.title,
+            reminderDate: createdTask.reminderDate,
+            dueDate: createdTask.dueDate,
+            lastMinuteReminderMinutes: createdTask.lastMinuteReminderMinutes,
+          );
 
       ref.read(tasksViewModelProvider.notifier).loadTasks();
 

@@ -8,6 +8,7 @@ import 'app/app.dart';
 import 'app/config/app_config.dart';
 import 'app/theme.dart';
 import 'core/notifications/notification_service.dart';
+import 'core/network/dio_client.dart';
 import 'core/storage/local_storage_service.dart';
 import 'core/storage/secure_storage_service.dart';
 
@@ -28,11 +29,13 @@ void main() async {
   // Initialize local storage (Hive: Web IndexedDB / Mobile disk)
   await LocalStorageService.init();
 
-  // Initialize notification service gracefully
-  final notificationService = NotificationService();
-  await notificationService.init();
-
   final secureStorage = SecureStorageService(const FlutterSecureStorage());
+
+  // Initialize notification service gracefully
+  final notificationService = NotificationService(
+    createDioClient(secureStorage),
+  );
+  await notificationService.init();
 
   // Tema guardado: se resuelve antes del primer frame para que la app arranque
   // directamente con la preferencia del usuario.

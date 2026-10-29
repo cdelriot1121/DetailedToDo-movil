@@ -106,14 +106,14 @@ class TaskApiService {
     }
   }
 
-  Future<Subtask> createSubtask(String taskId, String title, String description) async {
+  Future<Task> createSubtask(String taskId, String title, String description) async {
     try {
       final response = await _dio.post(
         '/tasks/$taskId/subtasks',
         data: {'title': title, 'description': description},
       );
       final task = Task.fromJson(response.data as Map<String, dynamic>);
-      return task.subtasks.last;
+      return task;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }

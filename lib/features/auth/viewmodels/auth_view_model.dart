@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/notifications/notification_service.dart';
 import '../../events/viewmodels/events_view_model.dart';
 import '../../home/viewmodels/home_view_model.dart';
 import '../../notes/viewmodels/notes_view_model.dart';
@@ -259,6 +260,7 @@ class AuthViewModel extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
+    await ref.read(notificationServiceProvider).disableWebPush();
     await _repository.logout();
     ref.invalidate(tasksViewModelProvider);
     ref.invalidate(notesViewModelProvider);

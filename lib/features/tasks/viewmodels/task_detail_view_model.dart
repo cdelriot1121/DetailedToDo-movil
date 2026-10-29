@@ -4,6 +4,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../data/task_repository.dart';
 import '../models/task.dart';
+import 'tasks_view_model.dart';
 
 class TaskDetailState {
   final Task? task;
@@ -171,6 +172,9 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
         state = state.copyWith(
           task: currentTask.copyWith(subtasks: updatedSubtasks),
         );
+        ref.read(tasksViewModelProvider.notifier).updateTaskSnapshot(
+          currentTask.copyWith(subtasks: updatedSubtasks),
+        );
       }
       return true;
     } catch (_) {
@@ -196,6 +200,10 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
     try {
       final subtask = currentTask.subtasks.firstWhere((s) => s.id == subtaskId);
       await _repository.toggleSubtask(taskId, subtaskId, completed, subtask.title, subtask.description);
+      final latest = state.task;
+      if (latest != null) {
+        ref.read(tasksViewModelProvider.notifier).updateTaskSnapshot(latest);
+      }
     } catch (_) {
       state = state.copyWith(task: currentTask);
     }
@@ -211,6 +219,9 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
           currentTask.subtasks.where((s) => s.id != subtaskId).toList();
       state = state.copyWith(
         task: currentTask.copyWith(subtasks: updatedSubtasks),
+      );
+      ref.read(tasksViewModelProvider.notifier).updateTaskSnapshot(
+        currentTask.copyWith(subtasks: updatedSubtasks),
       );
       return true;
     } catch (_) {
@@ -228,6 +239,7 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
     try {
       final updated = await _repository.reorderSubtasks(taskId, reordered);
       state = state.copyWith(task: updated);
+      ref.read(tasksViewModelProvider.notifier).updateTaskSnapshot(updated);
     } catch (_) {
       state = state.copyWith(task: current, errorMessage: 'No se pudo guardar el orden de las subtareas.');
     }
