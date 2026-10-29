@@ -172,6 +172,13 @@ class TasksViewModel extends Notifier<TasksState> {
 
     try {
       final updatedTask = await _repository.updateStatus(task.id, nextStatus);
+      ref.read(notificationServiceProvider).scheduleTaskReminders(
+        taskId: updatedTask.id,
+        title: updatedTask.title,
+        reminderDate: updatedTask.isCompleted ? null : updatedTask.reminderDate,
+        dueDate: updatedTask.isCompleted ? null : updatedTask.dueDate,
+        lastMinuteReminderMinutes: updatedTask.isCompleted ? null : updatedTask.lastMinuteReminderMinutes,
+      );
       final syncedList = state.tasks.map((t) {
         if (t.id == task.id) {
           return updatedTask;
@@ -187,6 +194,13 @@ class TasksViewModel extends Notifier<TasksState> {
         return t;
       }).toList();
       state = state.copyWith(tasks: rollbackList);
+      ref.read(notificationServiceProvider).scheduleTaskReminders(
+        taskId: task.id,
+        title: task.title,
+        reminderDate: task.reminderDate,
+        dueDate: task.dueDate,
+        lastMinuteReminderMinutes: task.lastMinuteReminderMinutes,
+      );
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/notifications/notification_service.dart';
 import '../../../core/network/api_exception.dart';
 import '../data/event_repository.dart';
 import '../models/event.dart';
@@ -80,6 +81,16 @@ class EventsViewModel extends Notifier<EventsState> {
         to: state.toDate,
       );
 
+      for (final event in events) {
+        ref
+            .read(notificationServiceProvider)
+            .scheduleEventReminder(
+              eventId: event.id,
+              title: event.title,
+              reminderDate: event.reminderDate,
+            );
+      }
+
       events.sort((a, b) => a.startDate.compareTo(b.startDate));
 
       if (events.isEmpty) {
@@ -125,6 +136,9 @@ class EventsViewModel extends Notifier<EventsState> {
 
   Future<bool> deleteEvent(String id) async {
     try {
+      ref
+          .read(notificationServiceProvider)
+          .scheduleEventReminder(eventId: id, title: '');
       await _repository.deleteEvent(id);
       state = state.copyWith(
         events: state.events.where((e) => e.id != id).toList(),

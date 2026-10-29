@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/notifications/notification_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../app/theme.dart';
@@ -38,8 +39,21 @@ class _AIEventScreenState extends ConsumerState<AIEventScreen> {
     });
 
     try {
+      await ref.read(notificationServiceProvider).requestWebPermission();
       final repository = ref.read(eventRepositoryProvider);
       final createdEvent = await repository.createEventWithAI(text);
+      if (createdEvent.reminderDate != null) {
+        await ref
+            .read(notificationServiceProvider)
+            .requestMobileReminderPermission();
+      }
+      ref
+          .read(notificationServiceProvider)
+          .scheduleEventReminder(
+            eventId: createdEvent.id,
+            title: createdEvent.title,
+            reminderDate: createdEvent.reminderDate,
+          );
 
       ref.read(eventsViewModelProvider.notifier).loadEvents();
 

@@ -116,13 +116,18 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_lastMinuteReminderMinutes != null && _dueDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Agrega una fecha límite para usar el aviso de última hora.')),
+        const SnackBar(
+          content: Text(
+            'Agrega una fecha límite para usar el aviso de última hora.',
+          ),
+        ),
       );
       return;
     }
 
-    if (_reminderDate != null || (_dueDate != null && _lastMinuteReminderMinutes != null)) {
-      await ref.read(notificationServiceProvider).requestWebPermission();
+    if (_reminderDate != null ||
+        (_dueDate != null && _lastMinuteReminderMinutes != null)) {
+      await ref.read(notificationServiceProvider).requestReminderPermission();
     }
 
     setState(() => _isLoading = true);
@@ -172,13 +177,17 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         savedTaskId = saved.id;
       }
 
-      ref.read(notificationServiceProvider).scheduleTaskReminders(
-        taskId: savedTaskId,
-        title: _titleController.text.trim(),
-        reminderDate: _isCompleted ? null : _reminderDate,
-        dueDate: _isCompleted ? null : _dueDate,
-        lastMinuteReminderMinutes: _isCompleted ? null : _lastMinuteReminderMinutes,
-      );
+      ref
+          .read(notificationServiceProvider)
+          .scheduleTaskReminders(
+            taskId: savedTaskId,
+            title: _titleController.text.trim(),
+            reminderDate: _isCompleted ? null : _reminderDate,
+            dueDate: _isCompleted ? null : _dueDate,
+            lastMinuteReminderMinutes: _isCompleted
+                ? null
+                : _lastMinuteReminderMinutes,
+          );
 
       ref.read(tasksViewModelProvider.notifier).loadTasks();
 
@@ -332,7 +341,10 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: context.palette.inputBackground,
                     borderRadius: BorderRadius.circular(10),
@@ -344,13 +356,29 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                       isExpanded: true,
                       hint: const Text('Sin aviso de última hora'),
                       items: const [
-                        DropdownMenuItem(value: null, child: Text('Sin aviso de última hora')),
-                        DropdownMenuItem(value: 180, child: Text('3 horas antes de la fecha límite')),
-                        DropdownMenuItem(value: 60, child: Text('1 hora antes de la fecha límite')),
-                        DropdownMenuItem(value: 30, child: Text('30 minutos antes de la fecha límite')),
-                        DropdownMenuItem(value: 15, child: Text('15 minutos antes de la fecha límite')),
+                        DropdownMenuItem(
+                          value: null,
+                          child: Text('Sin aviso de última hora'),
+                        ),
+                        DropdownMenuItem(
+                          value: 180,
+                          child: Text('3 horas antes de la fecha límite'),
+                        ),
+                        DropdownMenuItem(
+                          value: 60,
+                          child: Text('1 hora antes de la fecha límite'),
+                        ),
+                        DropdownMenuItem(
+                          value: 30,
+                          child: Text('30 minutos antes de la fecha límite'),
+                        ),
+                        DropdownMenuItem(
+                          value: 15,
+                          child: Text('15 minutos antes de la fecha límite'),
+                        ),
                       ],
-                      onChanged: (value) => setState(() => _lastMinuteReminderMinutes = value),
+                      onChanged: (value) =>
+                          setState(() => _lastMinuteReminderMinutes = value),
                     ),
                   ),
                 ),

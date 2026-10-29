@@ -66,8 +66,9 @@ jobs:
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+          WEB_PUSH_VAPID_PUBLIC_KEY: ${{ vars.WEB_PUSH_VAPID_PUBLIC_KEY }}
         run: |
-          flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define="API_BASE_URL=$API_BASE_URL" --dart-define="GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
+          flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define="API_BASE_URL=$API_BASE_URL" --dart-define="GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID" --dart-define="WEB_PUSH_VAPID_PUBLIC_KEY=$WEB_PUSH_VAPID_PUBLIC_KEY"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

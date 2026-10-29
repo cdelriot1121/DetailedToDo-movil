@@ -15,6 +15,8 @@ Future<bool> requestPermission() async {
 }
 
 void schedule(String id, String title, String body, DateTime at) {
+  // Browser timers are only a best-effort fallback while the PWA is open.
+  // Reliable delivery while closed is implemented through backend Web Push.
   cancel(id);
   void checkTime() {
     final delay = at.difference(DateTime.now());
@@ -29,7 +31,6 @@ void schedule(String id, String title, String body, DateTime at) {
     }
     _timers[id] = Timer(delay > _maxTimerDelay ? _maxTimerDelay : delay, checkTime);
   }
-
   checkTime();
 }
 
