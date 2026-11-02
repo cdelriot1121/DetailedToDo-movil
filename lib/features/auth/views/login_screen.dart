@@ -56,7 +56,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _completeGoogleSignIn(String idToken) async {
     final success = await ref.read(authViewModelProvider.notifier).loginWithGoogle(idToken);
-    if (success && mounted) context.go('/home');
+    if (success && mounted) {
+      final user = ref.read(authViewModelProvider).user;
+      if (user?.needsOnboardingPreferences ?? false) {
+        context.go('/onboarding-occupation');
+      } else {
+        context.go('/home');
+      }
+    }
   }
 
   @override
@@ -76,7 +83,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
 
     if (success && mounted) {
-      context.go('/home');
+      final user = ref.read(authViewModelProvider).user;
+      if (user?.needsOnboardingPreferences ?? false) {
+        context.go('/onboarding-occupation');
+      } else {
+        context.go('/home');
+      }
     }
   }
 

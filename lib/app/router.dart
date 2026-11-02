@@ -7,6 +7,7 @@ import '../features/auth/views/forgot_password_screen.dart';
 import '../features/auth/views/otp_screen.dart';
 import '../features/auth/views/register_screen.dart';
 import '../features/auth/views/splash_screen.dart';
+import '../features/auth/views/onboarding_occupation_screen.dart';
 import '../features/events/models/event.dart';
 import '../features/events/views/ai_event_screen.dart';
 import '../features/events/views/event_detail_screen.dart';
@@ -50,6 +51,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           final email = state.extra as String? ?? '';
           return OtpScreen(email: email);
         },
+      ),
+      GoRoute(
+        path: '/onboarding-occupation',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const OnboardingOccupationScreen(),
       ),
 
       // Bottom Navigation Shell for 4 Main Tabs

@@ -270,6 +270,17 @@ class AuthViewModel extends Notifier<AuthState> {
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
+  Future<bool> updatePreferences(List<String> preferenciasOficio) async {
+    try {
+      final updatedUser = await _repository.updatePreferences(preferenciasOficio);
+      state = state.copyWith(user: updatedUser);
+      ref.invalidate(profileViewModelProvider);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   void setUser(User user) {
     state = state.copyWith(user: user);
   }

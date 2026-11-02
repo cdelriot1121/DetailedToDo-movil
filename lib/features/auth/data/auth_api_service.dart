@@ -129,4 +129,20 @@ class AuthApiService {
       throw ApiException.fromDioError(e);
     }
   }
+
+  Future<User> updatePreferences({
+    required List<String> preferenciasOficio,
+  }) async {
+    try {
+      final response = await _dio.put(
+        '/users/me/preferences',
+        data: {
+          'preferenciasOficio': preferenciasOficio,
+        },
+      );
+      return User.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
 }
