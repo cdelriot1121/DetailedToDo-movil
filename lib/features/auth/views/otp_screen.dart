@@ -84,7 +84,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         .verifyOtp(widget.email, code);
 
     if (success && mounted) {
-      context.go('/home');
+      final user = ref.read(authViewModelProvider).user;
+      if (user?.needsOnboardingPreferences ?? false) {
+        context.go('/onboarding-occupation');
+      } else {
+        context.go('/home');
+      }
     }
   }
 

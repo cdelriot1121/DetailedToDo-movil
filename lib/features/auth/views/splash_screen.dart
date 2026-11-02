@@ -26,7 +26,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     final authState = ref.read(authViewModelProvider);
     if (authState.isAuthenticated) {
-      context.go('/home');
+      if (authState.user?.needsOnboardingPreferences ?? false) {
+        context.go('/onboarding-occupation');
+      } else {
+        context.go('/home');
+      }
     } else {
       context.go('/login');
     }

@@ -6,6 +6,7 @@ class User {
   final String subscriptionStatus;
   final DateTime? subscriptionExpiresAt;
   final DateTime? createdAt;
+  final List<String>? preferenciasOficio;
 
   const User({
     required this.id,
@@ -15,6 +16,7 @@ class User {
     this.subscriptionStatus = 'NONE',
     this.subscriptionExpiresAt,
     this.createdAt,
+    this.preferenciasOficio,
   });
 
   bool get isPlus => plan.toUpperCase() == 'PLUS';
@@ -23,6 +25,8 @@ class User {
       isPlus &&
       (subscriptionExpiresAt == null ||
           subscriptionExpiresAt!.isAfter(DateTime.now()));
+
+  bool get needsOnboardingPreferences => preferenciasOficio == null;
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -37,6 +41,11 @@ class User {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
+      preferenciasOficio: json['preferenciasOficio'] != null
+          ? (json['preferenciasOficio'] as List<dynamic>)
+              .map((e) => e.toString())
+              .toList()
+          : null,
     );
   }
 
@@ -49,6 +58,7 @@ class User {
       'subscriptionStatus': subscriptionStatus,
       'subscriptionExpiresAt': subscriptionExpiresAt?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
+      'preferenciasOficio': preferenciasOficio,
     };
   }
 
@@ -60,6 +70,8 @@ class User {
     String? subscriptionStatus,
     DateTime? subscriptionExpiresAt,
     DateTime? createdAt,
+    List<String>? preferenciasOficio,
+    bool clearPreferenciasOficio = false,
   }) {
     return User(
       id: id ?? this.id,
@@ -70,6 +82,9 @@ class User {
       subscriptionExpiresAt:
           subscriptionExpiresAt ?? this.subscriptionExpiresAt,
       createdAt: createdAt ?? this.createdAt,
+      preferenciasOficio: clearPreferenciasOficio
+          ? null
+          : (preferenciasOficio ?? this.preferenciasOficio),
     );
   }
 }

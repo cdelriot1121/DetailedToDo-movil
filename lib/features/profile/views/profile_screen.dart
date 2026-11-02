@@ -454,29 +454,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 10),
               AppCard(
                 padding: EdgeInsets.zero,
-                child: ListTile(
-                  leading: Icon(
-                    PhosphorIconsRegular.fadersHorizontal,
-                    color: palette.primaryText,
-                    size: 20,
-                  ),
-                  title: Text(
-                    'Tema de la aplicación',
-                    style: TextStyle(color: palette.primaryText, fontSize: 14),
-                  ),
-                  subtitle: Text(
-                    selectedTheme.label,
-                    style: TextStyle(
-                      color: palette.secondaryText,
-                      fontSize: 12.5,
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(
+                        PhosphorIconsRegular.fadersHorizontal,
+                        color: palette.primaryText,
+                        size: 20,
+                      ),
+                      title: Text(
+                        'Tema de la aplicación',
+                        style: TextStyle(color: palette.primaryText, fontSize: 14),
+                      ),
+                      subtitle: Text(
+                        selectedTheme.label,
+                        style: TextStyle(
+                          color: palette.secondaryText,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                      trailing: Icon(
+                        PhosphorIconsRegular.caretRight,
+                        size: 16,
+                        color: palette.secondaryText,
+                      ),
+                      onTap: () => context.push('/profile/customization'),
                     ),
-                  ),
-                  trailing: Icon(
-                    PhosphorIconsRegular.caretRight,
-                    size: 16,
-                    color: palette.secondaryText,
-                  ),
-                  onTap: () => context.push('/profile/customization'),
+                    Divider(height: 1, indent: 52, color: palette.divider),
+                    ListTile(
+                      leading: Icon(
+                        PhosphorIconsRegular.briefcase,
+                        color: palette.primaryText,
+                        size: 20,
+                      ),
+                      title: Text(
+                        'Oficio y preferencias IA',
+                        style: TextStyle(color: palette.primaryText, fontSize: 14),
+                      ),
+                      subtitle: Text(
+                        (user?.preferenciasOficio != null && user!.preferenciasOficio!.isNotEmpty)
+                            ? user.preferenciasOficio!.join(', ')
+                            : 'Sin especificar',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: palette.secondaryText,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                      trailing: Icon(
+                        PhosphorIconsRegular.caretRight,
+                        size: 16,
+                        color: palette.secondaryText,
+                      ),
+                      onTap: () => context.push('/onboarding-occupation'),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),

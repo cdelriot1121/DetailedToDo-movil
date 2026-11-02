@@ -146,6 +146,12 @@ class AuthRepository {
     return user;
   }
 
+  Future<User> updatePreferences(List<String> preferenciasOficio) async {
+    final user = await _apiService.updatePreferences(preferenciasOficio: preferenciasOficio);
+    await _localStorage.saveUser(user);
+    return user;
+  }
+
   Future<void> logout() async {
     await _storageService.clearAll();
     await _localStorage.clearAllData();

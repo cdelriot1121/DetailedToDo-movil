@@ -94,4 +94,22 @@ class ProfileViewModel extends Notifier<ProfileState> {
       return false;
     }
   }
+
+  Future<bool> updatePreferences(List<String> preferenciasOficio) async {
+    state = state.copyWith(isSaving: true, clearError: true);
+    try {
+      final updatedUser = await _repository.updatePreferences(preferenciasOficio);
+      state = state.copyWith(isSaving: false, user: updatedUser);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(isSaving: false, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        isSaving: false,
+        errorMessage: 'Error al actualizar preferencias.',
+      );
+      return false;
+    }
+  }
 }

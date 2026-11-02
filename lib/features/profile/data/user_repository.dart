@@ -50,6 +50,20 @@ class UserRepository {
     }
   }
 
+  Future<User> updatePreferences(List<String> preferenciasOficio) async {
+    try {
+      final response = await _dio.put(
+        '/users/me/preferences',
+        data: {'preferenciasOficio': preferenciasOficio},
+      );
+      final user = User.fromJson(response.data as Map<String, dynamic>);
+      await _localStorage.saveUser(user);
+      return user;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
   Future<AIQuota> getAIQuota() async {
     try {
       final response = await _dio.get('/ai/quota');
